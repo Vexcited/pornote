@@ -9,11 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
     "next": "11.1.2",
+    "node-fetch": "^2.6.5",
+    "node-forge": "^0.10.0",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
   "devDependencies": {
+    "@types/node-fetch": "^2.5.12",
+    "@types/node-forge": "^0.10.8",
     "@types/react": "17.0.30",
     "eslint": "^8.0.1",
     "eslint-config-next": "11.1.2",
