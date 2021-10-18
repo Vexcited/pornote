@@ -1,6 +1,8 @@
+import type { PronoteSession } from "types/PronoteSession";
+
 export default function extractSession (
   pronoteHtml: string
-): any {
+): PronoteSession {
   if (pronoteHtml.includes("Votre adresse IP est provisoirement suspendue")) {
     throw Error("TempBanIp");
   }
