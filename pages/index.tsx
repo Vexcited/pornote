@@ -2,29 +2,29 @@ import Head from "next/head";
 import React from "react";
 
 export default function Home () {
-  const [session, setSession] = React.useState("");
-  const [pronoteBaseUrl, setPronoteBaseUrl] = React.useState("");
+  // const [session, setSession] = React.useState("");
+  const [pronoteUrl, setPronoteUrl] = React.useState("");
 
   const initializeSession = async (): Promise<void> => {
     const response = await fetch(
-      "/api/auth/initialize",
+      "/api/informations",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          pronoteBaseUrl
+          pronoteUrl
         })
       }
     );
     const data = await response.json();
 
     if (data.success) {
-      setSession(data.session.h);
+     // setSession(data.session.h);
     }
     else {
-      setSession("Erreur");
+      // setSession("Erreur");
     }
   }
 
@@ -38,11 +38,10 @@ export default function Home () {
 
       <input
         type="text"
-        value={pronoteBaseUrl}
-        onChange={({ target }) => setPronoteBaseUrl(target.value)}
+        value={pronoteUrl}
+        onChange={({ target }) => setPronoteUrl(target.value)}
       />
 
-      <p>Session actuelle: "{session}"</p>
       <button
         onClick={initializeSession}
       >

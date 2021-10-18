@@ -1,66 +1,44 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import fetch from "node-fetch";
+
+import getServerUrl from "@/apiUtils/getServerUrl";
+import getPronotePage from "@/apiUtils/getPronotePage";
+import extractSession from "@/apiUtils/extractSession";
+import generateOrder from "@/apiUtils/generateOrder";
 
 type Data = {
     success: boolean;
-    message: string;
-    debug?: {
-        sessionId?: string;
-        pronoteBaseUrl: string;
-        data?: any;
-    };
+    message?: string;
+    sessionId?: string;
+    order?: string;
 }
 
 export default async (
     req: NextApiRequest,
     res: NextApiResponse<Data>
 ) => {
-    if (req.method === "POST") {
-        const {
-            pronoteBaseUrl,
-            sessionId,
-            ordre,
-            uuid,
-            navId
-        }: { 
-            pronoteBaseUrl: string;
-            sessionId: string;
-            ordre: string;
-            uuid: string;
-            navId: string;
-        } = req.body;
+  if (req.method === "POST") {
+    const {
+      pronoteUrl
+    }: { 
+      pronoteUrl: string;
+    } = req.body;
 
-        const response = await fetch(
-            pronoteBaseUrl + "/appelfonction/9/" + sessionId + "/" + ordre,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    nom: "FonctionParametres",
-                    session: sessionId,
-                    numeroOrdre: ordre,
-                    donnees: {
-                        "Uuid": uuid,
-                        identifiantNav: navId
-                    }
-                })
-            }
-        );
+    const pronoteServerUrl = getServerUrl(pronoteUrl);
+    const pronoteHtml = await getPronotePage({
+      pronoteUrl: pronoteServerUrl + "?login=true",
+      onlyFetch: true
+    });
 
-        const data = await response.json();
-        res.status(200).json({
-            success: true,
-            message: "Grabbed informations about school.",
-            debug: {
-                data,
-                sessionId,
-                pronoteBaseUrl
-            }
-        })
-    }
-    else {
+    const session = extractSession(pronoteHtml);
+    const order = generateOrder(1);
+
+    res.status(200).json({
+      success: true,
+      sessionId: session.h,
+      order
+    })
+  }
+  else {
         res.status(404).json({
             success: false,
             message: "Method doesn't exist."
