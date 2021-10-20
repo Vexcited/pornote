@@ -1,4 +1,4 @@
-import type { PronoteSession } from "types/PronoteSession";
+import type { PronoteSession } from "types/PronoteData";
 
 export default function extractSession (
   pronoteHtml: string
@@ -12,7 +12,7 @@ export default function extractSession (
   }
 
   // Removing all spaces and linebreaks (to clean).
-  pronoteHtml = pronoteHtml.replace(/ /ug, "").replace(/\n/ug, "");
+  const cleanedHtml = pronoteHtml.replace(/ /ug, "").replace(/\n/ug, "");
 
   // Find the relaxed JSON containing
   // the session datas we want.
@@ -20,7 +20,10 @@ export default function extractSession (
   const to = ")}catch";
 
   // Get that relaxed JSON.
-  const dataToFix = pronoteHtml.substring(pronoteHtml.indexOf(from) + from.length, pronoteHtml.indexOf(to));
+  const dataToFix = cleanedHtml.substring(
+    cleanedHtml.indexOf(from) + from.length,
+    cleanedHtml.indexOf(to)
+  );
   
   // Convert the relaxed JSON a parsable JSON.
   const sessionData = dataToFix.

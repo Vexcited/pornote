@@ -2,7 +2,6 @@ import Head from "next/head";
 import React from "react";
 
 export default function Home () {
-  // const [session, setSession] = React.useState("");
   const [pronoteUrl, setPronoteUrl] = React.useState("");
 
   const initializeSession = async (): Promise<void> => {

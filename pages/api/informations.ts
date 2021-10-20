@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { PronoteSession } from "types/PronoteSession";
+import type { PronoteSession } from "types/PronoteData";
 
 import getServerUrl from "@/apiUtils/getServerUrl";
 import getPronotePage from "@/apiUtils/getPronotePage";
@@ -46,6 +46,7 @@ export default async (
     const orderEncrypted = generateOrder(orderDecrypted);
 
     // Request to Pronote server.
+    // Here, is AccountID is 9 => Default for informations gathering.
     const informationsApiUrl = pronoteServerUrl + "appelfonction/9/" + session.h + "/" + orderEncrypted;
     const dataResponse = await fetch (
       informationsApiUrl,

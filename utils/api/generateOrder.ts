@@ -1,24 +1,41 @@
 import forge from "node-forge";
 
-function md5 (buffer: any): any {
+/**
+ * Generates a MD5 ByteBuffer from another ByteBuffer.
+ * @param buffer - ByteBuffer to convert to MD5.
+ * @returns - A new ByteBuffer in MD5.
+ */
+function md5 (
+  buffer: forge.util.ByteStringBuffer
+): forge.util.ByteStringBuffer {
   return forge.md.md5.create().update(buffer.bytes()).digest();
 }
 
 export default function generateOrder (
-  orderToEncrypt: number,
-  key = ""
+  orderToEncrypt: number, // Starts from 1, then add 2 for next request.
+  key?: forge.util.ByteStringBuffer // Default is undefined. Needs to be updated.
 ): string {
+  // When the key doesn't exist, we create it,
+  // by filling it with an empty BufferByte.
   if (!key) {
-    key = new forge.util.ByteBuffer();
+    key = forge.util.createBuffer();
   }
 
-  const cipher = forge.cipher.createCipher('AES-CBC', md5(key));
-  const iv = new forge.util.ByteBuffer(Buffer.alloc(16));
+  const cipher = forge.cipher.createCipher(
+    "AES-CBC",
+    md5(key)
+  );
 
+  // Crea.te initialization vector.
+  const iv = forge.util.createBuffer().fillWithByte(0, 16);
   cipher.start({ iv });
-
-  const data = forge.util.encodeUtf8('' + orderToEncrypt);
   
-  cipher.update(new forge.util.ByteBuffer(data));
-  return cipher.finish() && cipher.output.toHex();
+  // AES our order.
+  cipher.update(
+    forge.util.createBuffer(orderToEncrypt.toString(), "utf8")
+  );
+
+  cipher.finish();
+
+  return cipher.output.toHex();
 }
