@@ -29,4 +29,6 @@ export default async function getPronotePage ({
   if (onlyFetch) {
     return html; 
   }
+
+  return html; // TODO: Work on this.
 }
