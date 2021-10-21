@@ -27,6 +27,17 @@ export default function Home () {
     }
   }
 
+  const getLocation = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        console.log(position.coords.latitude, position.coords.longitude);
+      });
+    }
+    else {
+      alert ("Geolocation is not supported in your browser.");
+    }
+  }
+
   return (
     <div>
       <Head>
