@@ -21,5 +21,12 @@ export type PronoteSession = {
  * by Pronote when calling their Geolocation API.
  */
 export type PronoteGeolocationResult = {
-  
+  // Global informations.
+  url: string; // Pronote Server URL.
+  nomEtab: string; // School's name.
+
+  // Geolocation informations.
+  lat: string; // School's latitude.
+  long: string; // School's longitude.  
+  cp: string; // School's postal code.
 };

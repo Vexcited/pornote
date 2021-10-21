@@ -12,7 +12,7 @@ export default async function getPronotePage ({
   pronoteUrl, // URL that we'll get.
   method = "GET",
   followRedirects = true
-}): Promise<string> {
+}: Parameters): Promise<string> {
   const htmlResponse = await fetch(
     pronoteUrl,
     {
@@ -29,4 +29,6 @@ export default async function getPronotePage ({
   if (onlyFetch) {
     return html; 
   }
+
+  return html; // TODO: Work on this.
 }
