@@ -1,5 +1,8 @@
 import { URL } from "url";
 
+/**
+ * Get the `/pronote/` URL from any given URL.
+ */
 export default function getServerUrl (
   pronoteUrl: string
 ): string {

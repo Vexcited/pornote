@@ -14,10 +14,10 @@ type RequestData = {
     longitude: number;
 };
 
-export default async (
+export default async function handler (
     req: NextApiRequest,
     res: NextApiResponse<ResponseData>
-) => {
+) {
     if (req.method === "POST") {
         const { latitude, longitude }: RequestData = req.body;
 

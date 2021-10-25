@@ -22,10 +22,10 @@ type ResponseData = {
     data?: any;
 }
 
-export default async (
+export default async function handler (
     req: NextApiRequest,
     res: NextApiResponse<ResponseData>
-) => {
+) {
   if (req.method === "POST") {
     // Dirty Pronote URL.
     const pronoteUrl: string = req.body.pronoteUrl;
