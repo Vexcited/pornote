@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 
 import getPosition from "@/webUtils/getLocation";
-import isURL from "validator/es/lib/isURL";
 
 export default function Home () {
   const [pronoteUrl, setPronoteUrl] = React.useState("");
@@ -147,7 +146,7 @@ export default function Home () {
         />
       }
 
-      {isURL(pronoteUrl)
+      {pronoteUrl.includes("index-education.net/pronote") // Check if origin is safe.
         && <React.Fragment>
           <p>
             En cliquant sur "Confirmer", vous vous
