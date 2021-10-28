@@ -3,13 +3,22 @@ import type { PronoteGeolocationResult } from "types/PronoteData";
 import Head from "next/head";
 import React from "react";
 
-import { TextField } from "@mui/material";
+import {
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
+} from "@mui/material";
 
 import getPosition from "@/webUtils/getLocation";
+import isURL from "validator/es/lib/isURL";
 
 export default function Home () {
   const [pronoteUrl, setPronoteUrl] = React.useState("");
   const [geolocationResults, setGeolocationResults] = React.useState<PronoteGeolocationResult[]>([]);
+  const [showManual, setShowManual] = React.useState(true);
 
   const initializeSession = async (): Promise<void> => {
     const response = await fetch(
@@ -34,10 +43,10 @@ export default function Home () {
     }
   }
 
-  /**
-   * Geolocate yourself and puts the results in 
-   * `geolocationResults` state.
-   */
+ /**
+  * Geolocate yourself and puts the results in 
+  * `geolocationResults` state.
+  */
   const getGeolocationResults = async () => {
     if ("geolocation" in navigator) {
       const { 
@@ -85,48 +94,75 @@ export default function Home () {
         Pronote Évolution
       </h1>
       <p>
-        Connectez vous à votre compte Pronote
+        Connectez vous à votre compte Pronote, ci-dessous.
       </p>
 
-      <h2>
-        Choisissez votre méthode de connexion
-      </h2>
-
-      <h3>
-        Géolocalisation des établissemnts les plus proches de chez vous.
-      </h3>
-
-      <button
+      <Button
+        variant="outlined"
         onClick={getGeolocationResults}
       >
         Me géolocaliser
-      </button>
+      </Button>
 
-      <select
-        defaultValue={pronoteUrl}
-        onChange={({ target }) => setPronoteUrl(target.value)}
-        value={pronoteUrl}
-      >
-        <option value={pronoteUrl}>Manuel ({pronoteUrl})</option>
-      {geolocationResults.map((result, key) => 
-        <option key={key} value={result.url}>{result.nomEtab} ({result.cp})</option>
-      )}
-      </select>
+      <FormControl fullWidth>
+        <InputLabel id="pronoteGeolocation">
+          Choisir son établissement
+        </InputLabel>
+        <Select
+          labelId="pronoteGeolocation"
+          label="Choisir son établissement"
+          defaultValue="manual"
+          onChange={({ target }) => {
+            if (target.value === "manual") {
+              setShowManual(true);
+            }
+            else {
+              setShowManual(false);
+              setPronoteUrl(target.value);
+            }
+          }}
+        >
+          <MenuItem value="manual">
+            Manuel
+          </MenuItem>
+          {geolocationResults.map((result, key) => 
+            <MenuItem
+              key={key}
+              value={result.url}
+            >
+              {result.nomEtab} ({result.cp})
+            </MenuItem>
+          )}
+        </Select>
+      </FormControl>
 
-      <h3>
-        URL Pronote
-      </h3>
+      {showManual &&
+        <TextField
+          type="text"
+          value={pronoteUrl}
+          label="URL Pronote"
+          onChange={({ target }) => setPronoteUrl(
+            target.value
+          )}
+        />
+      }
 
-      <TextField
-        type="text"
-        value={pronoteUrl}
-        label="URL Pronote"
-        onChange={({ target }) => setPronoteUrl(target.value)}
-      />
+      {isURL(pronoteUrl)
+        && <React.Fragment>
+          <p>
+            En cliquant sur "Confirmer", vous vous
+            connecterez au serveur Pronote de
+            {" "}<strong>{pronoteUrl}</strong>.
+          </p>
 
-
-      <h2>URL Finale</h2>
-      <p>{pronoteUrl}</p>
+          <Button
+            onClick={initializeSession}
+            variant="contained"
+          >
+            Continuer
+          </Button>
+        </React.Fragment>
+      }
     </div>
   )
 }
