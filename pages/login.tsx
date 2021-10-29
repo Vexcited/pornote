@@ -17,9 +17,6 @@ import { SpecifyUrl } from "components/LoginSteps/SpecifyUrl";
 
 export default function Home () {
   const [pronoteUrl, setPronoteUrl] = React.useState("");
-  const [geolocationResults, setGeolocationResults] = React.useState<PronoteGeolocationResult[]>([]);
-  const [showManual, setShowManual] = React.useState(true);
-
   const [session, setSession] = React.useState({
     sessionId: ""
   });
@@ -46,45 +43,6 @@ export default function Home () {
     }
   }
 
- /**
-  * Geolocate yourself and puts the results in 
-  * `geolocationResults` state.
-  */
-  const getGeolocationResults = async () => {
-    if ("geolocation" in navigator) {
-      const { 
-        coords: { longitude, latitude }
-      } = await getPosition();
-      
-      // We try to get a response from Pronote.
-      const pronoteResponse = await fetch(
-        "https://www.index-education.com/swie/geoloc.php", // URL from the Pronote APK.
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-            },
-            body: `data=${JSON.stringify({
-                nomFonction: "geoLoc", // Geolocation
-                lat: latitude.toString(),
-                long: longitude.toString()
-            })}`
-        }
-      );
-  
-      // We get the response.
-      // If the data isn't an array (no results),
-      // then we create it ourselves (prevent errors).
-      const pronoteDataRaw = await pronoteResponse.json();
-      const data: PronoteGeolocationResult[] = Array.isArray(pronoteDataRaw) ? pronoteDataRaw : [];
-
-      setGeolocationResults(data);
-    }
-    else {
-      alert ("Geolocation is not supported in your browser.");
-    }
-  }
-
   return (
     <div>
       <Head>
@@ -104,13 +62,6 @@ export default function Home () {
         pronoteUrl={pronoteUrl}
         setPronoteUrl={setPronoteUrl}
       />
-
-      <Button
-        variant="outlined"
-        onClick={getGeolocationResults}
-      >
-        Me géolocaliser
-      </Button>
 
       <FormControl fullWidth>
         <InputLabel id="pronoteGeolocation">
