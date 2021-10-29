@@ -1,30 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { PronoteSession } from "types/PronoteData";
+import type { InformationsResponseData } from "types/LocalApiData";
 
 import getServerUrl from "@/apiUtils/getServerUrl";
 import getPronotePage from "@/apiUtils/getPronotePage";
 import extractSession from "@/apiUtils/extractSession";
 import generateOrder from "@/apiUtils/generateOrder";
 
-type ResponseData = {
-    success: boolean;
-    message: string;
-
-    // Informations that can help debug.
-    debug?: {
-      session: PronoteSession;
-      order: {
-        decrypted: number;
-        encrypted: string;
-      }
-    };
-
-    data?: any;
-}
-
 export default async function handler (
     req: NextApiRequest,
-    res: NextApiResponse<ResponseData>
+    res: NextApiResponse<InformationsResponseData>
 ) {
   if (req.method === "POST") {
     // Dirty Pronote URL.
@@ -32,58 +16,57 @@ export default async function handler (
 
     // We get URL origin and then get the DOM of account selection page.
     const pronoteServerUrl = getServerUrl(pronoteUrl);
-    const pronoteHtml = await getPronotePage({
+    const [pronoteHtmlSuccess, pronoteHtmlData] = await getPronotePage({
       pronoteUrl: pronoteServerUrl + "?login=true",
       onlyFetch: true
     });
 
-    // We extract session informations from the DOM.
-    const session = extractSession(pronoteHtml);
-    const sessionId = parseInt(session.h);
-
-    // Generate encrypted order for request.
-    const orderDecrypted = 1;
-    const orderEncrypted = generateOrder(orderDecrypted);
-
-    // Request to Pronote server.
-    // Here, is AccountID is 9 => Default for informations gathering.
-    const informationsApiUrl = pronoteServerUrl + "appelfonction/9/" + session.h + "/" + orderEncrypted;
-    const dataResponse = await fetch (
-      informationsApiUrl,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          session: sessionId,
-          numeroOrdre: orderEncrypted,
-          nom: "FonctionParametres",
-          donneesSec: {}
-        })
-      }
-    );
-
-    // Parse server response.
-    const data = await dataResponse.json();
-
-    res.status(200).json({
-      success: true,
-      message: "Grabbed SessionId and informations.",
-      debug: {
-        order: {
-          decrypted: orderDecrypted,
-          encrypted: orderEncrypted
-        },
-        session
-      },
-      data
-    })
+    if (pronoteHtmlSuccess) {
+      // We extract session informations from the DOM.
+      const session = extractSession(pronoteHtmlData);
+      const sessionId = parseInt(session.h);
+  
+      // Generate encrypted order for request.
+      const orderDecrypted = 1;
+      const orderEncrypted = generateOrder(orderDecrypted);
+  
+      // Request to Pronote server.
+      // Here, is AccountID is 9 => Default for informations gathering.
+      const informationsApiUrl = pronoteServerUrl + "appelfonction/9/" + session.h + "/" + orderEncrypted;
+      const dataResponse = await fetch (
+        informationsApiUrl,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            session: sessionId,
+            numeroOrdre: orderEncrypted,
+            nom: "FonctionParametres",
+            donneesSec: {}
+          })
+        }
+      );
+  
+      res.status(200).json({
+        success: true,
+        message: "Attached server's reponse.",
+        data: await dataResponse.json()
+      })
+    }
+    // An error occurred while fetching HTML.
+    else {
+      res.status(500).json({
+        success: false,
+        message: `Failed to fetch Pronote page.\n${pronoteHtmlData}`
+      })
+    }
   }
   else {
-        res.status(404).json({
-            success: false,
-            message: "Method doesn't exist."
-        })
-    }
+    res.status(404).json({
+      success: false,
+      message: "Method doesn't exist. Only POST method is available here."
+    })
+  }
 }

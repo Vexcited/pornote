@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React from "react";
+import { useState } from "react";
 
 import {
   TextField,
@@ -11,34 +11,26 @@ import {
 } from "@mui/material";
 
 import { SpecifyUrl } from "components/LoginSteps/SpecifyUrl";
+import getAccountTypesFrom from "@/webUtils/getAccountTypesFrom";
 
 export default function Home () {
-  const [pronoteUrl, setPronoteUrl] = React.useState("");
-  const [session, setSession] = React.useState({
-    sessionId: ""
-  });
+  const [pronoteUrl, setPronoteUrl] = useState("");
 
-  const initializeSession = async (): Promise<void> => {
-    const response = await fetch(
-      "/api/informations",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          pronoteUrl
-        })
-      }
-    );
-    const data = await response.json();
+  /**
+   * 0 => SpecifyUrl
+   * 1 => SpecifyAccountType
+   * 2 => SpecifyCredentials
+   */
+  const [currentLoginStep, setLoginStep] = useState<0 | 1 | 2>(0);
 
-    if (data.success) {
-      setSession({ 
-        sessionId: data.session.h
-      })
-    }
-  }
+
+  // Executed when click Button at step 0 (SpecifyUrl).
+  const getAccountTypes = async () => {
+    const accountTypes = await getAccountTypesFrom(pronoteUrl);
+    setLoginStep(1);
+
+    console.log(accountTypes);
+  };
 
   return (
     <div>
@@ -56,22 +48,14 @@ export default function Home () {
         setPronoteUrl={setPronoteUrl}
       />
 
-      {/* Provide a REGEX for this specific domain name. */}
-      {pronoteUrl.includes("index-education.net/pronote") // Check if origin is safe.
-        && <React.Fragment>
-          <p>
-            En continuant, vous vous
-            connecterez au serveur Pronote de
-            {" "}<strong>{pronoteUrl}</strong>.
-          </p>
-
-          <Button
-            onClick={initializeSession}
-            variant="contained"
-          >
-            Continuer
-          </Button>
-        </React.Fragment>
+      {/* TODO: Provide a REGEX to check origin (more safe). */}
+      {pronoteUrl.includes("index-education.net/pronote") &&
+        <Button
+          onClick={getAccountTypes}
+          variant="contained"
+        >
+          Continuer
+        </Button>
       }
     </div>
   )
