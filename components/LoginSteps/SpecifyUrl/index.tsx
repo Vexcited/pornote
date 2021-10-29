@@ -10,7 +10,6 @@ import {
   Select,
   FormControl,
   InputLabel,
-
   MenuItem
 } from "@mui/material";
 
@@ -19,11 +18,9 @@ export function SpecifyUrl ({
   setPronoteUrl
 }: {
   pronoteUrl: string;
-  setPronoteUrl: (value: string) => void;
+  setPronoteUrl: React.Dispatch<React.SetStateAction<string>>
 }) {
-  const [geoResults, setGeoResults] = useState<
-    PronoteGeolocationResult[]
-  >([]);
+  const [geoResults, setGeoResults] = useState<PronoteGeolocationResult[]>([]);
   const [showManual, setShowManual] = useState(true);
 
   const handleGeolocation = async () => {
@@ -63,7 +60,6 @@ export function SpecifyUrl ({
     }
  }
 
-
   return (
     <div>
       <Button
@@ -94,12 +90,12 @@ export function SpecifyUrl ({
           <MenuItem value="manual">
             Manuel
           </MenuItem>
-          {geoResults.map(result =>
+          {geoResults.map(school =>
             <MenuItem
-              key={`${result.latitude-result.longitude}`}
-              value={result.url}
+              key={`${school.lat}-${school.long}`}
+              value={school.url}
             >
-              {result.nomEtab} ({result.cp})
+              {school.nomEtab} ({school.cp})
             </MenuItem>
           )}
         </Select>
