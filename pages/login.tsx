@@ -13,11 +13,16 @@ import {
 } from "@mui/material";
 
 import getPosition from "@/webUtils/getLocation";
+import { SpecifyUrl } from "components/LoginSteps/SpecifyUrl";
 
 export default function Home () {
   const [pronoteUrl, setPronoteUrl] = React.useState("");
   const [geolocationResults, setGeolocationResults] = React.useState<PronoteGeolocationResult[]>([]);
   const [showManual, setShowManual] = React.useState(true);
+
+  const [session, setSession] = React.useState({
+    sessionId: ""
+  });
 
   const initializeSession = async (): Promise<void> => {
     const response = await fetch(
@@ -35,10 +40,9 @@ export default function Home () {
     const data = await response.json();
 
     if (data.success) {
-     // setSession(data.session.h);
-    }
-    else {
-      // setSession("Erreur");
+      setSession({ 
+        sessionId: data.session.h
+      })
     }
   }
 
@@ -96,6 +100,11 @@ export default function Home () {
         Connectez vous à votre compte Pronote, ci-dessous.
       </p>
 
+      <SpecifyUrl
+        pronoteUrl={pronoteUrl}
+        setPronoteUrl={setPronoteUrl}
+      />
+
       <Button
         variant="outlined"
         onClick={getGeolocationResults}
@@ -146,10 +155,11 @@ export default function Home () {
         />
       }
 
+      {/* Provide a REGEX for this specific domain name. */}
       {pronoteUrl.includes("index-education.net/pronote") // Check if origin is safe.
         && <React.Fragment>
           <p>
-            En cliquant sur "Confirmer", vous vous
+            En cliquant sur "Continuer", vous vous
             connecterez au serveur Pronote de
             {" "}<strong>{pronoteUrl}</strong>.
           </p>
