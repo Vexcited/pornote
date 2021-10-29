@@ -1,5 +1,7 @@
+import type { AccountType } from "types/SavedAccountData";
+
 import Head from "next/head";
-import { useState } from "react";
+import React, { useState } from "react";
 
 import {
   TextField,
@@ -10,11 +12,18 @@ import {
   MenuItem
 } from "@mui/material";
 
-import { SpecifyUrl } from "components/LoginSteps/SpecifyUrl";
+import {
+  SpecifyUrl, // 0
+  SpecifyAccountType // 1
+} from "components/LoginSteps";
 import getAccountTypesFrom from "@/webUtils/getAccountTypesFrom";
 
 export default function Home () {
   const [pronoteUrl, setPronoteUrl] = useState("");
+
+  // Defined in step 1 (SpecifyAccountType).
+  const [pronoteAccountType, setPronoteAccountType] = useState<AccountType | null>(null);
+  const [pronoteAccountTypes, setPronoteAccountTypes] = useState<AccountType[]>([]);
 
   /**
    * 0 => SpecifyUrl
@@ -23,14 +32,50 @@ export default function Home () {
    */
   const [currentLoginStep, setLoginStep] = useState<0 | 1 | 2>(0);
 
+  // (0) - SpecifyUrl
+  const LoginStep0 = () => {
+    const getAccountTypes = async () => {
+      const accountTypes = await getAccountTypesFrom(pronoteUrl);
+      
+      // We save the account types for use in step 1.
+      setPronoteAccountTypes(accountTypes);
 
-  // Executed when click Button at step 0 (SpecifyUrl).
-  const getAccountTypes = async () => {
-    const accountTypes = await getAccountTypesFrom(pronoteUrl);
-    setLoginStep(1);
+      // Go to step 1.
+      setLoginStep(1);
+    };
 
-    console.log(accountTypes);
+    return (
+      <React.Fragment>
+        <SpecifyUrl
+          pronoteUrl={pronoteUrl}
+          setPronoteUrl={setPronoteUrl}
+        />
+
+        {/* TODO: Provide a REGEX to check origin (more safe). */}
+        {pronoteUrl.includes("index-education.net/pronote") &&
+          <Button
+            onClick={getAccountTypes}
+            variant="contained"
+          >
+            Continuer
+          </Button>
+        }
+      </React.Fragment>
+    )
   };
+
+  const LoginStep1 = () => {
+
+    return (
+      <React.Fragment>
+        <SpecifyAccountType 
+          pronoteAccountTypes={pronoteAccountTypes}
+          pronoteAccountType={pronoteAccountType}
+          setPronoteAccountType={setPronoteAccountType}
+        />
+      </React.Fragment>
+    );
+  }
 
   return (
     <div>
@@ -43,20 +88,9 @@ export default function Home () {
         Connectez vous à votre compte Pronote, ci-dessous.
       </p>
 
-      <SpecifyUrl
-        pronoteUrl={pronoteUrl}
-        setPronoteUrl={setPronoteUrl}
-      />
-
-      {/* TODO: Provide a REGEX to check origin (more safe). */}
-      {pronoteUrl.includes("index-education.net/pronote") &&
-        <Button
-          onClick={getAccountTypes}
-          variant="contained"
-        >
-          Continuer
-        </Button>
-      }
+      {currentLoginStep === 0 && <LoginStep0 />}
+      {currentLoginStep === 1 && <LoginStep1 />}
+      
     </div>
   )
 }

@@ -1,14 +1,9 @@
 import type { InformationsResponseData } from "types/LocalApiData";
-
-type RenamedAccountType = {
-  id: number;
-  name: string;
-  url: string;
-};
+import type { AccountType } from "types/SavedAccountData";
 
 export default async function getAccountTypesFrom (
   pronoteUrl: string
-): Promise<RenamedAccountType[]> {
+): Promise<AccountType[]> {
   const response = await fetch(
     "/api/informations",
     {
@@ -23,7 +18,7 @@ export default async function getAccountTypesFrom (
   );
 
   const rawData: InformationsResponseData = await response.json();
-  const types: RenamedAccountType[] = [];
+  const types: AccountType[] = [];
   
   if (rawData.success && rawData.data) {
     const typesAvailable = rawData.data?.donneesSec?.donnees.espaces.V;
@@ -32,7 +27,7 @@ export default async function getAccountTypesFrom (
       types.push({
         id: type.G,
         name: type.L,
-        url: type.url
+        path: type.url
       });
     });
   }

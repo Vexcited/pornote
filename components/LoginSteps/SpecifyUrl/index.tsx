@@ -69,7 +69,7 @@ export function SpecifyUrl ({
         Me géolocaliser
       </Button>
 
-      <FormControl fullWidth>
+      <FormControl>
         <InputLabel id="pronoteGeolocation">
           Choisir son établissement
          </InputLabel>
