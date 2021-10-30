@@ -53,20 +53,20 @@ export default async function handler (
         success: true,
         message: "Attached server's reponse.",
         data: await dataResponse.json()
-      })
+      });
     }
     // An error occurred while fetching HTML.
     else {
       res.status(500).json({
         success: false,
         message: `Failed to fetch Pronote page.\n${pronoteHtmlData}`
-      })
+      });
     }
   }
   else {
     res.status(404).json({
       success: false,
       message: "Method doesn't exist. Only POST method is available here."
-    })
+    });
   }
 }

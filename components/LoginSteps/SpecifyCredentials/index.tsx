@@ -16,6 +16,23 @@ export function SpecifyCredentials ({
     updateState: UpdateStateType;
 }) {
 
+    const handleLogin = async () => {
+        const response = await fetch("/api/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                pronoteUrl: state.pronoteUrl,
+                pronoteAccountId: state.accountType.id,
+                pronoteAccountPath: state.accountType.path
+            })
+        });
+
+        const data = await response.json();
+        console.log(data);
+    }
+
     return (
         <React.Fragment>
             <Typography
@@ -39,7 +56,7 @@ export function SpecifyCredentials ({
             <Button
                 variant="contained"
                 color="primary"
-                onClick={() => console.log(state)}
+                onClick={handleLogin}
             >
                 Se connecter !
             </Button>
