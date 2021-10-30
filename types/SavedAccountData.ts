@@ -4,6 +4,11 @@ export type AccountType = {
     path: string;
 };
 
+export type SchoolInformations = {
+    name: string;
+    availableAccountTypes: AccountType[];
+}
+
 export type AccountMetadata = {
     name: string
     accountType: AccountType;

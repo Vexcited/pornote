@@ -1,15 +1,15 @@
-import type { AccountType } from "types/SavedAccountData";
+import type { AccountType, SchoolInformations } from "types/SavedAccountData";
 
 import Head from "next/head";
 import React, { useState } from "react";
 
 export type StateTypes = {
   step: 0 | 1 | 2;
+    
   pronoteUrl: string;
-
-  availableAccountTypes: AccountType[];
+  schoolInformations: SchoolInformations;
+  
   accountType: AccountType;
-
   username: string;
   password: string;
 }
@@ -20,11 +20,13 @@ export type UpdateStateType = (
   | number
   | AccountType[]
   | AccountType
+  | SchoolInformations
 ) => void;
 
 import {
   SpecifyUrl, // 0
-  SpecifyAccountType // 1
+  SpecifyAccountType, // 1
+  SpecifyCredentials // 2
 } from "components/LoginSteps";
 
 export default function Home () {
@@ -32,13 +34,16 @@ export default function Home () {
     step: 0,
     pronoteUrl: "",
 
-    availableAccountTypes: [],
+    schoolInformations: {
+      name: "",
+      availableAccountTypes: []
+    },
+
     accountType: {
       id: 0,
       name: "",
       path: ""
     },
-
     username: "",
     password: ""
   });
@@ -70,6 +75,13 @@ export default function Home () {
 
       {state.step === 1
         && <SpecifyAccountType
+          state={state}
+          updateState={updateState}
+        />
+      }
+
+      {state.step === 2
+        && <SpecifyCredentials
           state={state}
           updateState={updateState}
         />

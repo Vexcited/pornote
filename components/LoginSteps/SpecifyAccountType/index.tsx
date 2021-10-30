@@ -1,6 +1,6 @@
 import type { StateTypes, UpdateStateType } from "pages/login";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 import {
     Button,
@@ -8,6 +8,7 @@ import {
     FormControl,
     InputLabel,
     MenuItem,
+    Typography,
 
     // Types
     SelectChangeEvent
@@ -23,7 +24,7 @@ export function SpecifyAccountType ({
     const updateSelectedAccountType = (event: SelectChangeEvent<number>) => {
         const value = event.target.value;
 
-        const accountTypeObject = state.availableAccountTypes.find(
+        const accountTypeObject = state.schoolInformations.availableAccountTypes.find(
             (accountType) => accountType.id === value
         );
 
@@ -32,16 +33,27 @@ export function SpecifyAccountType ({
         }
     }
 
+    // Default account type state when the component mounts.
+    useEffect(() => {
+        if (state.accountType.id === 0) {
+            updateState("accountType", state.schoolInformations.availableAccountTypes[0]);
+        }
+    }, []);
+
     return (
         <React.Fragment>
-            <FormControl fullWidth>
+            <Typography variant="h5">
+                Connexion au serveur Pronote {state.schoolInformations.name}
+            </Typography>
+
+            <FormControl>
                 <InputLabel>Choisir un type de compte</InputLabel>
                 <Select
                     label="Choisir un type de compte"
                     onChange={updateSelectedAccountType}
-                    defaultValue={state.availableAccountTypes[0].id}
+                    defaultValue={state.schoolInformations.availableAccountTypes[0].id}
                 >
-                    {state.availableAccountTypes.map((accountType) => (
+                    {state.schoolInformations.availableAccountTypes.map((accountType) => (
                         <MenuItem
                             key={accountType.id}
                             value={accountType.id}
@@ -53,7 +65,8 @@ export function SpecifyAccountType ({
             </FormControl>
 
             <Button
-                onClick={() => console.log(state)}
+                variant="contained"
+                onClick={() => updateState("step", 2)}
             >
                 Sélectionner
             </Button>

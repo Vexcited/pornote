@@ -1,10 +1,11 @@
 import type { PronoteGeolocationResult } from "types/PronoteData";
 import type { StateTypes, UpdateStateType } from "pages/login";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 import getPosition from "@/webUtils/getLocation";
-import getAccountTypesFrom from "@/webUtils/getAccountTypesFrom";
+import getInformationsFrom from "@/webUtils/getInformationsFrom";
+import fixSchoolName from "@/webUtils/fixSchoolName";
 
 import {
   Button,
@@ -64,11 +65,11 @@ export function SpecifyUrl ({
 
   const handlePronoteConnect = async () => {
     // We try to get account types from Pronote.
-    const accountTypes = await getAccountTypesFrom(state.pronoteUrl);
+    const schoolInformations = await getInformationsFrom(state.pronoteUrl);
 
     // We store the account types.
     // This will trigger the useEffect below.
-    updateState("availableAccountTypes", accountTypes);
+    updateState("schoolInformations", schoolInformations);
   };
 
   /**
@@ -76,14 +77,17 @@ export function SpecifyUrl ({
    */
   useEffect(() => {
     // We check if the account types are available.
-    if (state.availableAccountTypes.length > 0) {
+    if (
+      state.schoolInformations.availableAccountTypes.length > 0
+      && state.schoolInformations.name !== ""  
+    ) {
       // We go to the next step.
       updateState("step", 1);
     }
-  }, [state.availableAccountTypes]);
+  }, [state.schoolInformations]);
 
   return (
-    <div>
+    <React.Fragment>
       <Button
         variant="outlined"
         onClick={handleGeolocation}
@@ -92,11 +96,10 @@ export function SpecifyUrl ({
       </Button>
 
       <FormControl>
-        <InputLabel id="pronoteGeolocation">
+        <InputLabel>
           Choisir son établissement
          </InputLabel>
          <Select
-          labelId="pronoteGeolocation"
           label="Choisir son établissement"
           defaultValue="manual"
           onChange={({ target }) => {
@@ -117,7 +120,7 @@ export function SpecifyUrl ({
               key={`${school.lat}-${school.long}`}
               value={school.url}
             >
-              {school.nomEtab} ({school.cp})
+              {fixSchoolName(school.nomEtab)} ({school.cp})
             </MenuItem>
           )}
         </Select>
@@ -140,6 +143,6 @@ export function SpecifyUrl ({
           Se connecter à ce serveur Pronote
         </Button>
       }
-    </div>
+    </React.Fragment>
   );
 }
