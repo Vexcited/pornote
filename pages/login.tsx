@@ -3,78 +3,51 @@ import type { AccountType } from "types/SavedAccountData";
 import Head from "next/head";
 import React, { useState } from "react";
 
-import {
-  TextField,
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
-} from "@mui/material";
+export type StateTypes = {
+  step: 0 | 1 | 2;
+  pronoteUrl: string;
+
+  availableAccountTypes: AccountType[];
+  accountType: AccountType;
+
+  username: string;
+  password: string;
+}
+
+export type UpdateStateType = (
+  key: keyof StateTypes,
+  value: string
+  | number
+  | AccountType[]
+  | AccountType
+) => void;
 
 import {
   SpecifyUrl, // 0
   SpecifyAccountType // 1
 } from "components/LoginSteps";
-import getAccountTypesFrom from "@/webUtils/getAccountTypesFrom";
 
 export default function Home () {
-  const [pronoteUrl, setPronoteUrl] = useState("");
+  const [state, setState] = useState<StateTypes>({
+    step: 0,
+    pronoteUrl: "",
 
-  // Defined in step 1 (SpecifyAccountType).
-  const [pronoteAccountType, setPronoteAccountType] = useState<AccountType | null>(null);
-  const [pronoteAccountTypes, setPronoteAccountTypes] = useState<AccountType[]>([]);
+    availableAccountTypes: [],
+    accountType: {
+      id: 0,
+      name: "",
+      path: ""
+    },
 
-  /**
-   * 0 => SpecifyUrl
-   * 1 => SpecifyAccountType
-   * 2 => SpecifyCredentials
-   */
-  const [currentLoginStep, setLoginStep] = useState<0 | 1 | 2>(0);
+    username: "",
+    password: ""
+  });
 
-  // (0) - SpecifyUrl
-  const LoginStep0 = () => {
-    const getAccountTypes = async () => {
-      const accountTypes = await getAccountTypesFrom(pronoteUrl);
-      
-      // We save the account types for use in step 1.
-      setPronoteAccountTypes(accountTypes);
-
-      // Go to step 1.
-      setLoginStep(1);
-    };
-
-    return (
-      <React.Fragment>
-        <SpecifyUrl
-          pronoteUrl={pronoteUrl}
-          setPronoteUrl={setPronoteUrl}
-        />
-
-        {/* TODO: Provide a REGEX to check origin (more safe). */}
-        {pronoteUrl.includes("index-education.net/pronote") &&
-          <Button
-            onClick={getAccountTypes}
-            variant="contained"
-          >
-            Continuer
-          </Button>
-        }
-      </React.Fragment>
-    )
-  };
-
-  const LoginStep1 = () => {
-
-    return (
-      <React.Fragment>
-        <SpecifyAccountType 
-          pronoteAccountTypes={pronoteAccountTypes}
-          pronoteAccountType={pronoteAccountType}
-          setPronoteAccountType={setPronoteAccountType}
-        />
-      </React.Fragment>
-    );
+  const updateState: UpdateStateType = (key, value) => {
+    setState({
+      ...state,
+      [key]: value
+    });
   }
 
   return (
@@ -88,9 +61,19 @@ export default function Home () {
         Connectez vous à votre compte Pronote, ci-dessous.
       </p>
 
-      {currentLoginStep === 0 && <LoginStep0 />}
-      {currentLoginStep === 1 && <LoginStep1 />}
-      
+      {state.step === 0
+        && <SpecifyUrl
+          state={state}
+          updateState={updateState}
+        />
+      }
+
+      {state.step === 1
+        && <SpecifyAccountType
+          state={state}
+          updateState={updateState}
+        />
+      }
     </div>
   )
 }

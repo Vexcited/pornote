@@ -1,6 +1,6 @@
-import type { AccountType } from "types/SavedAccountData";
+import type { StateTypes, UpdateStateType } from "pages/login";
 
-import React, { useState } from "react";
+import React from "react";
 
 import {
     Button,
@@ -14,25 +14,22 @@ import {
   } from "@mui/material";
   
 export function SpecifyAccountType ({
-    pronoteAccountTypes,
-    pronoteAccountType,
-    setPronoteAccountType
+    state,
+    updateState
 }: {
-    pronoteAccountTypes: AccountType[],
-    pronoteAccountType: AccountType | null,
-    setPronoteAccountType: React.Dispatch<React.SetStateAction<AccountType | null>>
+    state: StateTypes;
+    updateState: UpdateStateType;
 }) {
+    const updateSelectedAccountType = (event: SelectChangeEvent<number>) => {
+        const value = event.target.value;
 
-    const updateSelectedAccountType = (event: SelectChangeEvent<unknown>) => {
-        const value = event.target.value as number;
-
-        const accountTypeObject = pronoteAccountTypes.find(
+        const accountTypeObject = state.availableAccountTypes.find(
             (accountType) => accountType.id === value
-        ) ?? null;
+        );
 
-        setPronoteAccountType(accountTypeObject);
-
-        console.log(value, pronoteAccountType);
+        if (accountTypeObject) {
+            updateState("accountType", accountTypeObject);
+        }
     }
 
     return (
@@ -42,8 +39,9 @@ export function SpecifyAccountType ({
                 <Select
                     label="Choisir un type de compte"
                     onChange={updateSelectedAccountType}
+                    defaultValue={state.availableAccountTypes[0].id}
                 >
-                    {pronoteAccountTypes.map((accountType) => (
+                    {state.availableAccountTypes.map((accountType) => (
                         <MenuItem
                             key={accountType.id}
                             value={accountType.id}
@@ -55,7 +53,7 @@ export function SpecifyAccountType ({
             </FormControl>
 
             <Button
-                onClick={() => console.log(pronoteAccountType)}
+                onClick={() => console.log(state)}
             >
                 Sélectionner
             </Button>

@@ -1,8 +1,10 @@
 import type { PronoteGeolocationResult } from "types/PronoteData";
+import type { StateTypes, UpdateStateType } from "pages/login";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import getPosition from "@/webUtils/getLocation";
+import getAccountTypesFrom from "@/webUtils/getAccountTypesFrom";
 
 import {
   Button,
@@ -14,11 +16,11 @@ import {
 } from "@mui/material";
 
 export function SpecifyUrl ({
-  pronoteUrl,
-  setPronoteUrl
+  state,
+  updateState
 }: {
-  pronoteUrl: string;
-  setPronoteUrl: React.Dispatch<React.SetStateAction<string>>
+  state: StateTypes;
+  updateState: UpdateStateType;
 }) {
   const [geoResults, setGeoResults] = useState<PronoteGeolocationResult[]>([]);
   const [showManual, setShowManual] = useState(true);
@@ -58,12 +60,32 @@ export function SpecifyUrl ({
     else {
       alert ("Geolocation is not supported in your browser.");
     }
- }
+  };
+
+  const handlePronoteConnect = async () => {
+    // We try to get account types from Pronote.
+    const accountTypes = await getAccountTypesFrom(state.pronoteUrl);
+
+    // We store the account types.
+    // This will trigger the useEffect below.
+    updateState("availableAccountTypes", accountTypes);
+  };
+
+  /**
+   * Callback when the account types are changed.
+   */
+  useEffect(() => {
+    // We check if the account types are available.
+    if (state.availableAccountTypes.length > 0) {
+      // We go to the next step.
+      updateState("step", 1);
+    }
+  }, [state.availableAccountTypes]);
 
   return (
     <div>
       <Button
-        variant="contained"
+        variant="outlined"
         onClick={handleGeolocation}
       >
         Me géolocaliser
@@ -83,7 +105,7 @@ export function SpecifyUrl ({
             }
             else {
               setShowManual(false);
-              setPronoteUrl(target.value);
+              updateState("pronoteUrl", target.value);
             }
           }}
         >
@@ -104,11 +126,19 @@ export function SpecifyUrl ({
       {showManual &&
         <TextField
           label="URL Pronote"
-          value={pronoteUrl}
-          onChange={({ target }) => setPronoteUrl(
-            target.value
-          )}
+          value={state.pronoteUrl}
+          onChange={({ target }) => updateState("pronoteUrl", target.value)}
         />
+      }
+
+      {
+        state.pronoteUrl.includes("index-education.net/pronote") &&
+        <Button
+          variant="contained"
+          onClick={handlePronoteConnect}
+        >
+          Se connecter à ce serveur Pronote
+        </Button>
       }
     </div>
   );
