@@ -42,12 +42,13 @@ la **vraie** application Pronote pour être sûr.
 **English** - As I said earlier, this project is made for
 educationnal purposes. You (users of this app) must know
 that this app can be deleted at any time by
-the request of  **Index-Education**.
+the request of Index-Education.
 
 
 **French** - Comme je l'ai dis précedemment, ce projet est à but
-éducatif. Je sais trés bien que 
-
+éducatif. Je sais trés bien qu'Index-Education peut faire fermer cette
+application n'importe quand et c'est pour cela que 
+j'écris cette petite note.
 
 ## Development
 
