@@ -6,11 +6,16 @@ import getPronotePage from "@/apiUtils/getPronotePage";
 import extractSession from "@/apiUtils/extractSession";
 import generateOrder from "@/apiUtils/generateOrder";
 
+import decryptOrder from "@/apiUtils/decryptOrder";
+
+import forge from "node-forge";
+
 export default async function handler (
     req: NextApiRequest,
     res: NextApiResponse<{
         success: boolean;
         message: string;
+        debug?: any;
         data?: PronoteFonctionParametres;
     }>
 ) {
@@ -38,6 +43,15 @@ export default async function handler (
             // Generate encrypted order for request.
             const orderDecrypted = 1;
             const orderEncrypted = generateOrder(orderDecrypted);
+
+            const randomTempIv = forge.util.createBuffer().fillWithByte(0, 16);
+
+            const lRSA = forge.pki.rsa.setPublicKey(
+                new forge.jsbn.BigInteger(session.MR, 16),
+                new forge.jsbn.BigInteger(session.ER, 16)
+            );
+            
+            const lResult = forge.util.encode64(lRSA.encrypt(randomTempIv.bytes()), 64);
         
             // Request to Pronote server.
             // Here, is AccountID is 9 => Default for informations gathering.
@@ -53,7 +67,12 @@ export default async function handler (
                         session: sessionId,
                         numeroOrdre: orderEncrypted,
                         nom: "FonctionParametres",
-                        donneesSec: {}
+                        donneesSec: {
+                            donnees: {
+                                Uuid: lResult,
+                                identifiantNav: null
+                            }
+                        }
                     })
                 }
             );
@@ -62,7 +81,10 @@ export default async function handler (
             res.status(200).json({
                 success: true,
                 message: "TODO",
-                data
+                data,
+                debug: {
+                    decrypted: decryptOrder(data.numeroOrdre)
+                }
             })
         }
         else {

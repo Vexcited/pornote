@@ -13,14 +13,8 @@ function md5 (
 
 export default function generateOrder (
   orderToEncrypt: number, // Starts from 1, then add 2 for next request.
-  key?: forge.util.ByteStringBuffer // Default is undefined. Needs to be updated.
+  key = forge.util.createBuffer() // Default is empty ByteBuffer.
 ): string {
-  // When the key doesn't exist, we create it,
-  // by filling it with an empty BufferByte.
-  if (!key) {
-    key = forge.util.createBuffer();
-  }
-
   const cipher = forge.cipher.createCipher(
     "AES-CBC",
     md5(key)
