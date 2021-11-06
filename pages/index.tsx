@@ -4,10 +4,13 @@ import React from "react";
 import localforage from "localforage";
 import NextLink from "next/link";
 
+/*
 import {
     Typography,
     Button
 } from "@mui/material";
+*/
+// TODO: Replace to TailwindCSS.
 
 export default function Home () {
     const [accounts, setAccounts] = React.useState<AccountMetadata[]>([]);
@@ -16,18 +19,18 @@ export default function Home () {
      * We try to see if there's already
      * saved accounts in the localforage.
      */
-    React.useEffect(() => {
-        (async () => {
-            try {
-                const stored: AccountMetadata[] | null = await localforage.getItem("accountsMetadata");
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const stored: AccountMetadata[] | null = await localforage.getItem("accountsMetadata");
 
-                /**
-                 * If there's already saved accounts,
-                 * we store them to state.
-                 */
-                if (stored) {
-                    setAccounts(stored);
-                }
+       /**
+	* If there's already saved accounts,
+	* we store them to state.
+        */
+	if (stored) {
+          setAccounts(stored);
+        }
                 /**
                  * If not, we save an empty array.
                  */
