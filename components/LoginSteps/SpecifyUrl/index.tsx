@@ -7,15 +7,6 @@ import getPosition from "@/webUtils/getLocation";
 import getInformationsFrom from "@/webUtils/getInformationsFrom";
 import fixSchoolName from "@/webUtils/fixSchoolName";
 
-import {
-  Button,
-  TextField,
-  Select,
-  FormControl,
-  InputLabel,
-  MenuItem
-} from "@mui/material";
-
 export function SpecifyUrl ({
   state,
   updateState
@@ -88,19 +79,14 @@ export function SpecifyUrl ({
 
   return (
     <React.Fragment>
-      <Button
-        variant="outlined"
+      <button
         onClick={handleGeolocation}
       >
         Me géolocaliser
-      </Button>
+      </button>
 
-      <FormControl>
-        <InputLabel>
-          Choisir son établissement
-         </InputLabel>
-         <Select
-          label="Choisir son établissement"
+      <form>
+        <select
           defaultValue="manual"
           onChange={({ target }) => {
             if (target.value === "manual") {
@@ -112,23 +98,23 @@ export function SpecifyUrl ({
             }
           }}
         >
-          <MenuItem value="manual">
+          <option value="manual">
             Manuel
-          </MenuItem>
+          </option>
           {geoResults.map(school =>
-            <MenuItem
+            <option
               key={`${school.lat}-${school.long}`}
               value={school.url}
             >
               {fixSchoolName(school.nomEtab)} ({school.cp})
-            </MenuItem>
+            </option>
           )}
-        </Select>
-      </FormControl>
+        </select>
+      </form>
   
       {showManual &&
-        <TextField
-          label="URL Pronote"
+        <input
+          placeholder="URL Pronote"
           value={state.pronoteUrl}
           onChange={({ target }) => updateState("pronoteUrl", target.value)}
         />
@@ -136,12 +122,11 @@ export function SpecifyUrl ({
 
       {
         state.pronoteUrl.includes("index-education.net/pronote") &&
-        <Button
-          variant="contained"
+        <button
           onClick={handlePronoteConnect}
         >
           Se connecter à ce serveur Pronote
-        </Button>
+        </button>
       }
     </React.Fragment>
   );

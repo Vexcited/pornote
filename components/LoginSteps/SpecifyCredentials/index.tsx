@@ -1,12 +1,6 @@
 import type { StateTypes, UpdateStateType } from "pages/login";
 
-import React from "react";
-
-import {
-    Button,
-    TextField,
-    Typography
-} from "@mui/material";
+import { Fragment } from "react";
   
 export function SpecifyCredentials ({
     state,
@@ -34,32 +28,27 @@ export function SpecifyCredentials ({
     }
 
     return (
-        <React.Fragment>
-            <Typography
-                variant="h4"
-                component="h3"
-            >
+        <Fragment>
+            <h4>
                 {state.schoolInformations.name}
-            </Typography>
+            </h4>
 
-            <TextField
-                label="Nom d'utilisateur"
+            <input
+                placeholder="Nom d'utilisateur"
                 value={state.username}
                 onChange={({ target }) => updateState("username", target.value )}
             />
-            <TextField
-                label="Mot de passe"
+            <input
+                placeholder="Mot de passe"
                 type="password"
                 value={state.password}
                 onChange={({ target }) => updateState("password", target.value )}
             />
-            <Button
-                variant="contained"
-                color="primary"
+            <button
                 onClick={handleLogin}
             >
                 Se connecter !
-            </Button>
-        </React.Fragment>
+            </button>
+        </Fragment>
     );
 }

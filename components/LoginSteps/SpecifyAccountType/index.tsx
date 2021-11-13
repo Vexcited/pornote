@@ -1,19 +1,6 @@
 import type { StateTypes, UpdateStateType } from "pages/login";
 
 import React, { useEffect } from "react";
-
-import {
-    Button,
-    Select,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Typography,
-
-    // Types
-    SelectChangeEvent
-  } from "@mui/material";
-  
 export function SpecifyAccountType ({
     state,
     updateState
@@ -21,8 +8,8 @@ export function SpecifyAccountType ({
     state: StateTypes;
     updateState: UpdateStateType;
 }) {
-    const updateSelectedAccountType = (event: SelectChangeEvent<number>) => {
-        const value = event.target.value;
+    const updateSelectedAccountType = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = parseInt(event.target.value);
 
         const accountTypeObject = state.schoolInformations.availableAccountTypes.find(
             (accountType) => accountType.id === value
@@ -42,34 +29,31 @@ export function SpecifyAccountType ({
 
     return (
         <React.Fragment>
-            <Typography variant="h5">
+            <h5>
                 Connexion au serveur Pronote {state.schoolInformations.name}
-            </Typography>
+            </h5>
 
-            <FormControl>
-                <InputLabel>Choisir un type de compte</InputLabel>
-                <Select
-                    label="Choisir un type de compte"
+            <form>
+                <select
                     onChange={updateSelectedAccountType}
                     defaultValue={state.schoolInformations.availableAccountTypes[0].id}
                 >
                     {state.schoolInformations.availableAccountTypes.map((accountType) => (
-                        <MenuItem
+                        <option
                             key={accountType.id}
                             value={accountType.id}
                         >
                             {accountType.name}
-                        </MenuItem>
+                        </option>
                     ))}
-                </Select>
-            </FormControl>
+                </select>
+            </form>
 
-            <Button
-                variant="contained"
+            <button
                 onClick={() => updateState("step", 2)}
             >
                 Sélectionner
-            </Button>
+            </button>
         </React.Fragment>
     );
 };

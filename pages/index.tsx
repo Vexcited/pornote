@@ -4,14 +4,6 @@ import React from "react";
 import localforage from "localforage";
 import NextLink from "next/link";
 
-/*
-import {
-    Typography,
-    Button
-} from "@mui/material";
-*/
-// TODO: Replace to TailwindCSS.
-
 export default function Home () {
     const [accounts, setAccounts] = React.useState<AccountMetadata[]>([]);
 
@@ -47,25 +39,27 @@ export default function Home () {
     }, []);
 
     return (
-        <div>
-            <Typography variant="h2" component="h1">Gestion des comptes</Typography>
-            <Typography>Vous retrouvez, ici, tous vos comptes enregistrés localement.</Typography>
+        <div className="h-screen w-screen bg-gray-200 text-gray-800">
+            <h2 className="font-bold text-2xl">
+                Gestion des comptes
+            </h2>
+            <p>Vous retrouvez, ici, tous vos comptes enregistrés localement.</p>
 
             {accounts.length === 0 ?
-                <Typography>
+                <p>
                     Aucun compte présent !
                     <NextLink href="/login">
-                        <Button variant="contained">
+                        <button>
                             Connetez-vous à votre compte Pronote
-                        </Button>
+                        </button>
                     </NextLink>
-                </Typography>
+                </p>
             :
                 accounts.map((account, key) =>
                     <div key={key}>
-                        <Typography variant="h3" component="h3">
+                        <h3>
                             {account.name}
-                        </Typography>
+                        </h3>
                     </div>
                 )
             }
