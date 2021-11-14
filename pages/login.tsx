@@ -61,31 +61,37 @@ export default function Home () {
         <title>Connexion - Pronote Evolution</title>
       </Head>
 
-      <h1>Connexion Pronote</h1>
-      <p>
-        Connectez vous à votre compte Pronote, ci-dessous.
-      </p>
+      
 
-      {state.step === 0
-        && <SpecifyUrl
+      <div
+        className="flex flex-col items-center"
+      >
+        <h1>Connexion Pronote</h1>
+        <p>
+          Connectez vous à votre compte Pronote, ci-dessous.
+        </p>
+
+        {state.step === 0
+          && <SpecifyUrl
           state={state}
           updateState={updateState}
-        />
-      }
+          />
+        }
 
-      {state.step === 1
-        && <SpecifyAccountType
+        {state.step === 1
+          && <SpecifyAccountType
           state={state}
           updateState={updateState}
-        />
-      }
+          />
+        }
 
-      {state.step === 2
-        && <SpecifyCredentials
+        {state.step === 2
+          && <SpecifyCredentials
           state={state}
           updateState={updateState}
-        />
-      }
+          />
+        }
+      </div>
     </div>
   )
 }

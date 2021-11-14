@@ -4,6 +4,8 @@ import React from "react";
 import localforage from "localforage";
 import NextLink from "next/link";
 
+import HomeLayout from "components/HomeLayout";
+
 export default function Home () {
     const [accounts, setAccounts] = React.useState<AccountMetadata[]>([]);
 
@@ -39,30 +41,8 @@ export default function Home () {
     }, []);
 
     return (
-        <div className="h-screen w-screen bg-gray-200 text-gray-800">
-            <h2 className="font-bold text-2xl">
-                Gestion des comptes
-            </h2>
-            <p>Vous retrouvez, ici, tous vos comptes enregistrés localement.</p>
-
-            {accounts.length === 0 ?
-                <p>
-                    Aucun compte présent !
-                    <NextLink href="/login">
-                        <button>
-                            Connetez-vous à votre compte Pronote
-                        </button>
-                    </NextLink>
-                </p>
-            :
-                accounts.map((account, key) =>
-                    <div key={key}>
-                        <h3>
-                            {account.name}
-                        </h3>
-                    </div>
-                )
-            }
-        </div>
+        <HomeLayout>
+            <h1>Hey</h1>
+        </HomeLayout>
     );
 }
