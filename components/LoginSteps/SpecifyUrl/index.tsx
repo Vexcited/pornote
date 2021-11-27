@@ -1,19 +1,23 @@
 import type { PronoteGeolocationResult } from "types/PronoteData";
 import type { StateTypes, UpdateStateType } from "pages/login";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 import getPosition from "@/webUtils/getLocation";
 import getInformationsFrom from "@/webUtils/getInformationsFrom";
 import fixSchoolName from "@/webUtils/fixSchoolName";
 
+import { MdLocationOn } from "react-icons/md";
+
+type SpecifyUrlProps = {
+  state: StateTypes;
+  updateState: UpdateStateType;
+}
+
 export function SpecifyUrl ({
   state,
   updateState
-}: {
-  state: StateTypes;
-  updateState: UpdateStateType;
-}) {
+}: SpecifyUrlProps) {
   const [geoResults, setGeoResults] = useState<PronoteGeolocationResult[]>([]);
   const [showManual, setShowManual] = useState(true);
 
@@ -23,9 +27,7 @@ export function SpecifyUrl ({
         coords: { longitude, latitude }
       } = await getPosition();
  
-      // We try to get a response from Pronote.
       const pronoteResponse = await fetch(
-        // URL from the Pronote APK. 
         "https://www.index-education.com/swie/geoloc.php",
         {
           method: "POST",
@@ -50,102 +52,102 @@ export function SpecifyUrl ({
       setGeoResults(data);
     }
     else {
-      alert ("Geolocation is not supported in your browser.");
+      alert("La géolocalisation n'est pas disponible dans votre navigateur.");
     }
   };
 
+  /**
+   * Function to parse the informations
+   * gathered on the home page.
+   */
   const handlePronoteConnect = async () => {
-    // We try to get account types from Pronote.
     const schoolInformations = await getInformationsFrom(state.pronoteUrl);
 
-    // We store the account types.
-    // This will trigger the useEffect below.
+    // We save these informations that will trigger the useEffect below.
     updateState("schoolInformations", schoolInformations);
   };
 
-  /**
-   * Callback when the account types are changed.
-   */
+  // TODO: Trigger only after handlePronoteConnect().
   useEffect(() => {
-    // We check if the account types are available.
-    if (
-      state.schoolInformations.availableAccountTypes.length > 0
-      && state.schoolInformations.name !== ""  
-    ) {
+    /** Debug */ console.info("useEffect triggered.");
+    const { availableAccountTypes } = state.schoolInformations;
+
+    // We go to the next step if the current state have been updated.
+    if (availableAccountTypes.length > 0) {
       // We go to the next step.
       updateState("step", 1);
     }
   }, [state.schoolInformations]);
 
   return (
-    <React.Fragment>
-      <figure className="w-64 bg-gray-100 rounded-xl p-8">
-        <div className="inline-flex rounded-md shadow">
-          <button
-            onClick={handleGeolocation}
-            className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-          >
-            Me géolocaliser
-          </button>
-        </div>
+    <div className="flex flex-col justify-center items-center w-96 bg-green-200 bg-opacity-60 rounded-md p-8">
+      <div className="rounded-md shadow">
+        <button
+          onClick={handleGeolocation}
+          className="inline-flex items-center justify-center px-5 py-3 border border-transparent font-medium rounded-md text-green-100 bg-green-600 hover:bg-green-700"
+        >
+          <MdLocationOn size={20} />
+          Me géolocaliser
+        </button>
+      </div>
 
 
-        <form>
-          <select
-            defaultValue="manual"
-            onChange={({ target }) => {
-              if (target.value === "manual") {
-                setShowManual(true);
-              }
-              else {
-                setShowManual(false);
-                updateState("pronoteUrl", target.value);
-              }
-            }}
-          >
-            <option value="manual">
+      <form>
+        <select
+          defaultValue="manual"
+          onChange={({ target }) => {
+            if (target.value === "manual") {
+              setShowManual(true);
+            }
+            else {
+              setShowManual(false);
+              updateState("pronoteUrl", target.value);
+            }
+          }}
+        >
+          <option value="manual">
               Manuel
+          </option>
+          {geoResults.map(school =>
+            <option
+              key={`${school.lat}-${school.long}`}
+              value={school.url}
+            >
+              {fixSchoolName(school.nomEtab)} ({school.cp})
             </option>
-            {geoResults.map(school =>
-              <option
-                key={`${school.lat}-${school.long}`}
-                value={school.url}
-              >
-                {fixSchoolName(school.nomEtab)} ({school.cp})
-              </option>
-            )}
-          </select>
-        </form>
+          )}
+        </select>
+      </form>
 
-        {showManual &&
+      {showManual &&
           <input
-            className="px-2
-            py-1
-            placeholder-gray-400
-            text-gray-600
-            relative
-            bg-white bg-white
-            rounded
-            text-sm
-            border border-gray-400
-            outline-none
-            focus:outline-none focus:ring
-            w-full"
+            className="
+              px-2 py-1
+              placeholder-gray-400
+              text-gray-600
+              relative
+              bg-white
+              rounded
+              text-sm
+              border border-gray-400
+              outline-none
+              focus:outline-none focus:ring
+              w-full
+            "
             placeholder="URL Pronote"
             value={state.pronoteUrl}
             onChange={({ target }) => updateState("pronoteUrl", target.value)}
           />
-        }
+      }
 
-        {
-          state.pronoteUrl.includes("index-education.net/pronote") &&
+      {
+        state.pronoteUrl.includes("index-education.net/pronote") &&
           <button
             onClick={handlePronoteConnect}
           >
             Se connecter à ce serveur Pronote
           </button>
-        }
-      </figure>
-    </React.Fragment>
+      }
+    </div>
   );
 }

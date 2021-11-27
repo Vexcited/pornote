@@ -12,6 +12,4 @@ export type SchoolInformations = {
 export type AccountMetadata = {
     name: string
     accountType: AccountType;
-    
-    // TODO: Finish this, later.
 }

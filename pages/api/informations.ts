@@ -7,8 +7,8 @@ import extractSession from "@/apiUtils/extractSession";
 import generateOrder from "@/apiUtils/generateOrder";
 
 export default async function handler (
-    req: NextApiRequest,
-    res: NextApiResponse<InformationsResponseData>
+  req: NextApiRequest,
+  res: NextApiResponse<InformationsResponseData>
 ) {
   if (req.method === "POST") {
     // Dirty Pronote URL.

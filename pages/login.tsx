@@ -1,7 +1,10 @@
 import type { AccountType, SchoolInformations } from "types/SavedAccountData";
 
-import Head from "next/head";
-import React, { useState } from "react";
+import { Fragment, useState } from "react";
+import { NextSeo } from "next-seo";
+import NextLink from "next/link";
+
+import { BiArrowBack } from "react-icons/bi";
 
 export type StateTypes = {
   step: 0 | 1 | 2;
@@ -17,7 +20,7 @@ export type StateTypes = {
 export type UpdateStateType = (
   key: keyof StateTypes,
   value: string
-  | number
+  | 0 | 1 | 2
   | AccountType[]
   | AccountType
   | SchoolInformations
@@ -53,19 +56,29 @@ export default function Home () {
       ...state,
       [key]: value
     });
-  }
+  };
 
   return (
-    <div>
-      <Head>
-        <title>Connexion - Pronote Evolution</title>
-      </Head>
-
-      
-
+    <Fragment>
+      <NextSeo
+        title="Connexion"
+      />
       <div
-        className="flex flex-col items-center"
+        className="h-screen w-screen flex flex-col items-center justify-center bg-green-50 text-green-900"
       >
+
+        <header className="fixed top-0 w-full p-6">
+          <NextLink href="/">
+            <a className="
+              flex-row items-center font-medium gap-2
+              hover:bg-green-200 hover:bg-opacity-60 transition-colors
+              inline-flex px-4 py-2 rounded
+            ">
+              <BiArrowBack size={18} /> Revenir à la page d&apos;accueil
+            </a>
+          </NextLink>
+        </header>
+
         <h1>Connexion Pronote</h1>
         <p>
           Connectez vous à votre compte Pronote, ci-dessous.
@@ -73,25 +86,25 @@ export default function Home () {
 
         {state.step === 0
           && <SpecifyUrl
-          state={state}
-          updateState={updateState}
+            state={state}
+            updateState={updateState}
           />
         }
 
         {state.step === 1
           && <SpecifyAccountType
-          state={state}
-          updateState={updateState}
+            state={state}
+            updateState={updateState}
           />
         }
 
         {state.step === 2
           && <SpecifyCredentials
-          state={state}
-          updateState={updateState}
+            state={state}
+            updateState={updateState}
           />
         }
       </div>
-    </div>
-  )
+    </Fragment>
+  );
 }

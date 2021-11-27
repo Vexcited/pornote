@@ -1,11 +1,9 @@
 import type { AppProps } from "next/app";
 
-import { Fragment } from "react";
 import { DefaultSeo } from "next-seo";
 import SEO from "../next-seo.config";
+import { Fragment } from "react";
 
-// Styles
-import "@fontsource/roboto";
 import "tailwindcss/tailwind.css";
 
 export default function PronoteApp({
