@@ -6,6 +6,7 @@ export type AccountType = {
 
 export type SchoolInformations = {
     name: string;
+    entAvailable: boolean;
     availableAccountTypes: AccountType[];
 }
 

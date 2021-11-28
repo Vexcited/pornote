@@ -1,4 +1,4 @@
-import type { InformationsResponseData } from "types/LocalApiData";
+import type { InformationsResponseData } from "types/ApiData";
 import type { AccountType, SchoolInformations } from "types/SavedAccountData";
 
 import fixSchoolName from "@/webUtils/fixSchoolName";
@@ -44,8 +44,8 @@ export default async function getAccountTypesFrom (
   }
 
   return {
-    // Fixing a typo in the schools name.
-    name: fixSchoolName(schoolName),
+    name: fixSchoolName(schoolName), // Fixing a typo in schools name.
+    entAvailable: false,
     availableAccountTypes: types
   };
 }

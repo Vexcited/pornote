@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { InformationsResponseData } from "types/LocalApiData";
+import type { InformationsResponseData } from "types/ApiData";
 
 import getServerUrl from "@/apiUtils/getServerUrl";
 import getPronotePage from "@/apiUtils/getPronotePage";

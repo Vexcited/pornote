@@ -1,7 +1,8 @@
 import type { StateTypes, UpdateStateType } from "pages/login";
 
 import React, { useEffect } from "react";
-export function SpecifyAccountType ({
+
+export default function SpecifyAccountType ({
   state,
   updateState
 }: {
