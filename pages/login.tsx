@@ -111,7 +111,7 @@ export default function Home () {
               setState={setState}
             />
           }
-          
+
 
           {/*
             OPTIONAL: 3rd step: Login with ENT or Pronote's Credentials.

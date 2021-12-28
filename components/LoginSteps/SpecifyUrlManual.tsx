@@ -38,8 +38,8 @@ function SpecifyUrlManual ({ state, setState }: SpecifyUrlManualProps) {
     ">
       <div className="flex flex-col text-center">
         <h2 className="text-lg font-medium">Manuel</h2>
-        <p>Saisissez l'URL Pronote de votre établissement.</p>
-    
+        <p>Saisissez l&apos;URL Pronote de votre établissement.</p>
+
         <form onSubmit={handlePronoteConnect}>
           <input type="text" onChange={(e => setPronoteUrl(e.target.value))} value={pronoteUrl} />
 
