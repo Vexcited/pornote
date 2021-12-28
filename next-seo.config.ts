@@ -23,11 +23,11 @@ const SeoProps: DefaultSeoProps = {
     cardType: "summary_large_image"
   },
 
-  // Remove the ability to zoom on mobile devices.
-  additionalMetaTags: [{
-    name: "viewport",
-    content: "width=device-width, initial-scale=1.0, user-scalable=no"
-  },
+  additionalMetaTags: [
+    {
+      name: "viewport",
+      content: "width=device-width, initial-scale=1.0, user-scalable=no"
+    },
     {
       name: "theme-color",
       content: "#17AA67"
@@ -39,6 +39,14 @@ const SeoProps: DefaultSeoProps = {
       rel: "apple-touch-icon",
       href: "/apple-touch-icon.png",
       sizes: "180x180"
+    },
+    {
+      rel: "manifest",
+      href: "/manifest.json"
+    },
+    {
+      rel: "icon",
+      href: "/favicon.ico"
     }
   ]
 }
