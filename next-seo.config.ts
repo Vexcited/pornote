@@ -1,35 +1,46 @@
 import type { DefaultSeoProps } from "next-seo";
 
-const projectDescription = "Redesign de l'application web Pronote. Celle-ci est complétement personnalisable et inclus de nouvelles fonctionnalitées."
-const projectUrl = "https://pronote-evolution.vercel.app";
-const projectName = "Pronote Évolution";
+const projectDescription = "Redesign de l'application web Pronote. Celle-ci est complétement personnalisable et inclues de nouvelles fonctionnalitées."
+const projectUrl = "https://pornote.vexcited.me";
+const projectName = "Pornote";
 
 const SeoProps: DefaultSeoProps = {
-    titleTemplate: `%s - ${projectName}`,
-    defaultTitle: projectName,
+  titleTemplate: `%s - ${projectName}`,
+  defaultTitle: projectName,
 
-    description: projectDescription,
+  description: projectDescription,
 
-    openGraph: {
-        type: "website",
-        locale: "fr_FR",
-        
-        url: projectUrl,
-        title: projectName,
-        description: projectDescription
-    },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+      
+    url: projectUrl,
+    title: projectName,
+    description: projectDescription
+  },
 
-    twitter: {
-        cardType: "summary_large_image"
-    },
+  twitter: {
+    cardType: "summary_large_image"
+  },
 
-    // Remove the ability to zoom on mobile devices.
-    additionalMetaTags: [
-        {
-            name: "viewport",
-            content: "width=device-width, user-scalable=no"
-        }
-    ]
+  // Remove the ability to zoom on mobile devices.
+  additionalMetaTags: [{
+    name: "viewport",
+    content: "width=device-width, initial-scale=1.0, user-scalable=no"
+  },
+    {
+      name: "theme-color",
+      content: "#17AA67"
+    }
+  ],
+
+  additionalLinkTags: [
+    {
+      rel: "apple-touch-icon",
+      href: "/apple-touch-icon.png",
+      sizes: "180x180"
+    }
+  ]
 }
 
 export default SeoProps;
