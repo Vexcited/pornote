@@ -13,7 +13,7 @@ type SelectSchoolSelectionProps = {
 }
 
 function SelectSchoolSelection ({ state, setState }: SelectSchoolSelectionProps) {
-  
+
   const SelectionItem = ({ step, name, description }: SelectionItemProps) => {
     const updateStep = () => {
       setState({

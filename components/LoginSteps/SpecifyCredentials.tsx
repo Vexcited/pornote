@@ -1,7 +1,7 @@
 import type { StateTypes, UpdateStateType } from "pages/login";
 
 import { Fragment } from "react";
-  
+
 export default function SpecifyCredentials ({
   state,
   updateState

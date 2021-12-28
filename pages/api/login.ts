@@ -39,7 +39,7 @@ export default async function handler (
       // We extract session informations from the DOM.
       const session = extractSession(pronoteHtmlData);
       const sessionId = parseInt(session.h);
-        
+
       // Generate encrypted order for request.
       const orderDecrypted = 1;
       const orderEncrypted = generateOrder(orderDecrypted);
@@ -50,9 +50,9 @@ export default async function handler (
         new forge.jsbn.BigInteger(session.MR, 16),
         new forge.jsbn.BigInteger(session.ER, 16)
       );
-            
+
       const lResult = forge.util.encode64(lRSA.encrypt(randomTempIv.bytes()), 64);
-        
+
       // Request to Pronote server.
       // Here, is AccountID is 9 => Default for informations gathering.
       const informationsApiUrl = `${pronoteServerUrl}appelfonction/${pronoteAccountId}/${session.h}/${orderEncrypted}`;

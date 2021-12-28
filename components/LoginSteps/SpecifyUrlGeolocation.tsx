@@ -5,7 +5,7 @@ import {
   useState,
   useEffect,
   Fragment,
-  
+
   // Types
   Dispatch,
   SetStateAction
@@ -32,7 +32,7 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
     /**
      * Function to send our geolocation to Pronote API
      * and gets the nearest schools.
-     * 
+     *
      * We need also to check if geolocation is supported
      * in the user's navigator.
      */
@@ -41,7 +41,7 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
         const {
           coords: { longitude, latitude }
         } = await getPosition();
-   
+
         const data = await sendPronoteGeolocation(latitude, longitude);
         setGeolocationResults(data);
         setSelectedSchool(data[0]);
@@ -51,7 +51,7 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
       }
     };
 
-    handleGeolocation();    
+    handleGeolocation();
   }, []);
 
   /**
@@ -62,7 +62,7 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
     if (selectedSchool) {
       const schoolInformations = await getInformationsFrom(selectedSchool.url);
       console.log(schoolInformations);
-  
+
       // We save these informations that will trigger the useEffect below.
       // updateState("schoolInformations", schoolInformations);
     }

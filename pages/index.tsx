@@ -16,7 +16,7 @@ export default function Home () {
 
         // If there's already saved accounts, we store them to state.
         if (savedAccounts) setAccounts(savedAccounts);
-        
+
         // If not, we create an empty array to save them.
         if (!savedAccounts) {
           await localforage.setItem("accounts", []);

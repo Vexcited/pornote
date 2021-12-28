@@ -12,18 +12,19 @@ export type StateTypes = {
   | "specifyUrlGeolocation" | "specifyUrlManual" // Step 2 - Specify Pronote server's URL.
   | "selectLoginSelection" // Step 3 - Login to Pronote with credentials or ENT.
   | "specifyPronoteCredentials" | "specifyEntCredentials" // Step 4 - Pronote or ENT credentials.
-  ; 
-    
+  ;
+
   pronoteUrl: string;
   schoolInformations: SchoolInformations;
-  
+
   accountType: AccountType;
   username: string;
   password: string;
 }
 
-import SelectSchoolSelection from "components/LoginSteps/SelectSchoolSelection";
-import SpecifyUrlGeolocation from "components/LoginSteps/SpecifyUrlGeolocation";
+import SelectSchoolSelection from "components/LoginSteps/SelectSchoolSelection"; // Step 1
+import SpecifyUrlGeolocation from "components/LoginSteps/SpecifyUrlGeolocation"; // Step 2-1
+import SpecifyUrlManual from "components/LoginSteps/SpecifyUrlManual"; // Step 2-2
 
 export default function Home () {
   const [state, setState] = useState<StateTypes>({
@@ -105,7 +106,7 @@ export default function Home () {
 
           {/* 2nd-2 step: Manual input of Pronote's server URL. */}
           {state.step === "specifyUrlManual"
-            && <SpecifyAccountType
+            && <SpecifyUrlManual
               state={state}
               updateState={setState}
             />

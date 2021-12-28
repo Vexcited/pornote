@@ -25,11 +25,11 @@ export default async function handler (
       // We extract session informations from the DOM.
       const session = extractSession(pronoteHtmlData);
       const sessionId = parseInt(session.h);
-  
+
       // Generate encrypted order for request.
       const orderDecrypted = 1;
       const orderEncrypted = generateOrder(orderDecrypted);
-  
+
       // Request to Pronote server.
       // Here, is AccountID is 9 => Default for informations gathering.
       const informationsApiUrl = pronoteServerUrl + "appelfonction/9/" + session.h + "/" + orderEncrypted;
@@ -48,7 +48,7 @@ export default async function handler (
           })
         }
       );
-  
+
       res.status(200).json({
         success: true,
         message: "Attached server's reponse.",
