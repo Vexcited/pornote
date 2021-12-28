@@ -2,20 +2,13 @@ import type { StateTypes } from "pages/login";
 
 import {
   useState,
-  useEffect,
-  Fragment,
 
   // Types
   Dispatch,
   SetStateAction
 } from "react";
 
-import getPosition from "@/webUtils/getLocation";
-import sendPronoteGeolocation from "@/webUtils/sendPronoteGeolocation";
 import getInformationsFrom from "@/webUtils/getInformationsFrom";
-
-import { Listbox, Transition } from "@headlessui/react";
-import { HiCheck, HiSelector } from "react-icons/hi";
 
 type SpecifyUrlManualProps = {
   state: StateTypes;
@@ -45,7 +38,15 @@ function SpecifyUrlManual ({ state, setState }: SpecifyUrlManualProps) {
     ">
       <div className="flex flex-col text-center">
         <h2 className="text-lg font-medium">Manuel</h2>
-        <p>Saissise</p>
+        <p>Saisissez l'URL Pronote de votre établissement.</p>
+    
+        <form onSubmit={handlePronoteConnect}>
+          <input type="text" onChange={(e => setPronoteUrl(e.target.value))} value={pronoteUrl} />
+
+          <button type="submit">
+            Connexion
+          </button>
+        </form>
       </div>
 
     </div>

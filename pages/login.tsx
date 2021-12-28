@@ -8,11 +8,10 @@ import { BiArrowBack } from "react-icons/bi";
 
 export type StateTypes = {
   step: // Steps to know where we are in the login form.
-    "selectSchoolSelection" // Step 1 - How we know Pronote server's URL.
+  | "selectSchoolSelection" // Step 1 - How we know Pronote server's URL.
   | "specifyUrlGeolocation" | "specifyUrlManual" // Step 2 - Specify Pronote server's URL.
   | "selectLoginSelection" // Step 3 - Login to Pronote with credentials or ENT.
-  | "specifyPronoteCredentials" | "specifyEntCredentials" // Step 4 - Pronote or ENT credentials.
-  ;
+  | "specifyPronoteCredentials" | "specifyEntCredentials"; // Step 4 - Pronote or ENT credentials.
 
   pronoteUrl: string;
   schoolInformations: SchoolInformations;
@@ -25,6 +24,7 @@ export type StateTypes = {
 import SelectSchoolSelection from "components/LoginSteps/SelectSchoolSelection"; // Step 1
 import SpecifyUrlGeolocation from "components/LoginSteps/SpecifyUrlGeolocation"; // Step 2-1
 import SpecifyUrlManual from "components/LoginSteps/SpecifyUrlManual"; // Step 2-2
+import SelectLoginSelection from "components/LoginSteps/SelectLoginSelection"; // Step 3
 
 export default function Home () {
   const [state, setState] = useState<StateTypes>({
@@ -108,7 +108,18 @@ export default function Home () {
           {state.step === "specifyUrlManual"
             && <SpecifyUrlManual
               state={state}
-              updateState={setState}
+              setState={setState}
+            />
+          }
+
+          {/*
+            OPTIONNAL: 3rd step: Login with ENT or Pronote's Credentials.
+            - Can be skipped if ENT isn't supported.
+          */}
+          {state.step === "selectLoginSelection"
+            && <SelectLoginSelection
+              state={state}
+              setState={setState}
             />
           }
         </section>
