@@ -20,7 +20,7 @@ export default function generateOrder (
     md5(key)
   );
 
-  // Crea.te initialization vector.
+  // Create initialization vector.
   const iv = forge.util.createBuffer().fillWithByte(0, 16);
   cipher.start({ iv });
   

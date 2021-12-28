@@ -111,9 +111,10 @@ export default function Home () {
               setState={setState}
             />
           }
+          
 
           {/*
-            OPTIONNAL: 3rd step: Login with ENT or Pronote's Credentials.
+            OPTIONAL: 3rd step: Login with ENT or Pronote's Credentials.
             - Can be skipped if ENT isn't supported.
           */}
           {state.step === "selectLoginSelection"
