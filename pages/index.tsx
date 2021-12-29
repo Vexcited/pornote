@@ -31,7 +31,7 @@ export default function Home () {
   return (
     <div className="h-screen w-screen bg-green-50 text-green-900">
       <header className="fixed top-0 h-32 w-full flex flex-col items-center justify-center">
-        <h1 className="font-bold text-3xl">Pronote Évolution</h1>
+        <h1 className="font-bold text-3xl">Pornote</h1>
         <p className="text-lg">Client Pronote non-officiel.</p>
       </header>
 
@@ -56,7 +56,7 @@ export default function Home () {
       </section>
 
       <footer className="w-full fixed bottom-0 flex flex-col items-center justify-center h-16">
-        <a className="font-medium text-green-700 hover:text-green-500 transition-colors" href="https://github.com/Vexcited/pronote-evolution">GitHub</a>
+        <a className="font-medium text-green-700 hover:text-green-500 transition-colors" href="https://github.com/Vexcited/pornote">GitHub</a>
       </footer>
     </div>
   );
