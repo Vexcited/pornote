@@ -16,52 +16,59 @@ export default async function handler (
 
     // We get URL origin and then get the DOM of account selection page.
     const pronoteServerUrl = getServerUrl(pronoteUrl);
-    const [pronoteHtmlSuccess, pronoteHtmlData] = await getPronotePage({
+    const [pronoteHtmlSuccess, pronoteHtmlBody] = await getPronotePage({
       pronoteUrl: pronoteServerUrl + "?login=true",
-      onlyFetch: true
+      checkEnt: false
     });
 
-    if (pronoteHtmlSuccess) {
-      // We extract session informations from the DOM.
-      const session = extractSession(pronoteHtmlData);
-      const sessionId = parseInt(session.h);
+    // Fetch Pronote server URL without the "?login=true" part
+    // to see if an ENT is available.
+    const [pronoteEntSuccess, pronoteEntUrl] = await getPronotePage({
+      pronoteUrl: pronoteServerUrl,
+      checkEnt: true
+    });
 
-      // Generate encrypted order for request.
-      const orderDecrypted = 1;
-      const orderEncrypted = generateOrder(orderDecrypted);
-
-      // Request to Pronote server.
-      // Here, is AccountID is 9 => Default for informations gathering.
-      const informationsApiUrl = pronoteServerUrl + "appelfonction/9/" + session.h + "/" + orderEncrypted;
-      const dataResponse = await fetch (
-        informationsApiUrl,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            session: sessionId,
-            numeroOrdre: orderEncrypted,
-            nom: "FonctionParametres",
-            donneesSec: {}
-          })
-        }
-      );
-
-      res.status(200).json({
-        success: true,
-        message: "Attached server's reponse.",
-        data: await dataResponse.json()
-      });
-    }
-    // An error occurred while fetching HTML.
-    else {
+    if (!pronoteHtmlSuccess || !pronoteEntSuccess) {
       res.status(500).json({
         success: false,
-        message: `Failed to fetch Pronote page.\n${pronoteHtmlData}`
+        message: `Failed to fetch Pronote page.\n${pronoteHtmlBody || pronoteEntUrl}`
       });
     }
+
+    // We extract session informations from the DOM.
+    const session = extractSession(pronoteHtmlBody);
+    const sessionId = parseInt(session.h);
+
+    // Generate encrypted order for request.
+    const orderDecrypted = 1;
+    const orderEncrypted = generateOrder(orderDecrypted);
+
+    // Request to Pronote server.
+    // Here, is AccountID is 9 => Default for informations gathering.
+    const informationsApiUrl = pronoteServerUrl + "appelfonction/9/" + session.h + "/" + orderEncrypted;
+    const dataResponse = await fetch (
+      informationsApiUrl,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          session: sessionId,
+          numeroOrdre: orderEncrypted,
+          nom: "FonctionParametres",
+          donneesSec: {}
+        })
+      }
+    );
+
+    const pronoteData = await dataResponse.json();
+    res.status(200).json({
+      success: true,
+      message: "Attached server's response.",
+      pronoteData,
+      pronoteEntUrl
+    });
   }
   else {
     res.status(404).json({

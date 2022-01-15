@@ -4,5 +4,9 @@
   "editor.insertSpaces": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
-  }
+  },
+  "cSpell.words": [
+    "pornote",
+    "pronote"
+  ]
 }

@@ -2,7 +2,10 @@ import type { StateTypes } from "pages/login";
 import type { Dispatch, SetStateAction } from "react";
 
 type SelectionItemProps = {
-  step: "specifyUrlGeolocation" | "specifyUrlManual" // Possible next steps.
+  /** Next steps ID. */
+  step: "specifyUrlGeolocation" | "specifyUrlManual";
+
+  // Visuals.
   name: string;
   description: string;
 }
@@ -12,8 +15,8 @@ type SelectSchoolSelectionProps = {
   setState: Dispatch<SetStateAction<StateTypes>>;
 }
 
+/** Step 1: Select the method to type the Pronote URL - Manual or Geolocation. */
 function SelectSchoolSelection ({ state, setState }: SelectSchoolSelectionProps) {
-
   const SelectionItem = ({ step, name, description }: SelectionItemProps) => {
     const updateStep = () => {
       setState({
@@ -41,7 +44,7 @@ function SelectSchoolSelection ({ state, setState }: SelectSchoolSelectionProps)
     >
       <SelectionItem
         step="specifyUrlGeolocation"
-        name="Géolocation"
+        name="Géolocalisation"
         description="Géolocalisez les établissements proches de votre localisation actuelle."
       />
       <SelectionItem

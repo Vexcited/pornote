@@ -3,9 +3,10 @@ import type { AccountType, SchoolInformations } from "types/SavedAccountData";
 
 import fixSchoolName from "@/webUtils/fixSchoolName";
 
-export default async function getAccountTypesFrom (
+export default async function getInformationsFrom (
   pronoteUrl: string
 ): Promise<SchoolInformations> {
+
   const response = await fetch(
     "/api/informations",
     {
@@ -21,16 +22,16 @@ export default async function getAccountTypesFrom (
 
   // Get (raw) JSON data from the response.
   const rawData: InformationsResponseData = await response.json();
-  
+
   // Initializing default returned values.
   const types: AccountType[] = [];
   let schoolName = "";
-  
-  // Check if the request was successful.
-  if (rawData.success && rawData.data) {
-    const typesAvailable = rawData.data.donneesSec.donnees.espaces.V;
 
-    // Retreive account types.
+  // Check if the request was successful.
+  if (rawData.success && rawData.pronoteData) {
+    const typesAvailable = rawData.pronoteData.donneesSec.donnees.espaces.V;
+
+    // Retrieve account types.
     typesAvailable.forEach(type => {
       types.push({
         id: type.G,
@@ -39,13 +40,13 @@ export default async function getAccountTypesFrom (
       });
     });
 
-    // Retreive school name.
-    schoolName = rawData.data.donneesSec.donnees.NomEtablissement;
+    // Retrieve school name.
+    schoolName = rawData.pronoteData.donneesSec.donnees.NomEtablissement;
   }
 
   return {
-    name: fixSchoolName(schoolName), // Fixing a typo in schools name.
-    entAvailable: false,
-    availableAccountTypes: types
+    name: fixSchoolName(schoolName),
+    availableAccountTypes: types,
+    entUrl: rawData.pronoteEntUrl
   };
 }

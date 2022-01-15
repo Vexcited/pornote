@@ -1,7 +1,7 @@
 export default function getPosition(
-    options?: PositionOptions
+  options?: PositionOptions
 ): Promise<GeolocationPosition> {
-    return new Promise((resolve, reject) => 
-        navigator.geolocation.getCurrentPosition(resolve, reject, options)
-    );
+  return new Promise((resolve, reject) =>
+    navigator.geolocation.getCurrentPosition(resolve, reject, options)
+  );
 }

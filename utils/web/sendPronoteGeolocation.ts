@@ -15,7 +15,7 @@ export default async function sendPronoteGeolocation (latitude: number, longitud
       })}`
     }
   );
-  
+
   // We get the response.
   // If the data isn't an array (no results),
   // then we create it ourselves (prevent errors).

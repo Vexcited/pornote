@@ -19,15 +19,18 @@ function SpecifyUrlManual ({ state, setState }: SpecifyUrlManualProps) {
   const [pronoteUrl, setPronoteUrl] = useState("");
 
   /**
-   * Function to parse the informations
-   * gathered on the `pronoteUrl`'s home page.
+   * Parse the informations from the selected school.
+   * Move to next step if the informations are valid.
    */
   const handlePronoteConnect = async () => {
-    const schoolInformations = await getInformationsFrom(pronoteUrl);
-    console.log(schoolInformations);
+    if (pronoteUrl) {
+      const schoolInformations = await getInformationsFrom(pronoteUrl);
 
-    // We save these informations that will trigger the useEffect below.
-    // updateState("schoolInformations", schoolInformations);
+      setState({
+        ...state,
+        schoolInformations
+      });
+    }
   };
 
   return (

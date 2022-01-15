@@ -16,7 +16,7 @@
 
 ## Warning
 
-This project is made for educationnal purposes.
+This project is made for educational purposes.
 That means that the project will not really be
 maintained. You can still use this app, to do
 everyday tasks, but when it comes to start a quiz,

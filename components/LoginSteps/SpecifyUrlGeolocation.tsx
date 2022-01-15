@@ -23,25 +23,27 @@ type SpecifyUrlGeolocationProps = {
   setState: Dispatch<SetStateAction<StateTypes>>;
 }
 
+/** Step 2-1: Specify Pronote URL using Geolocation. */
 function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps) {
   const [geolocationResults, setGeolocationResults] = useState<PronoteGeolocationResult[]>([]);
   const [selectedSchool, setSelectedSchool] = useState<PronoteGeolocationResult | null>(null);
 
-  // On component mount, start Pronote's geolocation.
+  // On component mount, use Pronote geolocation.
   useEffect(() => {
-    /**
-     * Function to send our geolocation to Pronote API
-     * and gets the nearest schools.
-     *
-     * We need also to check if geolocation is supported
-     * in the user's navigator.
-     */
-    const handleGeolocation = async () => {
+    (async () => {
+      /**
+       * Check if geolocation is supported
+       * in the user's navigator.
+       */
       if ("geolocation" in navigator) {
         const {
           coords: { longitude, latitude }
         } = await getPosition();
 
+        /**
+         * Send our geolocation to Pronote
+         * to get the nearest schools.
+         */
         const data = await sendPronoteGeolocation(latitude, longitude);
         setGeolocationResults(data);
         setSelectedSchool(data[0]);
@@ -49,22 +51,21 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
       else {
         alert("La géolocalisation n'est pas disponible dans votre navigateur.");
       }
-    };
-
-    handleGeolocation();
+    })();
   }, []);
 
   /**
-   * Function to parse the informations
-   * gathered on the `pronoteUrl`'s home page.
+   * Parse the informations from the selected school.
+   * Move to next step if the informations are valid.
    */
   const handlePronoteConnect = async () => {
     if (selectedSchool) {
       const schoolInformations = await getInformationsFrom(selectedSchool.url);
-      console.log(schoolInformations);
 
-      // We save these informations that will trigger the useEffect below.
-      // updateState("schoolInformations", schoolInformations);
+      setState({
+        ...state,
+        schoolInformations
+      });
     }
   };
 
@@ -76,7 +77,7 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
     ">
       <div className="flex flex-col text-center">
         <h2 className="text-lg font-medium">Géolocalisation</h2>
-        <p>Choissisez votre établissement dans la liste ci-dessous</p>
+        <p>Choisissez votre établissement dans la liste ci-dessous</p>
       </div>
       {selectedSchool ? (
         <Listbox value={selectedSchool} onChange={setSelectedSchool}>
@@ -161,6 +162,12 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
           <span>N&apos;oubliez pas d&apos;accepter la géolocalisation de votre appareil.</span>
         </Fragment>
       )}
+
+      <button
+        onClick={handlePronoteConnect}
+      >
+        Valider votre choix d&apos;établissement
+      </button>
     </div>
   );
 }

@@ -13,7 +13,10 @@ export type StateTypes = {
   | "selectLoginSelection" // Step 3 - Login to Pronote with credentials or ENT.
   | "specifyPronoteCredentials" | "specifyEntCredentials"; // Step 4 - Pronote or ENT credentials.
 
+  // Get from step 1.
   pronoteUrl: string;
+
+  // On submit from step 1.
   schoolInformations: SchoolInformations;
 
   accountType: AccountType;
@@ -21,10 +24,15 @@ export type StateTypes = {
   password: string;
 }
 
-import SelectSchoolSelection from "components/LoginSteps/SelectSchoolSelection"; // Step 1
-import SpecifyUrlGeolocation from "components/LoginSteps/SpecifyUrlGeolocation"; // Step 2-1
-import SpecifyUrlManual from "components/LoginSteps/SpecifyUrlManual"; // Step 2-2
-import SelectLoginSelection from "components/LoginSteps/SelectLoginSelection"; // Step 3
+// Step 1.
+import SelectSchoolSelection from "components/LoginSteps/SelectSchoolSelection";
+
+// Step 2-1 and 2-2.
+import SpecifyUrlGeolocation from "components/LoginSteps/SpecifyUrlGeolocation";
+import SpecifyUrlManual from "components/LoginSteps/SpecifyUrlManual";
+
+// Step 3.
+import SelectLoginSelection from "components/LoginSteps/SelectLoginSelection";
 
 export default function Home () {
   const [state, setState] = useState<StateTypes>({
@@ -33,7 +41,7 @@ export default function Home () {
 
     schoolInformations: {
       name: "",
-      entAvailable: false,
+      entUrl: undefined,
       availableAccountTypes: []
     },
 
