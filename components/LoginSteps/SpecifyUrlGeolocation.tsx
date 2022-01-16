@@ -76,6 +76,22 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
     }
   };
 
+  /**
+   * Listen to state changes.
+   * Check if a school has been selected.
+   */
+  useEffect(() => {
+    const { name, availableAccountTypes } = state.schoolInformations;
+
+    if (name && availableAccountTypes.length > 0) {
+      setState({
+        ...state,
+        step: "selectLoginSelection"
+      });
+    }
+  }, [state, setState]);
+
+
   return (
     <div className="
       flex flex-col justify-center items-center

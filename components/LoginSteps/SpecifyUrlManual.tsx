@@ -6,6 +6,7 @@ import {
 
   // Types
   Dispatch,
+  FormEvent,
   SetStateAction
 } from "react";
 
@@ -23,7 +24,10 @@ function SpecifyUrlManual ({ state, setState }: SpecifyUrlManualProps) {
    * Parse the informations from the selected school.
    * Move to next step if the informations are valid.
    */
-  const handlePronoteConnect = async () => {
+  const handlePronoteConnect = async (e: FormEvent<HTMLFormElement>) => {
+    // Prevent a submit refresh.
+    e.preventDefault();
+
     if (pronoteUrl) {
       const [success, data] = await getInformationsFrom(pronoteUrl);
       if (success) {
