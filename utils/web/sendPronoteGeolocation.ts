@@ -1,10 +1,12 @@
-import { PronoteGeolocationResult } from "types/PronoteData";
+import type {
+  PronoteApiGeolocationItem
+} from "types/PronoteApiData";
+
+import ky, { HTTPError } from "ky";
 
 export default async function sendPronoteGeolocation (latitude: number, longitude: number) {
-  const pronoteResponse = await fetch(
-    "https://www.index-education.com/swie/geoloc.php",
-    {
-      method: "POST",
+  try {
+    const geolocationResponse = await ky.post("https://www.index-education.com/swie/geoloc.php", {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
       },
@@ -13,14 +15,17 @@ export default async function sendPronoteGeolocation (latitude: number, longitud
         lat: latitude.toString(),
         long: longitude.toString()
       })}`
-    }
-  );
+    }).json();
 
-  // We get the response.
-  // If the data isn't an array (no results),
-  // then we create it ourselves (prevent errors).
-  const pronoteDataRaw = await pronoteResponse.json();
-  const data: PronoteGeolocationResult[] = Array.isArray(pronoteDataRaw) ? pronoteDataRaw : [];
+    // If the data isn't an array (no results),
+    // then we create it ourselves (to prevent error).
+    const items: PronoteApiGeolocationItem[] = Array.isArray(geolocationResponse) ? geolocationResponse : [];
+    return items;
+  }
+  catch (e) {
+    const error = e as HTTPError;
+    console.error(error);
 
-  return data;
+    return [];
+  }
 }

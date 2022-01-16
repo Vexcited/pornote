@@ -1,4 +1,5 @@
 import type { StateTypes } from "pages/login";
+import type { SchoolInformations } from "types/SavedAccountData";
 
 import {
   useState,
@@ -24,12 +25,18 @@ function SpecifyUrlManual ({ state, setState }: SpecifyUrlManualProps) {
    */
   const handlePronoteConnect = async () => {
     if (pronoteUrl) {
-      const schoolInformations = await getInformationsFrom(pronoteUrl);
+      const [success, data] = await getInformationsFrom(pronoteUrl);
+      if (success) {
+        const schoolInformations = data as SchoolInformations;
 
-      setState({
-        ...state,
-        schoolInformations
-      });
+        setState({
+          ...state,
+          schoolInformations
+        });
+      }
+      else {
+        console.error("Error while getting informations from Pronote.", data);
+      }
     }
   };
 

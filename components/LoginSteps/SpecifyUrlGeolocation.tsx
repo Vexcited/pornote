@@ -1,5 +1,6 @@
-import type { PronoteGeolocationResult } from "types/PronoteData";
+import type { PronoteApiGeolocationItem } from "types/PronoteApiData";
 import type { StateTypes } from "pages/login";
+import type { SchoolInformations } from "types/SavedAccountData";
 
 import {
   useState,
@@ -25,8 +26,8 @@ type SpecifyUrlGeolocationProps = {
 
 /** Step 2-1: Specify Pronote URL using Geolocation. */
 function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps) {
-  const [geolocationResults, setGeolocationResults] = useState<PronoteGeolocationResult[]>([]);
-  const [selectedSchool, setSelectedSchool] = useState<PronoteGeolocationResult | null>(null);
+  const [geolocationResults, setGeolocationResults] = useState<PronoteApiGeolocationItem[]>([]);
+  const [selectedSchool, setSelectedSchool] = useState<PronoteApiGeolocationItem | null>(null);
 
   // On component mount, use Pronote geolocation.
   useEffect(() => {
@@ -60,12 +61,18 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
    */
   const handlePronoteConnect = async () => {
     if (selectedSchool) {
-      const schoolInformations = await getInformationsFrom(selectedSchool.url);
+      const [success, data] = await getInformationsFrom(selectedSchool.url);
+      if (success) {
+        const schoolInformations = data as SchoolInformations;
 
-      setState({
-        ...state,
-        schoolInformations
-      });
+        setState({
+          ...state,
+          schoolInformations
+        });
+      }
+      else {
+        console.error("Error while getting informations from Pronote.", data);
+      }
     }
   };
 
@@ -88,7 +95,7 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
                 bg-white rounded-lg shadow-md cursor-default
                 focus:outline-none focus-visible:ring-2
                 focus-visible:ring-opacity-75 focus-visible:ring-white
-                focus-visible:ring-offset-orange-300 focus-visible:ring-offset-2
+                focus-visible:ring-offset-green-300 focus-visible:ring-offset-2
                 focus-visible:border-green-500 sm:text-sm
               "
             >

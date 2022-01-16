@@ -1,40 +1,50 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import type {
-  InformationsResponseData,
+  NextApiRequest,
+  NextApiResponse
+} from "next";
+
+import type {
+  ApiInformationsResponse,
   ApiServerError
 } from "types/ApiData";
 
+import type {
+  PronoteApiFonctionParametres
+} from "types/PronoteApiData";
+
 import getServerUrl from "@/apiUtils/getServerUrl";
 import getPronotePage from "@/apiUtils/getPronotePage";
+import checkEntAvailable from "@/apiUtils/checkEntAvailable";
 import extractSession from "@/apiUtils/extractSession";
 import generateOrder from "@/apiUtils/generateOrder";
 
+import got from "got";
+
 export default async function handler (
   req: NextApiRequest,
-  res: NextApiResponse<InformationsResponseData | ApiServerError>
+  res: NextApiResponse<ApiInformationsResponse | ApiServerError>
 ) {
   if (req.method === "POST") {
     // Dirty Pronote URL.
     const pronoteUrl: string = req.body.pronoteUrl;
 
     // We get URL origin and then get the DOM of account selection page.
-    const pronoteServerUrl = getServerUrl(pronoteUrl).toLowerCase();
-    const [pronoteHtmlSuccess, pronoteHtmlBody] = await getPronotePage({
-      pronoteUrl: pronoteServerUrl + "?login=true",
-      checkEnt: false
-    });
+    const pronoteServerUrl = getServerUrl(pronoteUrl);
+    const [pronoteHtmlSuccess, pronoteHtmlBody] = await getPronotePage(pronoteServerUrl + "?login=true");
 
     // Fetch Pronote server URL without the "?login=true" part
     // to see if an ENT is available.
-    const [pronoteEntSuccess, pronoteEntUrl] = await getPronotePage({
-      pronoteUrl: pronoteServerUrl,
-      checkEnt: true
-    });
+    const [pronoteEntSuccess, pronoteEntUrl] = await checkEntAvailable(pronoteServerUrl);
 
+    // Checking if both functions executed successfully.
     if (!pronoteHtmlSuccess || !pronoteEntSuccess) {
       res.status(500).json({
         success: false,
-        message: `Failed to fetch Pronote page.\n${pronoteHtmlBody || pronoteEntUrl}`
+        message: "Failed to execute 'getPronotePage' or 'checkEntAvailable' functions.",
+        debug: {
+          pronoteHtmlBody,
+          pronoteEntUrl
+        }
       });
     }
 
@@ -49,31 +59,19 @@ export default async function handler (
     // Request to Pronote server.
     // Here, is AccountID is 9 => Default for informations gathering.
     const informationsApiUrl = pronoteServerUrl + "appelfonction/9/" + session.h + "/" + orderEncrypted;
-    const dataResponse = await fetch (
-      informationsApiUrl,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          session: sessionId,
-          numeroOrdre: orderEncrypted,
-          nom: "FonctionParametres",
-          donneesSec: {}
-        })
+    const pronoteData = await got.post(informationsApiUrl, {
+      json: {
+        session: sessionId,
+        numeroOrdre: orderEncrypted,
+        nom: "FonctionParametres",
+        donneesSec: {}
       }
-    );
-
-    const pronoteData = await dataResponse.json();
-    const getPronoteEntUrl = new URL(pronoteEntUrl).hostname === new URL(pronoteServerUrl).hostname
-      ? undefined
-      : pronoteEntUrl;
+    }).json<PronoteApiFonctionParametres>();
 
     res.status(200).json({
       success: true,
       pronoteData,
-      pronoteEntUrl: getPronoteEntUrl
+      pronoteEntUrl
     });
   }
   else {

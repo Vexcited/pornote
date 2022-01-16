@@ -23,7 +23,7 @@ export default function generateOrder (
   // Create initialization vector.
   const iv = forge.util.createBuffer().fillWithByte(0, 16);
   cipher.start({ iv });
-  
+
   // AES our order.
   cipher.update(
     forge.util.createBuffer(orderToEncrypt.toString(), "utf8")

@@ -1,4 +1,7 @@
-import type { AccountType, SchoolInformations } from "types/SavedAccountData";
+import type {
+  AccountType,
+  SchoolInformations
+} from "types/SavedAccountData";
 
 import { Fragment, useState } from "react";
 import { NextSeo } from "next-seo";

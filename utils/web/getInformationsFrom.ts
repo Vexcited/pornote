@@ -1,35 +1,23 @@
-import type { InformationsResponseData } from "types/ApiData";
+import type { ApiInformationsResponse } from "types/ApiData";
 import type { AccountType, SchoolInformations } from "types/SavedAccountData";
 
 import fixSchoolName from "@/webUtils/fixSchoolName";
 
+import ky, { HTTPError } from "ky";
+
 export default async function getInformationsFrom (
   pronoteUrl: string
-): Promise<SchoolInformations> {
+): Promise<[boolean, SchoolInformations | string]> {
+  try {
+    const data = await ky.post("/api/informations", {
+      json: { pronoteUrl }
+    }).json<ApiInformationsResponse>();
 
-  const response = await fetch(
-    "/api/informations",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        pronoteUrl
-      })
-    }
-  );
+    // Initializing default returned values.
+    const types: AccountType[] = [];
+    const schoolName = data.pronoteData.donneesSec.donnees.NomEtablissement;
 
-  // Get (raw) JSON data from the response.
-  const rawData: InformationsResponseData = await response.json();
-
-  // Initializing default returned values.
-  const types: AccountType[] = [];
-  let schoolName = "";
-
-  // Check if the request was successful.
-  if (rawData.success && rawData.pronoteData) {
-    const typesAvailable = rawData.pronoteData.donneesSec.donnees.espaces.V;
+    const typesAvailable = data.pronoteData.donneesSec.donnees.espaces.V;
 
     // Retrieve account types.
     typesAvailable.forEach(type => {
@@ -40,13 +28,14 @@ export default async function getInformationsFrom (
       });
     });
 
-    // Retrieve school name.
-    schoolName = rawData.pronoteData.donneesSec.donnees.NomEtablissement;
+    return [true, {
+      name: fixSchoolName(schoolName),
+      availableAccountTypes: types,
+      entUrl: data.pronoteEntUrl
+    }];
   }
-
-  return {
-    name: fixSchoolName(schoolName),
-    availableAccountTypes: types,
-    entUrl: rawData.pronoteEntUrl
-  };
+  catch (e) {
+    const error = e as HTTPError;
+    return [false, error.message];
+  }
 }

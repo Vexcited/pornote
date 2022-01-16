@@ -1,4 +1,6 @@
-import type { PronoteFonctionParametres } from "types/PronoteData";
+import type {
+  PronoteApiFonctionParametres
+} from "types/PronoteApiData";
 
 export interface ApiServerError {
   success: false;
@@ -6,10 +8,17 @@ export interface ApiServerError {
   debug?: any;
 }
 
-export interface InformationsResponseData {
+export interface ApiInformationsResponse {
   success: boolean;
 
   /** Server's response. */
-  pronoteData: PronoteFonctionParametres;
+  pronoteData: PronoteApiFonctionParametres;
   pronoteEntUrl?: string;
+}
+
+export interface ApiLoginResponse {
+  success: boolean;
+
+  /** Server's response. */
+  pronoteData: any;
 }
