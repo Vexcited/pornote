@@ -32,7 +32,7 @@ export default async function handler (
     const pronoteServerUrl = getServerUrl(pronoteUrl);
     const [pronoteHtmlSuccess, pronoteHtmlData] = await getPronotePage({
       pronoteUrl: pronoteServerUrl + pronoteAccountPath + "?login=true",
-      onlyFetch: true
+      checkEnt: false
     });
 
     if (pronoteHtmlSuccess) {
