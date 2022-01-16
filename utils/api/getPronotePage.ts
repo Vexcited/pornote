@@ -22,7 +22,7 @@ export default async function getPronotePage (
 
     // Pronote: return body.
     // ENT: return URL.
-    return [true, checkEnt ? url : body];
+    return [true, checkEnt ? url.toLowerCase() : body];
   }
   catch (e) {
     const error = e as HTTPError;

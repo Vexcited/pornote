@@ -1,11 +1,15 @@
 import type { PronoteFonctionParametres } from "types/PronoteData";
-import type { EntData } from "./SavedAccountData";
 
-export type InformationsResponseData = {
-    success: boolean;
-    message: string;
+export interface ApiServerError {
+  success: false;
+  message: string;
+  debug?: any;
+}
 
-    /** Server's response. */
-    pronoteData?: PronoteFonctionParametres;
-    pronoteEntUrl?: string;
-};
+export interface InformationsResponseData {
+  success: boolean;
+
+  /** Server's response. */
+  pronoteData: PronoteFonctionParametres;
+  pronoteEntUrl?: string;
+}

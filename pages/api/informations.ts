@@ -1,5 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { InformationsResponseData } from "types/ApiData";
+import type {
+  InformationsResponseData,
+  ApiServerError
+} from "types/ApiData";
 
 import getServerUrl from "@/apiUtils/getServerUrl";
 import getPronotePage from "@/apiUtils/getPronotePage";
@@ -8,14 +11,14 @@ import generateOrder from "@/apiUtils/generateOrder";
 
 export default async function handler (
   req: NextApiRequest,
-  res: NextApiResponse<InformationsResponseData>
+  res: NextApiResponse<InformationsResponseData | ApiServerError>
 ) {
   if (req.method === "POST") {
     // Dirty Pronote URL.
     const pronoteUrl: string = req.body.pronoteUrl;
 
     // We get URL origin and then get the DOM of account selection page.
-    const pronoteServerUrl = getServerUrl(pronoteUrl);
+    const pronoteServerUrl = getServerUrl(pronoteUrl).toLowerCase();
     const [pronoteHtmlSuccess, pronoteHtmlBody] = await getPronotePage({
       pronoteUrl: pronoteServerUrl + "?login=true",
       checkEnt: false
@@ -63,11 +66,14 @@ export default async function handler (
     );
 
     const pronoteData = await dataResponse.json();
+    const getPronoteEntUrl = new URL(pronoteEntUrl).hostname === new URL(pronoteServerUrl).hostname
+      ? undefined
+      : pronoteEntUrl;
+
     res.status(200).json({
       success: true,
-      message: "Attached server's response.",
       pronoteData,
-      pronoteEntUrl
+      pronoteEntUrl: getPronoteEntUrl
     });
   }
   else {
