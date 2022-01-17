@@ -80,13 +80,13 @@ export default function Home () {
 
       <div
         className="
-          h-screen w-screen 
+          h-screen w-screen
           bg-green-800 text-green-50
         "
       >
         <section className="
           h-full w-full md:fixed md:right-0 md:w-2/5 pt-24 px-4
-          flex flex-col 
+          flex flex-col
           gap-8 bg-green-900 bg-opacity-80 rounded-l-xl
         ">
           <div className="
@@ -100,12 +100,12 @@ export default function Home () {
                 state.step === "selectSchoolSelection"
                 || state.step === "specifyUrlGeolocation"
                 || state.step === "specifyUrlManual" ?
-                "URL Pronote" :
-                state.step === "selectLoginSelection"
+                  "URL Pronote" :
+                  state.step === "selectLoginSelection"
                 || state.step === "specifyEntCredentials"
                 || state.step === "specifyPronoteCredentials" ?
-                "S'identifier"
-                : ""
+                    "S'identifier"
+                    : ""
               }
             </p>
           </div>
