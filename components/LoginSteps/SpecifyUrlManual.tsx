@@ -39,6 +39,7 @@ function SpecifyUrlManual ({ state, setState }: SpecifyUrlManualProps) {
 
         setState({
           ...state,
+          pronoteUrl,
           schoolInformations
         });
       }

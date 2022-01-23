@@ -37,6 +37,10 @@ import SpecifyUrlManual from "components/LoginSteps/SpecifyUrlManual";
 // Step 3.
 import SelectLoginSelection from "components/LoginSteps/SelectLoginSelection";
 
+// Step 4-1 and 4-2.
+import SpecifyEntCredentials from "components/LoginSteps/SpecifyEntCredentials";
+import SpecifyPronoteCredentials from "components/LoginSteps/SpecifyPronoteCredentials";
+
 export default function Home () {
   const [state, setState] = useState<StateTypes>({
     step: "selectSchoolSelection",
@@ -138,10 +142,26 @@ export default function Home () {
 
           {/*
             OPTIONAL: 3rd step: Login with ENT or Pronote's Credentials.
-            - Can be skipped if ENT isn't supported.
+            - Can be skipped if ENT isn't available.
           */}
           {state.step === "selectLoginSelection"
             && <SelectLoginSelection
+              state={state}
+              setState={setState}
+            />
+          }
+
+          {/* 4th-1 step: Form to login using Pronote credentials. */}
+          {state.step === "specifyEntCredentials"
+            && <SpecifyEntCredentials
+            state={state}
+            setState={setState}
+            />
+          }
+
+          {/* 4th-2 step: Form to login using ENT credentials. */}
+          {state.step === "specifyPronoteCredentials"
+            && <SpecifyPronoteCredentials
               state={state}
               setState={setState}
             />
