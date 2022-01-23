@@ -2,7 +2,7 @@ import type { StateTypes } from "pages/login";
 
 import React, {
   useState,
-  
+
   // Types
   Dispatch,
   SetStateAction
@@ -29,19 +29,19 @@ function SpecifyEntCredentials ({ state, setState }: SpecifyEntCredentialsProps)
     evt.preventDefault();
 
     console.log(state);
-  }
+  };
 
   return (
     <div>
       <form onSubmit={handleEntLogin}>
-        <input 
+        <input
           type="text"
           placeholder="Nom d'utilisateur"
           onChange={updateFormStateInput("username")}
           value={formState.username}
         />
 
-        <input 
+        <input
           type="password"
           placeholder="Mot de passe"
           onChange={updateFormStateInput("password")}
@@ -53,7 +53,7 @@ function SpecifyEntCredentials ({ state, setState }: SpecifyEntCredentialsProps)
         </button>
       </form>
     </div>
-  )
+  );
 }
 
 export default SpecifyEntCredentials;

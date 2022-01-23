@@ -11,15 +11,15 @@ export default function specifyUrlCheckState ({
 }: SpecifyUrlCheckStateProps) {
   const { name, availableAccountTypes, entUrl } = state.schoolInformations;
 
-    if (name && availableAccountTypes.length > 0) {
-      const nextStep = entUrl // Check if an ENT is available.
-        ? "selectLoginSelection"
-        : "specifyPronoteCredentials";
+  if (name && availableAccountTypes.length > 0) {
+    const nextStep = entUrl // Check if an ENT is available.
+      ? "selectLoginSelection"
+      : "specifyPronoteCredentials";
 
-      // Move to next step.
-      setState({
-        ...state,
-        step: nextStep
-      });
-    }
+    // Move to next step.
+    setState({
+      ...state,
+      step: nextStep
+    });
+  }
 }

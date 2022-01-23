@@ -4,7 +4,7 @@ import type { SchoolInformations } from "types/SavedAccountData";
 import {
   useState,
   useEffect,
-  
+
   // Types
   Dispatch,
   FormEvent,
@@ -53,7 +53,7 @@ function SpecifyUrlManual ({ state, setState }: SpecifyUrlManualProps) {
    * Move to next step if a school have been
    * selected in the state.
    */
-   useEffect(() => {
+  useEffect(() => {
     specifyUrlCheckState({
       state,
       setState

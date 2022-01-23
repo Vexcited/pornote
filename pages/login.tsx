@@ -154,8 +154,8 @@ export default function Home () {
           {/* 4th-1 step: Form to login using Pronote credentials. */}
           {state.step === "specifyEntCredentials"
             && <SpecifyEntCredentials
-            state={state}
-            setState={setState}
+              state={state}
+              setState={setState}
             />
           }
 

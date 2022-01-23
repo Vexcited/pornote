@@ -2,7 +2,7 @@ import type { StateTypes } from "pages/login";
 
 import React, {
   useState,
-  
+
   // Types
   Dispatch,
   SetStateAction
@@ -37,7 +37,7 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
     evt.preventDefault();
 
     console.log(formState, selectedAccountType);
-  }
+  };
 
   return (
     <div>
@@ -57,14 +57,14 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
           ))}
         </SelectInput>
 
-        <input 
+        <input
           type="text"
           placeholder="Nom d'utilisateur"
           onChange={updateFormStateInput("username")}
           value={formState.username}
         />
 
-        <input 
+        <input
           type="password"
           placeholder="Mot de passe"
           onChange={updateFormStateInput("password")}
@@ -76,7 +76,7 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
         </button>
       </form>
     </div>
-  )
+  );
 }
 
 export default SpecifyPronoteCredentials;
