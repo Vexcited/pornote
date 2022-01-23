@@ -66,7 +66,7 @@ export default async function handler (
 
     // Request to Pronote server using account ID.
     const informationsApiUrl = `${pronoteServerUrl}appelfonction/${pronoteAccountId}/${session.h}/${orderEncrypted}`;
-    const pronoteData = await got.post(informationsApiUrl, {
+    const pronoteInformationsData = await got.post(informationsApiUrl, {
       json: {
         session: sessionId,
         numeroOrdre: orderEncrypted,
@@ -80,12 +80,33 @@ export default async function handler (
       }
     }).json<PronoteApiFonctionParametres>();
 
+    // const loginApiUrl = ``;
+    // const pronoteLoginData = await got.post(loginApiUrl, {
+    //   json: {
+    //     session: sessionId,
+    //     numeroOrdre: "",
+    //     nom: "Identification",
+    //     donneesSec: {
+    //       donnees: {
+    //         genreConnexion: 0,
+    //         genreEspace: pronoteAccountId,
+    //         identifiant: req.body.username,
+    //         pourENT: false,
+    //         enConnexionAuto: false,
+    //         demandeConnexionAuto: false,
+    //         demandeConnexionAppliMobile: false,
+    //         demandeConnexionAppliMobileJeton: false,
+    //         uuidAppliMobile: "",
+    //         loginTokenSAV: ""
+    //       }
+    //     }
+    //   }
+    // });
+
+
     res.status(200).json({
       success: true,
-      pronoteData: {
-        decrypted: decryptOrder(pronoteData.numeroOrdre),
-        pronoteData
-      }
+      pronoteData: pronoteInformationsData
     });
   }
   else {

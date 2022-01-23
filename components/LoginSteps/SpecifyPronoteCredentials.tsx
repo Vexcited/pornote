@@ -1,4 +1,8 @@
 import type { StateTypes } from "pages/login";
+import type {
+  ApiLoginResponse,
+  ApiServerError
+} from "types/ApiData";
 
 import React, {
   useState,
@@ -7,6 +11,8 @@ import React, {
   Dispatch,
   SetStateAction
 } from "react";
+
+import ky, { HTTPError } from "ky";
 
 import { SelectInput, SelectInputOption } from "components/SelectInput";
 
@@ -33,10 +39,26 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
     [key]: evt.target.value
   });
 
-  const handlePronoteLogin = (evt: React.FormEvent<HTMLFormElement>) => {
+  const handlePronoteLogin = async (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
 
-    console.log(formState, selectedAccountType);
+    try {
+      const data = await ky.post("/api/loginPronote", {
+        json: {
+          pronoteUrl: state.pronoteUrl,
+          pronoteAccountId: selectedAccountType.id,
+          pronoteAccountPath: selectedAccountType.path
+        }
+      }).json<ApiLoginResponse>();
+
+      console.info(formState, selectedAccountType, data);
+    }
+    catch (e) {
+      if (e instanceof HTTPError) {
+        const body: ApiServerError = await e.response.json();
+        console.error(body.message, body.debug);
+      }
+    }
   };
 
   return (
