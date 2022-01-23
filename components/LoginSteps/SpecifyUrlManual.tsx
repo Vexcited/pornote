@@ -3,7 +3,8 @@ import type { SchoolInformations } from "types/SavedAccountData";
 
 import {
   useState,
-
+  useEffect,
+  
   // Types
   Dispatch,
   FormEvent,
@@ -11,6 +12,9 @@ import {
 } from "react";
 
 import getInformationsFrom from "@/webUtils/getInformationsFrom";
+
+/** Used on the `useEffect` to DRY with `SpecifyUrlGeolocation`. */
+import specifyUrlCheckState from "./utils/specifyUrlCheckState";
 
 type SpecifyUrlManualProps = {
   state: StateTypes;
@@ -43,6 +47,17 @@ function SpecifyUrlManual ({ state, setState }: SpecifyUrlManualProps) {
       }
     }
   };
+
+  /**
+   * Move to next step if a school have been
+   * selected in the state.
+   */
+   useEffect(() => {
+    specifyUrlCheckState({
+      state,
+      setState
+    });
+  }, [state, setState]);
 
   return (
     <div className="

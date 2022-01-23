@@ -1,6 +1,6 @@
 import type { PronoteApiGeolocationItem } from "types/PronoteApiData";
-import type { StateTypes } from "pages/login";
 import type { SchoolInformations } from "types/SavedAccountData";
+import type { StateTypes } from "pages/login";
 
 import {
   useState,
@@ -12,9 +12,12 @@ import {
   SetStateAction
 } from "react";
 
-import getPosition from "@/webUtils/getLocation";
+import getPosition from "@/webUtils/getPosition";
 import sendPronoteGeolocation from "@/webUtils/sendPronoteGeolocation";
 import getInformationsFrom from "@/webUtils/getInformationsFrom";
+
+/** Used on the `useEffect` to DRY with `SpecifyUrlManual`. */
+import specifyUrlCheckState from "./utils/specifyUrlCheckState";
 
 import { Listbox, Transition } from "@headlessui/react";
 import { HiCheck, HiSelector } from "react-icons/hi";
@@ -77,20 +80,15 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
   };
 
   /**
-   * Listen to state changes.
-   * Check if a school has been selected.
+   * Move to next step if a school have been
+   * selected in the state.
    */
   useEffect(() => {
-    const { name, availableAccountTypes } = state.schoolInformations;
-
-    if (name && availableAccountTypes.length > 0) {
-      setState({
-        ...state,
-        step: "selectLoginSelection"
-      });
-    }
+    specifyUrlCheckState({
+      state,
+      setState
+    });
   }, [state, setState]);
-
 
   return (
     <div className="

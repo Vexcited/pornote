@@ -13,7 +13,6 @@ type SelectLoginSelectionProps = {
 }
 
 function SelectLoginSelection ({ state, setState }: SelectLoginSelectionProps) {
-
   const SelectionItem = ({ step, name, description }: SelectionItemProps) => {
     const updateStep = () => {
       setState({
