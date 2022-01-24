@@ -27,11 +27,7 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
     password: ""
   });
 
-  const [selectedAccountType, setSelectedAccountType] = useState({
-    id: 0,
-    name: "",
-    path: ""
-  });
+  const [selectedAccountType, setSelectedAccountType] = useState(state.schoolInformations.availableAccountTypes[0]);
 
   type FormStateTypes = typeof formState;
   const updateFormStateInput = (key: keyof FormStateTypes) => (evt: React.ChangeEvent<HTMLInputElement>) => setFormState({
@@ -66,7 +62,7 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
       <form onSubmit={handlePronoteLogin}>
 
         <SelectInput
-          placeholder="Type de compte"
+          placeholder={selectedAccountType.name}
           value={selectedAccountType}
           onChange={setSelectedAccountType}
         >
