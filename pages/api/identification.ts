@@ -29,7 +29,7 @@ export default async function handler (
     const pronoteAccountId: number = req.body.pronoteAccountId;
     const pronoteAccountPath: string = req.body.pronoteAccountPath;
     const pronoteSessionId: string = req.body.pronoteSessionId;
-    
+
     if (!pronoteUrl || !pronoteAccountId || !pronoteAccountPath || !pronoteSessionId) {
       res.status(400).json({
         success: false,
@@ -38,7 +38,7 @@ export default async function handler (
     }
 
     // 'identifiant' on 'Identification' request POST body.
-    const accountIdentifier: string = req.body.identifier;    
+    const accountIdentifier: string = req.body.identifier;
     if (!accountIdentifier) {
       res.status(400).json({
         success: false,

@@ -78,13 +78,13 @@ export default async function handler (
     if (pronoteAccountId && pronoteAccountPath) {
       // Random IV that will be used for our session.
       const randomIv = forge.random.getBytesSync(16);
-      
+
       // Create RSA using given modulos.
       const rsaKey = forge.pki.rsa.setPublicKey(
         new forge.jsbn.BigInteger(session.MR, 16),
         new forge.jsbn.BigInteger(session.ER, 16)
       );
-      
+
       // Create Uuid for 'FonctionParametres'.
       const rsaUuid = forge.util.encode64(rsaKey.encrypt(randomIv), 64);
 
