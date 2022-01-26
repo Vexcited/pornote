@@ -102,8 +102,7 @@ export default async function handler (
           }
         }
       }
-    });
-
+    }).json();
 
     res.status(200).json({
       success: true,
