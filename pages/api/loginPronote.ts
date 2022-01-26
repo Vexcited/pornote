@@ -26,10 +26,29 @@ export default async function handler (
   res: NextApiResponse<ApiLoginResponse | ApiServerError>
 ) {
   if (req.method === "POST") {
-    // Dirty Pronote URL.
+    /** Dirty Pronote URL. */
     const pronoteUrl: string = req.body.pronoteUrl;
+    // Informations about the Pronote account path.
     const pronoteAccountId: number = req.body.pronoteAccountId;
     const pronoteAccountPath: string = req.body.pronoteAccountPath;
+    
+    if (!pronoteUrl || !pronoteAccountId || !pronoteAccountPath) {
+      res.status(400).json({
+        success: false,
+        message: "Missing informations about the Pronote account path."
+      });
+    }
+
+    // Authentication informations (can be for ENT or Pronote).
+    const accountUsername: string = req.body.username;
+    const accountPassword: string = req.body.password;
+    
+    if (!accountUsername || !accountPassword) {
+      res.status(400).json({
+        success: false,
+        message: "Missing authentication informations."
+      });
+    }
 
     // We get URL origin and then get the DOM of account selection page.
     const pronoteServerUrl = getServerUrl(pronoteUrl);
@@ -37,6 +56,7 @@ export default async function handler (
       pronoteServerUrl + pronoteAccountPath + "?login=true",
     );
 
+    // Check if we can access DOM to parse data.
     if (!pronoteHtmlSuccess) {
       res.status(500).json({
         success: false,
@@ -51,41 +71,60 @@ export default async function handler (
     const session = extractSession(pronoteHtmlData);
     const sessionId = parseInt(session.h);
 
-    // Generate encrypted order for request.
-    const orderDecrypted = 1;
-    const orderEncrypted = generateOrder(orderDecrypted);
+    // Creathe the API endpoint using our sessionId.
+    const pronoteApiUrl = `${pronoteServerUrl}appelfonction/${pronoteAccountId}/${session.h}`;
 
-    const randomTempIv = forge.util.createBuffer().fillWithByte(0, 16);
+    // Generate encrypted order for 'FonctionParametres' request.
+    // At the first request, 'numeroOrdre' is always 1.
+    const informationsOrderEncrypted = generateOrder(1, {});
 
-    const lRSA = forge.pki.rsa.setPublicKey(
+    // Random IV that will be used for our session.
+    const randomIv = forge.random.getBytesSync(16);
+    const bufferRandomIv = forge.util.createBuffer(randomIv);
+
+    // Create RSA using given modulos.
+    const rsaKey = forge.pki.rsa.setPublicKey(
       new forge.jsbn.BigInteger(session.MR, 16),
       new forge.jsbn.BigInteger(session.ER, 16)
     );
 
-    const lResult = forge.util.encode64(lRSA.encrypt(randomTempIv.bytes()), 64);
+    // Create Uuid for 'FonctionParametres'.
+    const rsaUuid = forge.util.encode64(rsaKey.encrypt(randomIv), 64);
 
     // Request to Pronote server using account ID.
-    const informationsApiUrl = `${pronoteServerUrl}appelfonction/${pronoteAccountId}/${session.h}/${orderEncrypted}`;
+    const informationsApiUrl = `${pronoteApiUrl}/${informationsOrderEncrypted}`;
     const pronoteInformationsData = await got.post(informationsApiUrl, {
       json: {
         session: sessionId,
-        numeroOrdre: orderEncrypted,
+        numeroOrdre: informationsOrderEncrypted,
         nom: "FonctionParametres",
         donneesSec: {
           donnees: {
-            Uuid: lResult,
-            identifiantNav: null
+            Uuid: rsaUuid,
+            identifiantNav: null // Will be given in the future...
           }
         }
       }
     }).json<PronoteApiFonctionParametres>();
 
-    const newOrder = generateOrder(3, undefined, randomTempIv);
-    const loginApiUrl = `${pronoteServerUrl}appelfonction/${pronoteAccountId}/${session.h}/${newOrder}`;
-    const pronoteLoginData = await got.post(loginApiUrl, {
+    // Check 'numeroOrdre' from 'pronoteInformationsData'.
+    // It should be equal to '2'.
+    const checkInformationsOrder = decryptOrder(
+      pronoteInformationsData.numeroOrdre,
+      { iv: bufferRandomIv }
+    );
+
+    // Encrypt new order for 'Identification'.
+    const identificationOrderEncrypted = generateOrder(
+      checkInformationsOrder + 1, // This should be equal to '3'.
+      { iv: bufferRandomIv }
+    );
+
+    const identificationApiUrl = `${pronoteApiUrl}/${identificationOrderEncrypted}`;
+    const pronoteIdentificationData = await got.post(identificationApiUrl, {
       json: {
         session: sessionId,
-        numeroOrdre: newOrder,
+        numeroOrdre: identificationOrderEncrypted,
         nom: "Identification",
         donneesSec: {
           donnees: {
@@ -106,7 +145,7 @@ export default async function handler (
 
     res.status(200).json({
       success: true,
-      pronoteData: { pronoteInformationsData, pronoteLoginData }
+      pronoteData: { pronoteInformationsData, pronoteIdentificationData }
     });
   }
   else {

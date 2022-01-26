@@ -1,36 +1,31 @@
 import forge from "node-forge";
+import md5 from "@/apiUtils/createMd5Buffer";
 
-/**
- * Generates a MD5 ByteBuffer from another ByteBuffer.
- * @param buffer - ByteBuffer to convert to MD5.
- * @returns A new ByteBuffer in MD5.
- */
-function md5 (
-  buffer: forge.util.ByteStringBuffer
-) {
-  return forge.md.md5.create().update(buffer.bytes()).digest();
-}
+type GenerateOrderOptions = {
+  key?: forge.util.ByteStringBuffer,
+  iv?: forge.util.ByteStringBuffer
+};
 
-export default function generateOrder (
-  orderToEncrypt: number, // Starts from 1, then add 2 for next request.
-  key = forge.util.createBuffer(), // Default is empty buffer.
-  iv = forge.util.createBuffer().fillWithByte(0, 16) // Default is 16 bytes of 0.
-) {
-  const cipher = forge.cipher.createCipher(
-    "AES-CBC",
-    md5(key)
-  );
+export default function generateOrder (orderToEncrypt: number, {
+  key = forge.util.createBuffer(),
+  iv
+}: GenerateOrderOptions) {
+  // Create cipher using 'AES-CBC' method and
+  // use an MD5 ButeBuffer of the given 'key'.
+  const cipher = forge.cipher.createCipher("AES-CBC", md5(key));
 
-  // if (iv.length()) {
-  //   iv = forge.md.md5.create().update(iv.bytes()).digest();
-  // }
+  // IV => Generate a MD5 ByteBuffer from current IV.
+  if (iv && iv.length()) iv = md5(iv);
+  // No IV => Create an empty buffer of 16 bytes.
+  else iv = forge.util.createBuffer().fillWithByte(0, 16);
 
+  // We need to encrypt `orderToEncrypt` (UTF-8).
+  const bufferToEncrypt = forge.util.createBuffer(orderToEncrypt.toString(), "utf8");
+  
+  // Start the encryption.
   cipher.start({ iv });
+  cipher.update(bufferToEncrypt);
 
-  // AES our order.
-  cipher.update(
-    forge.util.createBuffer(orderToEncrypt.toString(), "utf8")
-  );
-
+  // Return the encrypted buffer in HEX.
   return cipher.finish() && cipher.output.toHex();
 }

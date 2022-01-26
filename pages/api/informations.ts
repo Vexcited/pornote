@@ -54,7 +54,7 @@ export default async function handler (
 
     // Generate encrypted order for request.
     const orderDecrypted = 1;
-    const orderEncrypted = generateOrder(orderDecrypted);
+    const orderEncrypted = generateOrder(orderDecrypted, {});
 
     // Request to Pronote server.
     // Here, is AccountID is 9 => Default for informations gathering.
