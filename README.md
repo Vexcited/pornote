@@ -12,6 +12,10 @@
 
 - [ ] Finish login.tsx.
   - [x] Add multiple steps (select school, then account type, then ask for username/password).
+  - [x] Check if ENT is available.
+  - [x] Pass `Identification` step.
+  - [ ] Solve challenge to achieve an auth request.
+  - [x] Do username/password challenge on client-side only.
   - [ ] On successful login, store it in localforage->accountsMetadata.
 
 ## Warning

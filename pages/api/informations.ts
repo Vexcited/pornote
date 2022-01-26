@@ -9,7 +9,8 @@ import type {
 } from "types/ApiData";
 
 import type {
-  PronoteApiFonctionParametres
+  PronoteApiFonctionParametresCommon,
+  PronoteApiFonctionParametresStudent
 } from "types/PronoteApiData";
 
 import getServerUrl from "@/apiUtils/getServerUrl";
@@ -18,6 +19,7 @@ import checkEntAvailable from "@/apiUtils/checkEntAvailable";
 import extractSession from "@/apiUtils/extractSession";
 import generateOrder from "@/apiUtils/generateOrder";
 
+import forge from "node-forge";
 import got from "got";
 
 export default async function handler (
@@ -28,20 +30,30 @@ export default async function handler (
     // Dirty Pronote URL.
     const pronoteUrl: string = req.body.pronoteUrl;
 
+    // Given when authenticating with Pronote.
+    const pronoteAccountPath: string | undefined = req.body.pronoteAccountPath ?? "";
+    const pronoteAccountId: number | undefined = req.body.pronoteAccountId;
+
     // We get URL origin and then get the DOM of account selection page.
     const pronoteServerUrl = getServerUrl(pronoteUrl);
-    const [pronoteHtmlSuccess, pronoteHtmlBody] = await getPronotePage(pronoteServerUrl + "?login=true");
+    const pronoteHtmlUrl = pronoteServerUrl + pronoteAccountPath + "?login=true";
+    const [pronoteHtmlSuccess, pronoteHtmlBody] = await getPronotePage(
+      pronoteHtmlUrl
+    );
 
     // Fetch Pronote server URL without the "?login=true" part
     // to see if an ENT is available.
-    const [pronoteEntSuccess, pronoteEntUrl] = await checkEntAvailable(pronoteServerUrl);
+    const [pronoteEntSuccess, pronoteEntUrl] = !pronoteAccountPath
+      ? await checkEntAvailable(pronoteServerUrl)
+      : [true, undefined];
 
     // Checking if both functions executed successfully.
     if (!pronoteHtmlSuccess || !pronoteEntSuccess) {
       res.status(500).json({
         success: false,
-        message: "Failed to execute 'getPronotePage' or 'checkEntAvailable' functions.",
+        message: `Failed to execute 'getPronotePage'${!pronoteAccountPath && " or 'checkEntAvailable'"}.`,
         debug: {
+          pronoteHtmlUrl,
           pronoteHtmlBody,
           pronoteEntUrl
         }
@@ -53,32 +65,64 @@ export default async function handler (
     const sessionId = parseInt(session.h);
 
     // Generate encrypted order for request.
-    const orderDecrypted = 1;
-    const orderEncrypted = generateOrder(orderDecrypted, {});
+    const orderEncrypted = generateOrder(1, {});
 
     // Request to Pronote server.
-    // Here, is AccountID is 9 => Default for informations gathering.
-    const informationsApiUrl = pronoteServerUrl + "appelfonction/9/" + session.h + "/" + orderEncrypted;
-    console.log(orderEncrypted, sessionId);
+    // AccountID: 9 => Default for informations gathering (no account type).
+    const informationsApiUrl = pronoteServerUrl + `appelfonction/${pronoteAccountId ? pronoteAccountId : "9"}/` + session.h + "/" + orderEncrypted;
+
+    // Append POST body to request only if we
+    // want to get informations for an account login.
+    const informationsPostBody: { identifiantNav?: null, Uuid?: string } = {};
+    let pronoteCryptoInformations: ApiInformationsResponse["pronoteCryptoInformations"] | undefined = undefined;
+    if (pronoteAccountId && pronoteAccountPath) {
+      // Random IV that will be used for our session.
+      const randomIv = forge.random.getBytesSync(16);
+      
+      // Create RSA using given modulos.
+      const rsaKey = forge.pki.rsa.setPublicKey(
+        new forge.jsbn.BigInteger(session.MR, 16),
+        new forge.jsbn.BigInteger(session.ER, 16)
+      );
+      
+      // Create Uuid for 'FonctionParametres'.
+      const rsaUuid = forge.util.encode64(rsaKey.encrypt(randomIv), 64);
+
+      informationsPostBody.identifiantNav = null;
+      informationsPostBody.Uuid = rsaUuid;
+
+      // Append crypto informations we used to response.
+      pronoteCryptoInformations = {
+        iv: randomIv,
+        session
+      };
+    }
+
     const pronoteData = await got.post(informationsApiUrl, {
       json: {
         session: sessionId,
         numeroOrdre: orderEncrypted,
         nom: "FonctionParametres",
-        donneesSec: {}
+        donneesSec: {
+          donnees: informationsPostBody
+        }
       }
-    }).json<PronoteApiFonctionParametres>();
+    }).json<
+      | PronoteApiFonctionParametresCommon
+      | PronoteApiFonctionParametresStudent
+    >();
 
     res.status(200).json({
       success: true,
       pronoteData,
-      pronoteEntUrl
+      pronoteEntUrl,
+      pronoteCryptoInformations
     });
   }
   else {
     res.status(404).json({
       success: false,
-      message: "Method doesn't exist. Only POST method is available here."
+      message: "Method doesn't exist."
     });
   }
 }

@@ -1,5 +1,8 @@
 import type {
-  PronoteApiFonctionParametres
+  PronoteApiFonctionParametresCommon,
+  PronoteApiFonctionParametresStudent,
+  PronoteApiIdentification,
+  PronoteSession
 } from "types/PronoteApiData";
 
 export interface ApiServerError {
@@ -9,16 +12,24 @@ export interface ApiServerError {
 }
 
 export interface ApiInformationsResponse {
-  success: boolean;
+  success: true;
 
   /** Server's response. */
-  pronoteData: PronoteApiFonctionParametres;
+  pronoteData:
+    | PronoteApiFonctionParametresCommon
+    | PronoteApiFonctionParametresStudent;
   pronoteEntUrl?: string;
+  
+  /** Keys used when authenticating. */
+  pronoteCryptoInformations?: {
+    iv: string;
+    session: PronoteSession;
+  };
 }
 
-export interface ApiLoginResponse {
-  success: boolean;
+export interface ApiIdentificationResponse {
+  success: true;
 
   /** Server's response. */
-  pronoteData: any;
+  pronoteData: PronoteApiIdentification;
 }

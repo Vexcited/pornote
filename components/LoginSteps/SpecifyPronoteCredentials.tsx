@@ -1,6 +1,6 @@
 import type { StateTypes } from "pages/login";
 import type {
-  ApiLoginResponse,
+  ApiInformationsResponse,
   ApiServerError
 } from "types/ApiData";
 
@@ -13,8 +13,11 @@ import React, {
 } from "react";
 
 import ky, { HTTPError } from "ky";
+import forge from "node-forge";
 
 import { SelectInput, SelectInputOption } from "components/SelectInput";
+
+import decryptOrder from "@/apiUtils/decryptOrder";
 
 type SpecifyPronoteCredentialsProps = {
   state: StateTypes;
@@ -39,17 +42,51 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
     evt.preventDefault();
 
     try {
-      const data = await ky.post("/api/loginPronote", {
+      const pronoteInformationsData = await ky.post("/api/informations", {
+        json: {
+          pronoteUrl: state.pronoteUrl,
+          pronoteAccountId: selectedAccountType.id,
+          pronoteAccountPath: selectedAccountType.path
+        }
+      }).json<ApiInformationsResponse>();
+
+      if (!pronoteInformationsData.pronoteCryptoInformations) throw Error("Missing fields.");
+
+      // IV used to decrypt AES datas.
+      const iv = pronoteInformationsData.pronoteCryptoInformations.iv;
+      const bufferIv = forge.util.createBuffer(iv);
+
+      const sessionId = pronoteInformationsData.pronoteCryptoInformations.session.h;
+
+      // Check 'numeroOrdre' from 'pronoteInformationsData'.
+      // It should be equal to '2'.
+      const decryptedInformationsOrder = decryptOrder(
+        pronoteInformationsData.pronoteData.numeroOrdre,
+        { iv: bufferIv }
+      );
+
+      const pronoteIdentificationData = await ky.post("/api/identification", {
         json: {
           pronoteUrl: state.pronoteUrl,
           pronoteAccountId: selectedAccountType.id,
           pronoteAccountPath: selectedAccountType.path,
-          username: formState.username,
-          password: formState.password
-        }
-      }).json<ApiLoginResponse>();
+          pronoteSessionId: sessionId,
 
-      console.info(formState, selectedAccountType, data);
+          identifier: formState.username,
+
+          pronoteOrder: decryptedInformationsOrder + 1,
+          pronoteCryptoIv: iv,
+        }
+      }).json<ApiInformationsResponse>();
+
+      // Check 'numeroOrdre' from 'pronoteIdentificationData'.
+      // It should be equal to '4'.
+      const decryptedIdentificationOrder = decryptOrder(
+        pronoteIdentificationData.pronoteData.numeroOrdre,
+        { iv: bufferIv }
+      );
+
+      console.log(decryptedIdentificationOrder, pronoteIdentificationData);
     }
     catch (e) {
       if (e instanceof HTTPError) {
