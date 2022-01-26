@@ -80,7 +80,7 @@ export default async function handler (
       }
     }).json<PronoteApiFonctionParametres>();
 
-    const newOrder = generateOrder(3, randomTempIv);
+    const newOrder = generateOrder(3, undefined, randomTempIv);
     const loginApiUrl = `${pronoteServerUrl}appelfonction/${pronoteAccountId}/${session.h}/${newOrder}`;
     const pronoteLoginData = await got.post(loginApiUrl, {
       json: {
