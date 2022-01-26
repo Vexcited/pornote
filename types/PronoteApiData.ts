@@ -135,15 +135,23 @@ export interface PronoteApiFonctionParametresCommon {
     fichiers: string[];
   };
 }
+
 // 'FonctionParametres' response student account type (3).
 export interface PronoteApiFonctionParametresStudent {
   nom: "FonctionParametres";
   session: number; // Unique session ID.
   numeroOrdre: string;
 
-  donnees: {
-    identifiantNav: string;
+  donneesSec: {
+    nom: "FonctionParametres";
 
+    _Signature_: {
+      ModeExclusif: boolean;
+    }
+
+    donnees: {
+      identifiantNav: string;
+  
       /** Array of available fonts. */
       listePolices: {
         _T: 24;
@@ -484,6 +492,7 @@ export interface PronoteApiFonctionParametresStudent {
 
         nomCookieAppli: string;
       }
+    }
   }
 
   donneesNonSec: {
