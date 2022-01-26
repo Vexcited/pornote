@@ -43,7 +43,9 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
         json: {
           pronoteUrl: state.pronoteUrl,
           pronoteAccountId: selectedAccountType.id,
-          pronoteAccountPath: selectedAccountType.path
+          pronoteAccountPath: selectedAccountType.path,
+          username: formState.username,
+          password: formState.password
         }
       }).json<ApiLoginResponse>();
 
