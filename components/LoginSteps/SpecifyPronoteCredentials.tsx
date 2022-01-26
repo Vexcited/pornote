@@ -1,5 +1,6 @@
 import type { StateTypes } from "pages/login";
 import type {
+  ApiIdentificationResponse,
   ApiInformationsResponse,
   ApiServerError
 } from "types/ApiData";
@@ -18,6 +19,7 @@ import forge from "node-forge";
 import { SelectInput, SelectInputOption } from "components/SelectInput";
 
 import decryptOrder from "@/apiUtils/decryptOrder";
+import generateOrder from "@/apiUtils/generateOrder";
 
 type SpecifyPronoteCredentialsProps = {
   state: StateTypes;
@@ -56,7 +58,7 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
       const iv = pronoteInformationsData.pronoteCryptoInformations.iv;
       const bufferIv = forge.util.createBuffer(iv);
 
-      const sessionId = pronoteInformationsData.pronoteCryptoInformations.session.h;
+      const sessionId = parseInt(pronoteInformationsData.pronoteCryptoInformations.session.h);
 
       // Check 'numeroOrdre' from 'pronoteInformationsData'.
       // It should be equal to '2'.
@@ -65,19 +67,21 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
         { iv: bufferIv }
       );
 
+      const identificationOrderEncrypted = generateOrder(
+        decryptedInformationsOrder + 1,
+        { iv: bufferIv }
+      );
+
       const pronoteIdentificationData = await ky.post("/api/identification", {
         json: {
           pronoteUrl: state.pronoteUrl,
           pronoteAccountId: selectedAccountType.id,
-          pronoteAccountPath: selectedAccountType.path,
           pronoteSessionId: sessionId,
+          pronoteOrder: identificationOrderEncrypted,
 
-          identifier: formState.username,
-
-          pronoteOrder: decryptedInformationsOrder + 1,
-          pronoteCryptoIv: iv,
+          identifier: formState.username
         }
-      }).json<ApiInformationsResponse>();
+      }).json<ApiIdentificationResponse>();
 
       // Check 'numeroOrdre' from 'pronoteIdentificationData'.
       // It should be equal to '4'.

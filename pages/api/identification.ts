@@ -27,10 +27,9 @@ export default async function handler (
     const pronoteUrl: string = req.body.pronoteUrl;
     // Informations about the Pronote account path.
     const pronoteAccountId: number = req.body.pronoteAccountId;
-    const pronoteAccountPath: string = req.body.pronoteAccountPath;
-    const pronoteSessionId: string = req.body.pronoteSessionId;
+    const pronoteSessionId: number = req.body.pronoteSessionId;
 
-    if (!pronoteUrl || !pronoteAccountId || !pronoteAccountPath || !pronoteSessionId) {
+    if (!pronoteUrl || !pronoteAccountId || !pronoteSessionId) {
       res.status(400).json({
         success: false,
         message: "Missing informations about the Pronote account path."
@@ -42,7 +41,7 @@ export default async function handler (
     if (!accountIdentifier) {
       res.status(400).json({
         success: false,
-        message: "Missing account identifier."
+        message: "Missing account 'identifier'."
       });
     }
 
@@ -52,29 +51,19 @@ export default async function handler (
     // Creathe the API endpoint using the given session ID.
     const pronoteApiUrl = `${pronoteServerUrl}appelfonction/${pronoteAccountId}/${pronoteSessionId}`;
 
-    const pronoteOrder: number = req.body.pronoteOrder;
-    const pronoteCryptoIv: string = req.body.pronoteCryptoIv;
-
-    if (!pronoteOrder || !pronoteCryptoIv) {
-      res.status(400).json({
+    const pronoteOrder: string = req.body.pronoteOrder;
+    if (!pronoteOrder) {
+      return res.status(400).json({
         success: false,
-        message: "Missing informations about crypto in current Pronote session."
+        message: "Missing 'pronoteOrder' for 'numeroOrdre'."
       });
     }
 
-    // IV that will be used for our session.
-    const bufferCryptoIv = forge.util.createBuffer(pronoteCryptoIv);
-
-    // Encrypt 'numeroOrdre' for 'Identification' request.
-    const identificationOrderEncrypted = generateOrder(
-      pronoteOrder, { iv: bufferCryptoIv }
-    );
-
-    const identificationApiUrl = `${pronoteApiUrl}/${identificationOrderEncrypted}`;
+    const identificationApiUrl = `${pronoteApiUrl}/${pronoteOrder}`;
     const pronoteIdentificationData = await got.post(identificationApiUrl, {
       json: {
         session: pronoteSessionId,
-        numeroOrdre: identificationOrderEncrypted,
+        numeroOrdre: pronoteOrder,
         nom: "Identification",
         donneesSec: {
           donnees: {
