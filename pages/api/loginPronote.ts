@@ -80,33 +80,34 @@ export default async function handler (
       }
     }).json<PronoteApiFonctionParametres>();
 
-    // const loginApiUrl = ``;
-    // const pronoteLoginData = await got.post(loginApiUrl, {
-    //   json: {
-    //     session: sessionId,
-    //     numeroOrdre: "",
-    //     nom: "Identification",
-    //     donneesSec: {
-    //       donnees: {
-    //         genreConnexion: 0,
-    //         genreEspace: pronoteAccountId,
-    //         identifiant: req.body.username,
-    //         pourENT: false,
-    //         enConnexionAuto: false,
-    //         demandeConnexionAuto: false,
-    //         demandeConnexionAppliMobile: false,
-    //         demandeConnexionAppliMobileJeton: false,
-    //         uuidAppliMobile: "",
-    //         loginTokenSAV: ""
-    //       }
-    //     }
-    //   }
-    // });
+    const newOrder = generateOrder(3, randomTempIv);
+    const loginApiUrl = `${pronoteServerUrl}appelfonction/${pronoteAccountId}/${session.h}/${newOrder}`;
+    const pronoteLoginData = await got.post(loginApiUrl, {
+      json: {
+        session: sessionId,
+        numeroOrdre: newOrder,
+        nom: "Identification",
+        donneesSec: {
+          donnees: {
+            genreConnexion: 0,
+            genreEspace: pronoteAccountId,
+            identifiant: req.body.username,
+            pourENT: false,
+            enConnexionAuto: false,
+            demandeConnexionAuto: false,
+            demandeConnexionAppliMobile: false,
+            demandeConnexionAppliMobileJeton: false,
+            uuidAppliMobile: "",
+            loginTokenSAV: ""
+          }
+        }
+      }
+    });
 
 
     res.status(200).json({
       success: true,
-      pronoteData: pronoteInformationsData
+      pronoteData: { pronoteInformationsData, pronoteLoginData }
     });
   }
   else {

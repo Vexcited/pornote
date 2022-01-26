@@ -10,15 +10,13 @@ export default function decryptOrder (
   if (iv.length()) {
     iv = forge.md.md5.create().update(iv.bytes()).digest();
   }
-  else {
-    iv = forge.util.createBuffer().fillWithByte(0, 16);
-  }
 
   const orderBuffer = forge.util.createBuffer(forge.util.hexToBytes(order));
   const decipher = forge.cipher.createDecipher("AES-CBC", key);
 
   decipher.start({ iv });
   decipher.update(orderBuffer);
+  decipher.finish();
 
-  return decipher.finish() && decipher.output.bytes();
+  return decipher.output.bytes();
 }

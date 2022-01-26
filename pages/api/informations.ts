@@ -59,6 +59,7 @@ export default async function handler (
     // Request to Pronote server.
     // Here, is AccountID is 9 => Default for informations gathering.
     const informationsApiUrl = pronoteServerUrl + "appelfonction/9/" + session.h + "/" + orderEncrypted;
+    console.log(orderEncrypted, sessionId);
     const pronoteData = await got.post(informationsApiUrl, {
       json: {
         session: sessionId,
