@@ -131,10 +131,12 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
       const challengeAesKey = pronoteUsername + forge.util.encodeUtf8(challengeAesKeyHash);
       const challengeAesKeyBuffer = forge.util.createBuffer(challengeAesKey);
 
-      const decrypted = decryptAes(challengeData.challenge, {
+      const decryptedBytes = decryptAes(challengeData.challenge, {
         iv: bufferIv,
         key: challengeAesKeyBuffer
       });
+
+      const decrypted = forge.util.decodeUtf8(decryptedBytes);
 
       const unscrambled = new Array(decrypted.length);
       for (let i = 0; i < decrypted.length; i += 1) {
