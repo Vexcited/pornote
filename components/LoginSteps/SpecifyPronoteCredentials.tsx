@@ -118,20 +118,11 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
        */
       const challengeAesKeyHash = forge.md.sha256
         .create()
-        .update(challengeData.alea + pronotePassword)
-        // .update(formState.password)
+        .update(challengeData.alea)
+        .update(forge.util.encodeUtf8(pronotePassword))
         .digest()
         .toHex()
         .toUpperCase();
-
-      //     alea = idr['donneesSec']['donnees']['alea']
-      //     motdepasse = SHA256.new((alea + p).encode()).hexdigest().upper()
-      //     e.aes_key = MD5.new((u + motdepasse).encode()).digest()
-
-      // # challenge
-      // dec = e.aes_decrypt(bytes.fromhex(challenge))
-      // dec_no_alea = _enleverAlea(dec.decode())
-      // ch = e.aes_encrypt(dec_no_alea.encode()).hex()
 
       /**
        * Challenge key is an MD5 hash of the username,
@@ -145,13 +136,15 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
         key: challengeAesKeyBuffer
       });
 
-      const splitedDecrypted = decrypted.split("").filter((_, i) => i % 2 === 0).join("");
-      console.log(splitedDecrypted, formState);
+      const unscrambled = new Array(decrypted.length);
+      for (let i = 0; i < decrypted.length; i += 1) {
+        if (i % 2 === 0) {
+          unscrambled.push(decrypted.charAt(i));
+        }
+      }
 
-      // const challengeAesCipher = forge.cipher.createCipher("AES-CBC", md5(challengeAesKeyBuffer));
-      // challengeAesCipher.start({ iv: md5(bufferIv) });
-      // challengeAesCipher.update(forge.util.createBuffer(splitedDecrypted));
-      // challengeAesCipher.finish();
+      const splitedDecrypted = unscrambled.join("");
+      console.log(splitedDecrypted, formState);
 
       const encrypted = encryptAes(splitedDecrypted, {
         iv: bufferIv,
