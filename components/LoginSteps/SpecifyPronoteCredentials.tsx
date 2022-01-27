@@ -1,5 +1,6 @@
 import type { StateTypes } from "pages/login";
 import type {
+  ApiAuthenticationResponse,
   ApiIdentificationResponse,
   ApiInformationsResponse,
   ApiServerError
@@ -20,6 +21,7 @@ import { SelectInput, SelectInputOption } from "components/SelectInput";
 
 import decryptOrder from "@/apiUtils/decryptOrder";
 import generateOrder from "@/apiUtils/generateOrder";
+import md5 from "@/apiUtils/createMd5Buffer";
 
 type SpecifyPronoteCredentialsProps = {
   state: StateTypes;
@@ -68,7 +70,7 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
       );
 
       const identificationOrderEncrypted = generateOrder(
-        decryptedInformationsOrder + 1,
+        parseInt(decryptedInformationsOrder) + 1,
         { iv: bufferIv }
       );
 
@@ -90,7 +92,75 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
         { iv: bufferIv }
       );
 
-      console.log(decryptedIdentificationOrder, pronoteIdentificationData);
+      const authenticationOrderEncrypted = generateOrder(
+        parseInt(decryptedIdentificationOrder) + 1,
+        { iv: bufferIv }
+      );
+
+      const challengeData = pronoteIdentificationData.pronoteData.donneesSec.donnees;
+
+      /**
+       * Hash for the challenge key is an
+       * uppercase HEX representation
+       * of a SHA256 hash of "challengeData.alea"
+       * and the user password concatenated
+       * into a single string.
+       */
+      const challengeAesKeyHash = forge.md.sha256
+        .create()
+        .update(challengeData.alea || "")
+        .update(
+          forge.util.encodeUtf8(formState.password)
+        )
+        .digest()
+        .toHex()
+        .toUpperCase();
+
+      /**
+       * Challenge key is an MD5 hash of the username,
+       * and the SHA256 hash created of "alea" and user password.
+       */
+      const challengeAesKey = formState.username.toLowerCase() + challengeAesKeyHash;
+      const challengeAesKeyBuffer = forge.util.createBuffer(forge.util.encodeUtf8(challengeAesKey));
+
+      // const challengeAesDecipher = forge.cipher.createDecipher("AES-CBC", md5(challengeAesKeyBuffer));
+      // challengeAesDecipher.start({ iv: md5(bufferIv) });
+      // challengeAesDecipher.update(forge.util.createBuffer(challengeData.challenge));
+      // challengeAesDecipher.finish();
+
+      // const decrypted = challengeAesDecipher.output.bytes();
+      const decrypted = decryptOrder(challengeData.challenge, {
+        iv: bufferIv,
+        key: challengeAesKeyBuffer
+      });
+
+      const splitedDecrypted = decrypted.split("").filter((_, i) => (i + 1) % 2 !== 0).join("");
+      console.log(splitedDecrypted);
+
+      // const challengeAesCipher = forge.cipher.createCipher("AES-CBC", md5(challengeAesKeyBuffer));
+      // challengeAesCipher.start({ iv: md5(bufferIv) });
+      // challengeAesCipher.update(forge.util.createBuffer(splitedDecrypted));
+      // challengeAesCipher.finish();
+
+      const encrypted = generateOrder(splitedDecrypted, {
+        iv: bufferIv,
+        key: challengeAesKeyBuffer
+      });
+
+      console.log(encrypted);
+
+      const pronoteAuthenticationData = await ky.post("/api/authentication", {
+        json: {
+          pronoteUrl: state.pronoteUrl,
+          pronoteAccountId: selectedAccountType.id,
+          pronoteSessionId: sessionId,
+
+          pronoteOrder: authenticationOrderEncrypted,
+          pronoteSolvedChallenge: encrypted
+        }
+      }).json<ApiAuthenticationResponse>();
+
+      console.log(pronoteAuthenticationData.pronoteData.donneesSec.donnees);
     }
     catch (e) {
       if (e instanceof HTTPError) {

@@ -6,7 +6,7 @@ type GenerateOrderOptions = {
   iv?: forge.util.ByteStringBuffer
 };
 
-export default function generateOrder (orderToEncrypt: number, {
+export default function generateOrder (orderToEncrypt: number | string, {
   key = forge.util.createBuffer(),
   iv
 }: GenerateOrderOptions) {

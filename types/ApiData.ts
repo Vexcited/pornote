@@ -33,3 +33,10 @@ export interface ApiIdentificationResponse {
   /** Server's response. */
   pronoteData: PronoteApiIdentification;
 }
+
+export interface ApiAuthenticationResponse {
+  success: true;
+  
+  /** Server's response. */
+  pronoteData: any;
+}

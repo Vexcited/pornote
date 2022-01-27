@@ -25,8 +25,7 @@ export default function decryptOrder (order: string, {
   decipher.update(orderBuffer);
   decipher.finish();
 
-  // Return the decrypted value in integer
-  // to count more easily the requests.
+  // Return the decrypted value.
   const decrypted = decipher.output.bytes();
-  return parseInt(decrypted); 
+  return decrypted; 
 }

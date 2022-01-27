@@ -4,7 +4,7 @@ import type {
 } from "next";
 
 import type {
-  ApiIdentificationResponse,
+  ApiAuthenticationResponse,
   ApiServerError
 } from "types/ApiData";
 
@@ -17,11 +17,12 @@ import got from "got";
 
 export default async function handler (
   req: NextApiRequest,
-  res: NextApiResponse<ApiIdentificationResponse | ApiServerError>
+  res: NextApiResponse<ApiAuthenticationResponse | ApiServerError>
 ) {
   if (req.method === "POST") {
     /** Dirty Pronote URL. */
     const pronoteUrl: string = req.body.pronoteUrl;
+
     // Informations about the Pronote account path.
     const pronoteAccountId: number = req.body.pronoteAccountId;
     const pronoteSessionId: number = req.body.pronoteSessionId;
@@ -30,15 +31,6 @@ export default async function handler (
       res.status(400).json({
         success: false,
         message: "Missing informations about the Pronote account path."
-      });
-    }
-
-    // 'identifiant' on 'Identification' request POST body.
-    const accountIdentifier: string = req.body.identifier;
-    if (!accountIdentifier) {
-      res.status(400).json({
-        success: false,
-        message: "Missing account 'identifier'."
       });
     }
 
@@ -56,24 +48,25 @@ export default async function handler (
       });
     }
 
+    const pronoteSolvedChallenge: string = req.body.pronoteSolvedChallenge;
+    if (!pronoteSolvedChallenge) {
+      return res.status(401).json({
+        success: false,
+        message: "Missing 'pronoteSolvedChallenge'."
+      })
+    }
+
     const identificationApiUrl = `${pronoteApiUrl}/${pronoteOrder}`;
     const pronoteIdentificationData = await got.post(identificationApiUrl, {
       json: {
         session: pronoteSessionId,
         numeroOrdre: pronoteOrder,
-        nom: "Identification",
+        nom: "Authentification",
         donneesSec: {
           donnees: {
-            genreConnexion: 0,
-            genreEspace: pronoteAccountId,
-            identifiant: accountIdentifier,
-            pourENT: false,
-            enConnexionAuto: false,
-            demandeConnexionAuto: false,
-            demandeConnexionAppliMobile: false,
-            demandeConnexionAppliMobileJeton: false,
-            uuidAppliMobile: "",
-            loginTokenSAV: ""
+            connexion: 0,
+            challenge: pronoteSolvedChallenge,
+            espace: pronoteAccountId
           }
         }
       }
