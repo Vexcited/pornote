@@ -8,9 +8,9 @@ import type {
   ApiServerError
 } from "types/ApiData";
 
-import type {
-  PronoteApiIdentification
-} from "types/PronoteApiData";
+// import type {
+  
+// } from "types/PronoteApiData";
 
 import getServerUrl from "@/apiUtils/getServerUrl";
 import got from "got";
@@ -56,8 +56,8 @@ export default async function handler (
       })
     }
 
-    const identificationApiUrl = `${pronoteApiUrl}/${pronoteOrder}`;
-    const pronoteIdentificationData = await got.post(identificationApiUrl, {
+    const authenticationApiUrl = `${pronoteApiUrl}/${pronoteOrder}`;
+    const pronoteAuthenticationData = await got.post(authenticationApiUrl, {
       json: {
         session: pronoteSessionId,
         numeroOrdre: pronoteOrder,
@@ -70,11 +70,11 @@ export default async function handler (
           }
         }
       }
-    }).json<PronoteApiIdentification>();
+    }).json();
 
     res.status(200).json({
       success: true,
-      pronoteData: pronoteIdentificationData
+      pronoteData: pronoteAuthenticationData
     });
   }
   else {

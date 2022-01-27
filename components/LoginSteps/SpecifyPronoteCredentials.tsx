@@ -19,8 +19,8 @@ import forge from "node-forge";
 
 import { SelectInput, SelectInputOption } from "components/SelectInput";
 
-import decryptOrder from "@/apiUtils/decryptOrder";
-import generateOrder from "@/apiUtils/generateOrder";
+import decryptAes from "@/apiUtils/decryptAes";
+import encryptAes from "@/apiUtils/encryptAes";
 import md5 from "@/apiUtils/createMd5Buffer";
 
 type SpecifyPronoteCredentialsProps = {
@@ -64,13 +64,13 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
 
       // Check 'numeroOrdre' from 'pronoteInformationsData'.
       // It should be equal to '2'.
-      const decryptedInformationsOrder = decryptOrder(
+      const decryptedInformationsOrder = decryptAes(
         pronoteInformationsData.pronoteData.numeroOrdre,
         { iv: bufferIv }
       );
 
-      const identificationOrderEncrypted = generateOrder(
-        parseInt(decryptedInformationsOrder) + 1,
+      const identificationOrderEncrypted = encryptAes(
+        (parseInt(decryptedInformationsOrder) + 1).toString(),
         { iv: bufferIv }
       );
 
@@ -87,17 +87,27 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
 
       // Check 'numeroOrdre' from 'pronoteIdentificationData'.
       // It should be equal to '4'.
-      const decryptedIdentificationOrder = decryptOrder(
+      const decryptedIdentificationOrder = decryptAes(
         pronoteIdentificationData.pronoteData.numeroOrdre,
         { iv: bufferIv }
       );
 
-      const authenticationOrderEncrypted = generateOrder(
-        parseInt(decryptedIdentificationOrder) + 1,
+      const authenticationOrderEncrypted = encryptAes(
+        (parseInt(decryptedIdentificationOrder) + 1).toString(),
         { iv: bufferIv }
       );
 
       const challengeData = pronoteIdentificationData.pronoteData.donneesSec.donnees;
+
+      // Update username with `modeCompLog`.
+      let pronoteUsername = formState.username;
+      if (challengeData.modeCompLog === 1)
+        pronoteUsername = pronoteUsername.toLowerCase();
+
+      // Update password with `modeCompMdp`
+      let pronotePassword = formState.password;
+      if (challengeData.modeCompMdp === 1)
+        pronotePassword = pronotePassword.toLowerCase();
 
       /**
        * Hash for the challenge key is an
@@ -108,41 +118,42 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
        */
       const challengeAesKeyHash = forge.md.sha256
         .create()
-        .update(challengeData.alea || "")
-        .update(
-          forge.util.encodeUtf8(formState.password)
-        )
+        .update(challengeData.alea + pronotePassword)
+        // .update(formState.password)
         .digest()
         .toHex()
         .toUpperCase();
+
+      //     alea = idr['donneesSec']['donnees']['alea']
+        //     motdepasse = SHA256.new((alea + p).encode()).hexdigest().upper()
+        //     e.aes_key = MD5.new((u + motdepasse).encode()).digest()
+
+        // # challenge
+        // dec = e.aes_decrypt(bytes.fromhex(challenge))
+        // dec_no_alea = _enleverAlea(dec.decode())
+        // ch = e.aes_encrypt(dec_no_alea.encode()).hex()
 
       /**
        * Challenge key is an MD5 hash of the username,
        * and the SHA256 hash created of "alea" and user password.
        */
-      const challengeAesKey = formState.username.toLowerCase() + challengeAesKeyHash;
-      const challengeAesKeyBuffer = forge.util.createBuffer(forge.util.encodeUtf8(challengeAesKey));
+      const challengeAesKey = pronoteUsername + forge.util.encodeUtf8(challengeAesKeyHash);
+      const challengeAesKeyBuffer = forge.util.createBuffer(challengeAesKey);
 
-      // const challengeAesDecipher = forge.cipher.createDecipher("AES-CBC", md5(challengeAesKeyBuffer));
-      // challengeAesDecipher.start({ iv: md5(bufferIv) });
-      // challengeAesDecipher.update(forge.util.createBuffer(challengeData.challenge));
-      // challengeAesDecipher.finish();
-
-      // const decrypted = challengeAesDecipher.output.bytes();
-      const decrypted = decryptOrder(challengeData.challenge, {
+      const decrypted = decryptAes(challengeData.challenge, {
         iv: bufferIv,
         key: challengeAesKeyBuffer
-      });
+      })
 
-      const splitedDecrypted = decrypted.split("").filter((_, i) => (i + 1) % 2 !== 0).join("");
-      console.log(splitedDecrypted);
+      const splitedDecrypted = decrypted.split("").filter((_, i) => i % 2 === 0).join("");
+      console.log(splitedDecrypted, formState);
 
       // const challengeAesCipher = forge.cipher.createCipher("AES-CBC", md5(challengeAesKeyBuffer));
       // challengeAesCipher.start({ iv: md5(bufferIv) });
       // challengeAesCipher.update(forge.util.createBuffer(splitedDecrypted));
       // challengeAesCipher.finish();
 
-      const encrypted = generateOrder(splitedDecrypted, {
+      const encrypted = encryptAes(splitedDecrypted, {
         iv: bufferIv,
         key: challengeAesKeyBuffer
       });

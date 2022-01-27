@@ -17,7 +17,7 @@ import getServerUrl from "@/apiUtils/getServerUrl";
 import getPronotePage from "@/apiUtils/getPronotePage";
 import checkEntAvailable from "@/apiUtils/checkEntAvailable";
 import extractSession from "@/apiUtils/extractSession";
-import generateOrder from "@/apiUtils/generateOrder";
+import encryptAes from "@/apiUtils/encryptAes";
 
 import forge from "node-forge";
 import got from "got";
@@ -65,7 +65,7 @@ export default async function handler (
     const sessionId = parseInt(session.h);
 
     // Generate encrypted order for request.
-    const orderEncrypted = generateOrder(1, {});
+    const orderEncrypted = encryptAes("1", {});
 
     // Request to Pronote server.
     // AccountID: 9 => Default for informations gathering (no account type).

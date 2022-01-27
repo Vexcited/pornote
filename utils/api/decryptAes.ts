@@ -6,7 +6,7 @@ type DecryptOrderOptions = {
   iv?: forge.util.ByteStringBuffer
 };
 
-export default function decryptOrder (order: string, {
+export default function decryptAes (data: string, {
   key = forge.util.createBuffer(),
   iv
 }: DecryptOrderOptions) {
@@ -15,14 +15,14 @@ export default function decryptOrder (order: string, {
   // No IV => Create an empty buffer of 16 bytes.
   else iv = forge.util.createBuffer().fillWithByte(0, 16);
 
-  // Get the buffer of the order number.
-  const orderInBytes = forge.util.hexToBytes(order);
-  const orderBuffer = forge.util.createBuffer(orderInBytes);
+  // Get the buffer.
+  const dataInBytes = forge.util.hexToBytes(data);
+  const dataBuffer = forge.util.createBuffer(dataInBytes);
 
   // Start the decryption using 'AES-CBC' method.
   const decipher = forge.cipher.createDecipher("AES-CBC", md5(key));
   decipher.start({ iv });
-  decipher.update(orderBuffer);
+  decipher.update(dataBuffer);
   decipher.finish();
 
   // Return the decrypted value.

@@ -6,7 +6,7 @@ type GenerateOrderOptions = {
   iv?: forge.util.ByteStringBuffer
 };
 
-export default function generateOrder (orderToEncrypt: number | string, {
+export default function encryptAes (data: string, {
   key = forge.util.createBuffer(),
   iv
 }: GenerateOrderOptions) {
@@ -19,8 +19,8 @@ export default function generateOrder (orderToEncrypt: number | string, {
   // No IV => Create an empty buffer of 16 bytes.
   else iv = forge.util.createBuffer().fillWithByte(0, 16);
 
-  // We need to encrypt `orderToEncrypt` (UTF-8).
-  const bufferToEncrypt = forge.util.createBuffer(orderToEncrypt.toString(), "utf8");
+  // We need to encrypt `data` (UTF-8).
+  const bufferToEncrypt = forge.util.createBuffer(data, "utf8");
   
   // Start the encryption.
   cipher.start({ iv });
