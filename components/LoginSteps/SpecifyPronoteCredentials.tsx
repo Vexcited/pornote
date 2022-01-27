@@ -125,13 +125,13 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
         .toUpperCase();
 
       //     alea = idr['donneesSec']['donnees']['alea']
-        //     motdepasse = SHA256.new((alea + p).encode()).hexdigest().upper()
-        //     e.aes_key = MD5.new((u + motdepasse).encode()).digest()
+      //     motdepasse = SHA256.new((alea + p).encode()).hexdigest().upper()
+      //     e.aes_key = MD5.new((u + motdepasse).encode()).digest()
 
-        // # challenge
-        // dec = e.aes_decrypt(bytes.fromhex(challenge))
-        // dec_no_alea = _enleverAlea(dec.decode())
-        // ch = e.aes_encrypt(dec_no_alea.encode()).hex()
+      // # challenge
+      // dec = e.aes_decrypt(bytes.fromhex(challenge))
+      // dec_no_alea = _enleverAlea(dec.decode())
+      // ch = e.aes_encrypt(dec_no_alea.encode()).hex()
 
       /**
        * Challenge key is an MD5 hash of the username,
@@ -143,7 +143,7 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
       const decrypted = decryptAes(challengeData.challenge, {
         iv: bufferIv,
         key: challengeAesKeyBuffer
-      })
+      });
 
       const splitedDecrypted = decrypted.split("").filter((_, i) => i % 2 === 0).join("");
       console.log(splitedDecrypted, formState);

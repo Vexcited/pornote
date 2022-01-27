@@ -9,7 +9,7 @@ import type {
 } from "types/ApiData";
 
 // import type {
-  
+
 // } from "types/PronoteApiData";
 
 import getServerUrl from "@/apiUtils/getServerUrl";
@@ -53,7 +53,7 @@ export default async function handler (
       return res.status(401).json({
         success: false,
         message: "Missing 'pronoteSolvedChallenge'."
-      })
+      });
     }
 
     const authenticationApiUrl = `${pronoteApiUrl}/${pronoteOrder}`;
