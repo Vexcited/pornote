@@ -2,6 +2,7 @@ import type {
   PronoteApiFonctionParametresCommon,
   PronoteApiFonctionParametresStudent,
   PronoteApiIdentification,
+  PronoteApiAuthentication,
   PronoteSession
 } from "types/PronoteApiData";
 
@@ -37,6 +38,13 @@ export interface ApiIdentificationResponse {
 export interface ApiAuthenticationResponse {
   success: true;
   
+  /** Server's response. */
+  pronoteData: PronoteApiAuthentication;
+}
+
+export interface ApiUserResponse {
+  success: true;
+
   /** Server's response. */
   pronoteData: any;
 }

@@ -3,8 +3,13 @@ import type {
   ApiAuthenticationResponse,
   ApiIdentificationResponse,
   ApiInformationsResponse,
-  ApiServerError
+  ApiServerError,
+  ApiUserResponse
 } from "types/ApiData";
+
+import type {
+  PronoteSession
+} from "types/PronoteApiData";
 
 import React, {
   useState,
@@ -29,6 +34,17 @@ type SpecifyPronoteCredentialsProps = {
   setState: Dispatch<SetStateAction<StateTypes>>;
 }
 
+type AuthDataStateProps = {
+  iv: forge.util.ByteBuffer;
+  key: forge.util.ByteBuffer;
+  session: PronoteSession;
+  
+  // Response of 'FonctionParametres'.
+  schoolData: ApiInformationsResponse["pronoteData"]["donneesSec"];
+  // Response of 'ParametresUtilisateur'.
+  userInformations: any;
+}
+
 function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentialsProps) {
   const [formState, setFormState] = useState({
     username: "",
@@ -36,6 +52,8 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
   });
 
   const [selectedAccountType, setSelectedAccountType] = useState(state.schoolInformations.availableAccountTypes[0]);
+
+  const [authData, setAuthData] = useState<null | AuthDataStateProps>(null);
 
   type FormStateTypes = typeof formState;
   const updateFormStateInput = (key: keyof FormStateTypes) => (evt: React.ChangeEvent<HTMLInputElement>) => setFormState({
@@ -138,7 +156,6 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
       });
 
       const decrypted = forge.util.decodeUtf8(decryptedBytes);
-
       const unscrambled = new Array(decrypted.length);
       for (let i = 0; i < decrypted.length; i += 1) {
         if (i % 2 === 0) {
@@ -147,14 +164,10 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
       }
 
       const splitedDecrypted = unscrambled.join("");
-      console.log(splitedDecrypted, formState);
-
       const encrypted = encryptAes(splitedDecrypted, {
         iv: bufferIv,
         key: challengeAesKeyBuffer
       });
-
-      console.log(encrypted);
 
       const pronoteAuthenticationData = await ky.post("/api/authentication", {
         json: {
@@ -167,7 +180,51 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
         }
       }).json<ApiAuthenticationResponse>();
 
-      console.log(pronoteAuthenticationData.pronoteData.donneesSec.donnees);
+      const authenticationData = pronoteAuthenticationData.pronoteData.donneesSec.donnees;
+      if (!authenticationData.cle) {
+        console.error("Incorrect login.");
+      }
+
+      const decryptedAuthenticationKey = decryptAes(authenticationData.cle, {
+        iv: bufferIv,
+        key: challengeAesKeyBuffer
+      });
+
+      /** Get the new AES key buffer. */
+      const authenticationKeyBytesArray = decryptedAuthenticationKey.split(",").map(a => parseInt(a));
+      const authenticationKey = forge.util.createBuffer(new Uint8Array(authenticationKeyBytesArray));
+
+      // Check 'numeroOrdre' from 'pronoteIdentificationData'.
+      // It should be equal to '6'.
+      const decryptedAuthenticationOrder = decryptAes(
+        pronoteAuthenticationData.pronoteData.numeroOrdre,
+        { iv: bufferIv }
+      );
+
+      const encryptedUserOrder = encryptAes(
+        (parseInt(decryptedAuthenticationOrder) + 1).toString(),
+        { iv: bufferIv, key: authenticationKey }
+      );
+
+      const pronoteUserData = await ky.post("/api/user", {
+        json: {
+          pronoteUrl: state.pronoteUrl,
+          pronoteAccountId: selectedAccountType.id,
+          pronoteSessionId: sessionId,
+
+          pronoteOrder: encryptedUserOrder
+        }
+      }).json<ApiUserResponse>();
+
+      // Saving data to state for saving in
+      // localForage later...
+      setAuthData({
+        iv: bufferIv,
+        key: authenticationKey,
+        session: pronoteInformationsData.pronoteCryptoInformations.session,
+        schoolData: pronoteInformationsData.pronoteData.donneesSec,
+        userInformations: pronoteUserData.pronoteData.donneesSec
+      });
     }
     catch (e) {
       if (e instanceof HTTPError) {
