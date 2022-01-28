@@ -73,7 +73,7 @@ export default function Home () {
           <a className="
             font-medium px-4 py-2 rounded
             flex-row items-center inline-flex gap-2
-            text-green-50 bg-green-900 bg-opacity-60
+            text-green-50 md:bg-brand-primary bg-brand-dark bg-opacity-20
             hover:bg-opacity-80 transition-colors
           ">
             <BiArrowBack size={18} />
@@ -85,33 +85,22 @@ export default function Home () {
       <div
         className="
           h-screen w-screen
-          bg-green-800 text-green-50
+          bg-brand-light 
         "
       >
         <section className="
-          h-full w-full md:fixed md:right-0 md:w-2/5 pt-24 px-4
+          h-full w-full md:fixed md:right-0 md:w-[28rem] pt-24 px-8
           flex flex-col
-          gap-8 bg-green-900 bg-opacity-80 rounded-l-xl
+          gap-8 bg-brand-primary md:rounded-l-xl
         ">
           <div className="
             flex flex-col
             items-center
             md:items-start
           ">
-            <h1 className="text-2xl font-medium">Connexion</h1>
-            <p className="text-lg">
-              {
-                state.step === "selectSchoolSelection"
-                || state.step === "specifyUrlGeolocation"
-                || state.step === "specifyUrlManual" ?
-                  "URL Pronote" :
-                  state.step === "selectLoginSelection"
-                || state.step === "specifyEntCredentials"
-                || state.step === "specifyPronoteCredentials" ?
-                    "S'identifier"
-                    : ""
-              }
-            </p>
+            <h1 className="text-2xl font-medium">
+              Connexion
+            </h1>
           </div>
 
           {/* 1st step: Choose how you specify the Pronote's server URL. */}

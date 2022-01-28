@@ -18,10 +18,11 @@ import ky, { HTTPError } from "ky";
 import forge from "node-forge";
 
 import { SelectInput, SelectInputOption } from "components/SelectInput";
+import InputText from "components/InputText";
+import Button from "components/Button";
 
 import decryptAes from "@/apiUtils/decryptAes";
 import encryptAes from "@/apiUtils/encryptAes";
-import md5 from "@/apiUtils/createMd5Buffer";
 
 type SpecifyPronoteCredentialsProps = {
   state: StateTypes;
@@ -178,7 +179,10 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
 
   return (
     <div>
-      <form onSubmit={handlePronoteLogin}>
+      <form
+        className="flex flex-colmun flex-wrap gap-6"
+        onSubmit={handlePronoteLogin}
+      >
 
         <SelectInput
           placeholder={selectedAccountType.name}
@@ -194,23 +198,36 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
           ))}
         </SelectInput>
 
-        <input
+        <InputText
           type="text"
+          id="pronoteUsername"
+
+          labelColor="text-brand-light"
+          inputClass="w-full border-gray-100 bg-transparent border-2 border-gray-100 text-gray-100 text-opacity-80 focus:bg-green-600 focus:bg-opacity-20 transition-colors"
+
           placeholder="Nom d'utilisateur"
           onChange={updateFormStateInput("username")}
           value={formState.username}
         />
 
-        <input
+        <InputText
           type="password"
+          id="pronotePassword"
+
+          labelColor="text-brand-light"
+          inputClass="w-full border-gray-100 bg-transparent border-2 border-gray-100 text-gray-100 text-opacity-80 focus:bg-green-600 focus:bg-opacity-20 transition-colors"
+
           placeholder="Mot de passe"
           onChange={updateFormStateInput("password")}
           value={formState.password}
         />
 
-        <button type="submit">
+        <Button
+          buttonType="submit"
+          className="text-brand-dark bg-brand-light"
+        >
           Se connecter !
-        </button>
+        </Button>
       </form>
     </div>
   );

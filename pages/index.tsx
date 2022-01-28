@@ -29,7 +29,7 @@ export default function Home () {
   }, []);
 
   return (
-    <div className="h-screen w-screen bg-green-50 text-green-900">
+    <div className="h-screen w-screen bg-brand-primary text-brand-white">
       <header className="fixed top-0 h-32 w-full flex flex-col items-center justify-center">
         <h1 className="font-bold text-3xl">Pornote</h1>
         <p className="text-lg">Client Pronote non-officiel.</p>
@@ -46,7 +46,7 @@ export default function Home () {
             <div className="flex flex-col justify-center items-center">
               <p className="text-md">Aucun compte sauvegardé localement</p>
               <NextLink href="/login">
-                <a className="m-2 px-6 py-4 rounded font-medium bg-green-200 bg-opacity-60 text-green-800 hover:bg-opacity-80 transition-colors">
+                <a className="m-2 px-6 py-4 rounded font-medium bg-brand-light bg-opacity-60 text-green-800 hover:bg-opacity-80 transition-colors">
                   Ajouter un compte Pronote
                 </a>
               </NextLink>
@@ -56,7 +56,7 @@ export default function Home () {
       </section>
 
       <footer className="w-full fixed bottom-0 flex flex-col items-center justify-center h-16">
-        <a className="font-medium text-green-700 hover:text-green-500 transition-colors" href="https://github.com/Vexcited/pornote">GitHub</a>
+        <a className="font-medium text-brand-light hover:text-opacity-60 transition-colors" href="https://github.com/Vexcited/pornote">GitHub</a>
       </footer>
     </div>
   );

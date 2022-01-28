@@ -8,9 +8,9 @@ import type {
   ApiServerError
 } from "types/ApiData";
 
-// import type {
-
-// } from "types/PronoteApiData";
+import type {
+  PronoteApiAuthentication
+} from "types/PronoteApiData";
 
 import getServerUrl from "@/apiUtils/getServerUrl";
 import got from "got";
@@ -70,7 +70,7 @@ export default async function handler (
           }
         }
       }
-    }).json();
+    }).json<PronoteApiAuthentication>();
 
     res.status(200).json({
       success: true,

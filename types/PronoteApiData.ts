@@ -522,3 +522,27 @@ export interface PronoteApiIdentification {
   /** Current session ID. */
   session: number;
 }
+
+export interface PronoteApiAuthentication {
+  donneesSec: {
+    nom: "Authentification";
+    donnees: {
+      /** Authentication key. */
+      cle: string;
+      /** Last authentication date. */
+      derniereConnexion: {
+        _T: 7;
+        V: string;
+      };
+
+      libelleUtil: string;
+      modeSecurisationParDefaut: number;
+    }
+  };
+
+  nom: "Authentification";
+  numeroOrdre: string;
+
+  /** Current session ID. */
+  session: number;
+}
