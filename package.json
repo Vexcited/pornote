@@ -21,7 +21,8 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-icons": "^4.3.1",
-    "swr": "^1.1.2"
+    "swr": "^1.1.2",
+    "zustand": "^3.6.9"
   },
   "devDependencies": {
     "@types/node-forge": "^0.10.8",

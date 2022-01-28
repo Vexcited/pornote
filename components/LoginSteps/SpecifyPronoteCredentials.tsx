@@ -29,6 +29,8 @@ import Button from "components/Button";
 import decryptAes from "@/apiUtils/decryptAes";
 import encryptAes from "@/apiUtils/encryptAes";
 
+import { useStore } from "@/webUtils/LocalStore";
+
 type SpecifyPronoteCredentialsProps = {
   state: StateTypes;
   setState: Dispatch<SetStateAction<StateTypes>>;
@@ -50,6 +52,8 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
     username: "",
     password: ""
   });
+
+  const localStoreSetAccount = useStore(store => store.setAccount);
 
   const [selectedAccountType, setSelectedAccountType] = useState(state.schoolInformations.availableAccountTypes[0]);
 
@@ -218,7 +222,7 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
 
       // Saving data to state for saving in
       // localForage later...
-      setAuthData({
+      localStoreSetAccount("randomSlug", {
         iv: bufferIv,
         key: authenticationKey,
         session: pronoteInformationsData.pronoteCryptoInformations.session,
