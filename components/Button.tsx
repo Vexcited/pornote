@@ -16,8 +16,8 @@ export default function Button ({
   className = "text-white bg-green-600 hover:bg-green-700"
 }: ButtonProps) {
   const classWithCustom = `inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md ${className}`;
-  
-  return isButton 
+
+  return isButton
     ? (
       <button
         onClick={onClick}

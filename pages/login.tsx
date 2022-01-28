@@ -85,7 +85,7 @@ export default function Home () {
       <div
         className="
           h-screen w-screen
-          bg-brand-light 
+          bg-brand-light
         "
       >
         <section className="

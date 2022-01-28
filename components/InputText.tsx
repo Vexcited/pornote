@@ -39,5 +39,5 @@ export default function InputText ({
         onChange={onChange}
       />
     </div>
-  )
+  );
 }
