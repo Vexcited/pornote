@@ -38,7 +38,7 @@ type AuthDataStateProps = {
   iv: forge.util.ByteBuffer;
   key: forge.util.ByteBuffer;
   session: PronoteSession;
-  
+
   // Response of 'FonctionParametres'.
   schoolData: ApiInformationsResponse["pronoteData"]["donneesSec"];
   // Response of 'ParametresUtilisateur'.
