@@ -220,7 +220,7 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
 
   if (authData) return <ModalSpecifySlug
     authData={authData}
-  />
+  />;
 
   return (
     <div>

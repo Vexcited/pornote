@@ -14,9 +14,9 @@ export default function Home () {
     accountsStore.iterate((accountData: SavedAccountData, slug) => {
       tempAccounts[slug] = accountData;
     })
-    .then(() => {
-      setAccounts(tempAccounts);
-    });
+      .then(() => {
+        setAccounts(tempAccounts);
+      });
   }, []);
 
   return (
@@ -29,7 +29,7 @@ export default function Home () {
       <section className="h-full w-full flex items-center justify-center py-32 px-4">
         {!accounts ? <p>Loading...</p>
           : Object.keys(accounts).length > 0
-            ? ( 
+            ? (
               <div className="">
 
               </div>
