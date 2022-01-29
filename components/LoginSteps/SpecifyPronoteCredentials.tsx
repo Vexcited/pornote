@@ -8,16 +8,10 @@ import type {
 } from "types/ApiData";
 
 import type {
-  PronoteSession
-} from "types/PronoteApiData";
+  SavedAccountData
+} from "types/SavedAccountData";
 
-import React, {
-  useState,
-
-  // Types
-  Dispatch,
-  SetStateAction
-} from "react";
+import React, { useState } from "react";
 
 import ky, { HTTPError } from "ky";
 import forge from "node-forge";
@@ -29,35 +23,20 @@ import Button from "components/Button";
 import decryptAes from "@/apiUtils/decryptAes";
 import encryptAes from "@/apiUtils/encryptAes";
 
-import { useStore } from "@/webUtils/LocalStore";
+import ModalSpecifySlug from "./utils/ModalSpecifySlug";
 
 type SpecifyPronoteCredentialsProps = {
   state: StateTypes;
-  setState: Dispatch<SetStateAction<StateTypes>>;
 }
 
-type AuthDataStateProps = {
-  iv: forge.util.ByteBuffer;
-  key: forge.util.ByteBuffer;
-  session: PronoteSession;
-
-  // Response of 'FonctionParametres'.
-  schoolData: ApiInformationsResponse["pronoteData"]["donneesSec"];
-  // Response of 'ParametresUtilisateur'.
-  userInformations: any;
-}
-
-function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentialsProps) {
+function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
   const [formState, setFormState] = useState({
     username: "",
     password: ""
   });
 
-  const localStoreSetAccount = useStore(store => store.setAccount);
-
   const [selectedAccountType, setSelectedAccountType] = useState(state.schoolInformations.availableAccountTypes[0]);
-
-  const [authData, setAuthData] = useState<null | AuthDataStateProps>(null);
+  const [authData, setAuthData] = useState<null | SavedAccountData>(null);
 
   type FormStateTypes = typeof formState;
   const updateFormStateInput = (key: keyof FormStateTypes) => (evt: React.ChangeEvent<HTMLInputElement>) => setFormState({
@@ -195,8 +174,8 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
       });
 
       /** Get the new AES key buffer. */
-      const authenticationKeyBytesArray = decryptedAuthenticationKey.split(",").map(a => parseInt(a));
-      const authenticationKey = forge.util.createBuffer(new Uint8Array(authenticationKeyBytesArray));
+      const authenticationKeyBytesArray = new Uint8Array(decryptedAuthenticationKey.split(",").map(a => parseInt(a)));
+      const authenticationKey = forge.util.createBuffer(authenticationKeyBytesArray);
 
       // Check 'numeroOrdre' from 'pronoteIdentificationData'.
       // It should be equal to '6'.
@@ -220,13 +199,14 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
         }
       }).json<ApiUserResponse>();
 
-      // Saving data to state for saving in
-      // localForage later...
-      localStoreSetAccount("randomSlug", {
-        iv: bufferIv,
-        key: authenticationKey,
-        session: pronoteInformationsData.pronoteCryptoInformations.session,
-        schoolData: pronoteInformationsData.pronoteData.donneesSec,
+      // Saving data to state for saving in localForage later...
+      setAuthData({
+        currentSessionData: {
+          iv,
+          key: authenticationKeyBytesArray,
+          session: pronoteInformationsData.pronoteCryptoInformations.session
+        },
+        schoolInformations: pronoteInformationsData.pronoteData.donneesSec,
         userInformations: pronoteUserData.pronoteData.donneesSec
       });
     }
@@ -237,6 +217,10 @@ function SpecifyPronoteCredentials ({ state, setState }: SpecifyPronoteCredentia
       }
     }
   };
+
+  if (authData) return <ModalSpecifySlug
+    authData={authData}
+  />
 
   return (
     <div>

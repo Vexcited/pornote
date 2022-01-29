@@ -23,8 +23,6 @@ export type StateTypes = {
   schoolInformations: SchoolInformations;
 
   accountType: AccountType;
-  username: string;
-  password: string;
 }
 
 // Step 1.
@@ -56,10 +54,7 @@ export default function Home () {
       id: 0,
       name: "",
       path: ""
-    },
-
-    username: "",
-    password: ""
+    }
   });
 
   return (
@@ -152,7 +147,6 @@ export default function Home () {
           {state.step === "specifyPronoteCredentials"
             && <SpecifyPronoteCredentials
               state={state}
-              setState={setState}
             />
           }
         </section>

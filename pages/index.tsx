@@ -1,31 +1,22 @@
-import type { AccountMetadata } from "types/SavedAccountData";
+import type { SavedAccountData } from "types/SavedAccountData";
 
-import { useState, useEffect } from "react";
-import localforage from "localforage";
 import NextLink from "next/link";
+import { useState, useEffect } from "react";
+
+import { accountsStore } from "@/webUtils/accountsStore";
 
 export default function Home () {
-  const [accounts, setAccounts] = useState<AccountMetadata[]>([]);
+  type SavedAccounts = { [slug: string]: SavedAccountData };
+  const [accounts, setAccounts] = useState<SavedAccounts | null>(null);
 
-  // We try to see if there's already
-  // saved accounts in the localforage.
   useEffect(() => {
-    (async () => {
-      try {
-        const savedAccounts: AccountMetadata[] | null = await localforage.getItem("accounts");
-
-        // If there's already saved accounts, we store them to state.
-        if (savedAccounts) setAccounts(savedAccounts);
-
-        // If not, we create an empty array to save them.
-        if (!savedAccounts) {
-          await localforage.setItem("accounts", []);
-        }
-      }
-      catch (e) {
-        console.error(e);
-      }
-    })();
+    const tempAccounts: SavedAccounts = {};
+    accountsStore.iterate((accountData: SavedAccountData, slug) => {
+      tempAccounts[slug] = accountData;
+    })
+    .then(() => {
+      setAccounts(tempAccounts);
+    });
   }, []);
 
   return (
@@ -36,22 +27,23 @@ export default function Home () {
       </header>
 
       <section className="h-full w-full flex items-center justify-center py-32 px-4">
-        {accounts.length > 0
-          ? (
-            <div className="">
+        {!accounts ? <p>Loading...</p>
+          : Object.keys(accounts).length > 0
+            ? ( 
+              <div className="">
 
-            </div>
-          )
-          : (
-            <div className="flex flex-col justify-center items-center">
-              <p className="text-md">Aucun compte sauvegardé localement</p>
-              <NextLink href="/login">
-                <a className="m-2 px-6 py-4 rounded font-medium bg-brand-light bg-opacity-60 text-green-800 hover:bg-opacity-80 transition-colors">
-                  Ajouter un compte Pronote
-                </a>
-              </NextLink>
-            </div>
-          )
+              </div>
+            )
+            : (
+              <div className="flex flex-col justify-center items-center">
+                <p className="text-md">Aucun compte sauvegardé localement</p>
+                <NextLink href="/login">
+                  <a className="m-2 px-6 py-4 rounded font-medium bg-brand-light bg-opacity-60 text-green-800 hover:bg-opacity-80 transition-colors">
+                    Ajouter un compte Pronote
+                  </a>
+                </NextLink>
+              </div>
+            )
         }
       </section>
 

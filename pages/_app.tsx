@@ -9,19 +9,14 @@ import SEO from "../next-seo.config";
 // TailwindCSS
 import "styles/globals.css";
 
-import { StateProvider, createLocalStore } from "@/webUtils/LocalStore";
-
 export default function PronoteApp({
   Component,
   pageProps
 }: AppProps) {
-
   return (
     <Fragment>
       <DefaultSeo {...SEO} />
-      <StateProvider createStore={createLocalStore}>
-        <Component {...pageProps} />
-      </StateProvider>
+      <Component {...pageProps} />
     </Fragment>
   );
 }

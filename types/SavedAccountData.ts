@@ -1,3 +1,15 @@
+import type forge from "node-forge";
+
+import type {
+  ApiInformationsResponse,
+  ApiUserResponse
+} from "types/ApiData";
+
+import type {
+  PronoteSession
+} from "types/PronoteApiData";
+
+
 export type AccountType = {
   id: number;
   name: string;
@@ -19,3 +31,17 @@ export type AccountMetadata = {
   name: string
   accountType: AccountType;
 }
+
+export type SavedAccountData = {
+  currentSessionData: {
+    iv: string;
+    key: Uint8Array;
+    session: PronoteSession;
+  }
+
+  /** Response of 'FonctionParametres'. */
+  schoolInformations: ApiInformationsResponse["pronoteData"]["donneesSec"];
+
+  /** Response of 'ParametresUtilisateur'. */
+  userInformations: ApiUserResponse["pronoteData"];
+};

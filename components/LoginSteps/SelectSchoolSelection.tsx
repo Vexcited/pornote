@@ -15,8 +15,6 @@ type SelectSchoolSelectionProps = {
   setState: Dispatch<SetStateAction<StateTypes>>;
 }
 
-import { useStore } from "@/webUtils/LocalStore";
-
 /** Step 1: Select the method to type the Pronote URL - Manual or Geolocation. */
 function SelectSchoolSelection ({ state, setState }: SelectSchoolSelectionProps) {
   const SelectionItem = ({ step, name, description }: SelectionItemProps) => {
@@ -26,9 +24,6 @@ function SelectSchoolSelection ({ state, setState }: SelectSchoolSelectionProps)
         step
       });
     };
-
-    const store = useStore(state => state.accounts);
-    console.log(store);
 
     return (
       <div
