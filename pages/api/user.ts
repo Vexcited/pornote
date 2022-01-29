@@ -9,7 +9,7 @@ import type {
 } from "types/ApiData";
 
 import type {
-  PronoteApiStudentUser
+  PronoteApiUserDataStudent
 } from "types/PronoteApiData";
 
 import getServerUrl from "@/apiUtils/getServerUrl";
@@ -57,7 +57,7 @@ export default async function handler (
         donneesSec: {}
       }
     }).json<
-      | PronoteApiStudentUser
+      | PronoteApiUserDataStudent
     >();
 
     res.status(200).json({

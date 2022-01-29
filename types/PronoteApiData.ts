@@ -549,7 +549,7 @@ export interface PronoteApiAuthentication {
   session: number;
 }
 
-export interface PronoteApiStudentUser {
+export interface PronoteApiUserDataStudent {
   donneesSec: {
     donnees: {
       ressource: {

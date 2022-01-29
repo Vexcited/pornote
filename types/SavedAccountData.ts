@@ -6,7 +6,7 @@ import type {
   PronoteSession,
   PronoteApiFonctionParametresStudent,
 
-  PronoteApiStudentUser
+  PronoteApiUserDataStudent
 } from "types/PronoteApiData";
 
 
@@ -45,5 +45,5 @@ export type SavedAccountData = {
 
   /** Response of 'ParametresUtilisateur'. */
   userInformations: 
-    | PronoteApiStudentUser["donneesSec"]["donnees"];
+    | PronoteApiUserDataStudent["donneesSec"]["donnees"];
 };
