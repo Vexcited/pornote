@@ -30,11 +30,11 @@ export default function Home () {
         {!accounts ? <p>Loading...</p>
           : Object.keys(accounts).length > 0
             ? (
-              Object.entries(accounts).map(([slug, accountData]) => 
+              Object.entries(accounts).map(([slug, accountData]) =>
                 <div
                   key={slug}
                 >
-                  <h2>{accountData.userInformations.donnees.ressource.L}</h2>
+                  <h2>{accountData.userInformations.ressource.L} ({accountData.userInformations.ressource.classeDEleve.L})</h2>
                   <p>
                     {accountData.schoolInformations.General.NomEtablissement}
                   </p>

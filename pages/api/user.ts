@@ -9,7 +9,7 @@ import type {
 } from "types/ApiData";
 
 import type {
-  PronoteApiAuthentication
+  PronoteApiStudentUser
 } from "types/PronoteApiData";
 
 import getServerUrl from "@/apiUtils/getServerUrl";
@@ -56,7 +56,9 @@ export default async function handler (
         nom: "ParametresUtilisateur",
         donneesSec: {}
       }
-    }).json<any>();
+    }).json<
+      | PronoteApiStudentUser
+    >();
 
     res.status(200).json({
       success: true,

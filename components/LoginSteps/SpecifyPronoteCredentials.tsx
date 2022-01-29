@@ -205,7 +205,7 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
 
       const pronoteInformationsOnlyData = pronoteInformationsData.pronoteData as (
         | PronoteApiFonctionParametresStudent
-      ); 
+      );
 
       // Saving data to state for usage in 'ModalSpecifySlug'.
       setAuthData({
@@ -215,7 +215,7 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
           session: pronoteInformationsData.pronoteCryptoInformations.session
         },
         schoolInformations: pronoteInformationsOnlyData.donneesSec.donnees,
-        userInformations: pronoteUserData.pronoteData.donneesSec
+        userInformations: pronoteUserData.pronoteData.donneesSec.donnees
       });
     }
     catch (e) {
