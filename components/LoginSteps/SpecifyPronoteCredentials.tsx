@@ -8,6 +8,10 @@ import type {
 } from "types/ApiData";
 
 import type {
+  PronoteApiFonctionParametresStudent
+} from "types/PronoteApiData";
+
+import type {
   SavedAccountData
 } from "types/SavedAccountData";
 
@@ -199,14 +203,18 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
         }
       }).json<ApiUserResponse>();
 
-      // Saving data to state for saving in localForage later...
+      const pronoteInformationsOnlyData = pronoteInformationsData.pronoteData as (
+        | PronoteApiFonctionParametresStudent
+      ); 
+
+      // Saving data to state for usage in 'ModalSpecifySlug'.
       setAuthData({
         currentSessionData: {
           iv,
           key: authenticationKeyBytesArray,
           session: pronoteInformationsData.pronoteCryptoInformations.session
         },
-        schoolInformations: pronoteInformationsData.pronoteData.donneesSec,
+        schoolInformations: pronoteInformationsOnlyData.donneesSec.donnees,
         userInformations: pronoteUserData.pronoteData.donneesSec
       });
     }

@@ -1,12 +1,11 @@
-import type forge from "node-forge";
-
 import type {
   ApiInformationsResponse,
   ApiUserResponse
 } from "types/ApiData";
 
 import type {
-  PronoteSession
+  PronoteSession,
+  PronoteApiFonctionParametresStudent
 } from "types/PronoteApiData";
 
 
@@ -40,7 +39,8 @@ export type SavedAccountData = {
   }
 
   /** Response of 'FonctionParametres'. */
-  schoolInformations: ApiInformationsResponse["pronoteData"]["donneesSec"];
+  schoolInformations: 
+    | PronoteApiFonctionParametresStudent["donneesSec"]["donnees"];
 
   /** Response of 'ParametresUtilisateur'. */
   userInformations: ApiUserResponse["pronoteData"];

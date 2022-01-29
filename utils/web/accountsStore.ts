@@ -1,5 +1,4 @@
 import localforage from "localforage";
-import create from "zustand";
 
 import type {
   SavedAccountData
