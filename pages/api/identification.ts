@@ -36,11 +36,13 @@ export default async function handler (
     // 'identifiant' on 'Identification' request POST body.
     const accountIdentifier: string = req.body.identifier;
     if (!accountIdentifier) {
-      res.status(400).json({
+      return  res.status(400).json({
         success: false,
         message: "Missing account 'identifier'."
       });
     }
+
+    const usingEnt = req.body.usingEnt as boolean || false;
 
     /** Cleaned Pronote URL. */
     const pronoteServerUrl = getServerUrl(pronoteUrl);
@@ -67,7 +69,7 @@ export default async function handler (
             genreConnexion: 0,
             genreEspace: pronoteAccountId,
             identifiant: accountIdentifier,
-            pourENT: false,
+            pourENT: usingEnt,
             enConnexionAuto: false,
             demandeConnexionAuto: false,
             demandeConnexionAppliMobile: false,

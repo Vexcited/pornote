@@ -1,15 +1,16 @@
 import got, { HTTPError } from "got";
 
-async function getPronotePage (pronoteUrl: string): Promise<[boolean, string]> {
+async function getPronotePage (pronoteUrl: string, cookie?: string): Promise<[boolean, string, string[]?]> {
   try {
-    const { body } = await got.get(pronoteUrl, {
+    const { body, headers } = await got.get(pronoteUrl, {
       followRedirect: false,
       headers: {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:59.0) Gecko/20100101 Firefox/59.0"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36 Edge/97.0.1072.76",
+        "Cookie": cookie
       }
     });
 
-    return [true, body];
+    return [true, body, headers["set-cookie"]];
   }
   catch (e) {
     const error = e as HTTPError;

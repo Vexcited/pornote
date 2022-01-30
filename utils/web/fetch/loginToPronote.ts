@@ -17,13 +17,16 @@ import decryptAes from "@/apiUtils/decryptAes";
 import encryptAes from "@/apiUtils/encryptAes";
 
 type LoginToPronoteProps = {
-  username: string;
-  password: string;
+  username?: string;
+  password?: string;
 
   accountId: number;
 
   pronoteUrl: string;
   accountPath: string;
+
+  usingEnt?: boolean;
+  cookie?: string;
 };
 
 // Utility used to create the next string order.
@@ -34,14 +37,20 @@ export default async function loginToPronote ({
   password,
   accountId,
   pronoteUrl,
-  accountPath
+  accountPath,
+  usingEnt = false,
+  cookie
 }: LoginToPronoteProps) {
   try {
+    let pronoteUsername = username || "";
+    let pronotePassword = password || "";
+
     const pronoteInformationsData = await ky.post("/api/informations", {
       json: {
         pronoteUrl,
         pronoteAccountId: accountId,
-        pronoteAccountPath: accountPath
+        pronoteAccountPath: accountPath,
+        ...(usingEnt ? { pronoteCookie: cookie } : {})
       }
     }).json<ApiInformationsResponse>();
 
@@ -56,7 +65,14 @@ export default async function loginToPronote ({
     const bufferIv = forge.util.createBuffer(iv);
 
     // Parse current session ID.
-    const sessionId = parseInt(pronoteInformationsData.pronoteCryptoInformations.session.h);
+    const currentSession = pronoteInformationsData.pronoteCryptoInformations.session;
+    const sessionId = parseInt(currentSession.h);
+
+    // When using ENT, e is the username, f is the password.
+    if (usingEnt && currentSession.e && currentSession.f) {
+      pronoteUsername = currentSession.e;
+      pronotePassword = currentSession.f;
+    }
 
     // Check 'numeroOrdre' from 'pronoteInformationsData'.
     // It should be equal to '2'.
@@ -77,7 +93,8 @@ export default async function loginToPronote ({
         pronoteSessionId: sessionId,
         pronoteOrder: identificationOrderEncrypted,
 
-        identifier: username
+        identifier: pronoteUsername,
+        usingEnt
       }
     }).json<ApiIdentificationResponse>();
 
@@ -96,12 +113,10 @@ export default async function loginToPronote ({
     const challengeData = pronoteIdentificationData.pronoteData.donneesSec.donnees;
 
     // Update username with `modeCompLog`.
-    let pronoteUsername = username;
     if (challengeData.modeCompLog === 1)
       pronoteUsername = pronoteUsername.toLowerCase();
 
     // Update password with `modeCompMdp`
-    let pronotePassword = password;
     if (challengeData.modeCompMdp === 1)
       pronotePassword = pronotePassword.toLowerCase();
 
@@ -114,7 +129,7 @@ export default async function loginToPronote ({
      */
     const challengeAesKeyHash = forge.md.sha256
       .create()
-      .update(challengeData.alea)
+      .update(usingEnt ? "" : challengeData.alea)
       .update(forge.util.encodeUtf8(pronotePassword))
       .digest()
       .toHex()
@@ -203,7 +218,9 @@ export default async function loginToPronote ({
         iv,
         key: authenticationKeyBytesArray,
         session: pronoteInformationsData.pronoteCryptoInformations.session,
-        loginCookie: pronoteUserData.pronoteLoginCookie
+        loginCookie: pronoteUserData.pronoteLoginCookie,
+        pronoteUrl,
+        pronotePath: accountPath
       },
       schoolInformations: pronoteInformationsOnlyData.donneesSec.donnees,
       userInformations: pronoteUserData.pronoteData.donneesSec.donnees

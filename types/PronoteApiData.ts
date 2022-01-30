@@ -7,6 +7,10 @@ export type PronoteSession = {
   a: number; // Account Type ID.
   d: boolean; // ??
 
+  // Used for ENT (when cookies appended).
+  e?: string;
+  f?: string;
+
   // RSA
   MR: string; // Modulus for RSA encryption.
   ER: string; // Exponent for RSA encryption.

@@ -37,8 +37,9 @@ export default async function handler (
     // We get URL origin and then get the DOM of account selection page.
     const pronoteServerUrl = getServerUrl(pronoteUrl);
     const pronoteHtmlUrl = pronoteServerUrl + pronoteAccountPath + "?login=true";
-    const [pronoteHtmlSuccess, pronoteHtmlBody] = await getPronotePage(
-      pronoteHtmlUrl
+    const [pronoteHtmlSuccess, pronoteHtmlBody, pronoteHtmlCookies] = await getPronotePage(
+      pronoteHtmlUrl,
+      req.body.pronoteCookie as string
     );
 
     // Fetch Pronote server URL without the "?login=true" part
@@ -116,7 +117,8 @@ export default async function handler (
       success: true,
       pronoteData,
       pronoteEntUrl,
-      pronoteCryptoInformations
+      pronoteCryptoInformations,
+      pronoteHtmlCookie: pronoteHtmlCookies ? pronoteHtmlCookies[0].split(";")[0] : undefined
     });
   }
   else {

@@ -38,6 +38,8 @@ export type SavedAccountData = {
     key: Uint8Array;
     session: PronoteSession;
     loginCookie?: string;
+    pronoteUrl: string;
+    pronotePath: string;
   }
 
   /** Response of 'FonctionParametres'. */

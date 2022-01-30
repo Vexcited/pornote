@@ -27,6 +27,8 @@ export interface ApiInformationsResponse {
     iv: string;
     session: PronoteSession;
   };
+
+  pronoteHtmlCookie?: string;
 }
 
 export interface ApiIdentificationResponse {

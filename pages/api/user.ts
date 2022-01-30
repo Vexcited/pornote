@@ -66,7 +66,7 @@ export default async function handler (
     res.status(200).json({
       success: true,
       pronoteData: pronoteUserData,
-      pronoteLoginCookie: pronoteLoginCookies ? pronoteLoginCookies[0] : undefined
+      pronoteLoginCookie: pronoteLoginCookies ? pronoteLoginCookies[0].split(";")[0] : undefined
     });
   }
   else {

@@ -1,9 +1,13 @@
+import type {
+  SavedAccountData
+} from "types/SavedAccountData";
+
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import usePush from "@/webUtils/routerPush";
 
 import { accountsStore } from "@/webUtils/accountsStore";
-
+import loginToPronote from "@/webUtils/fetch/loginToPronote";
 
 export default function Dashboard () {
   const router = useRouter();
@@ -15,12 +19,19 @@ export default function Dashboard () {
 
     (async () => {
       console.log("rendered");
-      const data = await accountsStore.getItem(slug);
+      const data: SavedAccountData | null = await accountsStore.getItem(slug);
 
-      if (!data)
-        return routerPush("/login");
+      if (!data) return routerPush("/login");
 
-      console.log(data);
+      const login = await loginToPronote({
+        pronoteUrl: data.currentSessionData.pronoteUrl,
+        accountId: data.currentSessionData.session.a,
+        accountPath: data.currentSessionData.pronotePath,
+        usingEnt: true,
+        cookie: data.currentSessionData.loginCookie
+      });
+
+      console.log(data, login);
     })();
   }, [slug, routerPush]);
 
