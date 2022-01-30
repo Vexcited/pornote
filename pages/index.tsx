@@ -38,6 +38,11 @@ export default function Home () {
                   <p>
                     {accountData.schoolInformations.General.NomEtablissement}
                   </p>
+                  <NextLink
+                    href={`/app/${slug}/dashboard`}
+                  >
+                    <a>Accès au compte</a>
+                  </NextLink>
                 </div>
               )
             )

@@ -49,20 +49,24 @@ export default async function handler (
     }
 
     const userApiUrl = `${pronoteApiUrl}/${pronoteOrder}`;
-    const pronoteUserData = await got.post(userApiUrl, {
+    const pronoteUserDataResponse = await got.post(userApiUrl, {
       json: {
         session: pronoteSessionId,
         numeroOrdre: pronoteOrder,
         nom: "ParametresUtilisateur",
         donneesSec: {}
       }
-    }).json<
-      | PronoteApiUserDataStudent
-    >();
+    });
+
+    const pronoteUserData = JSON.parse(pronoteUserDataResponse.body) as
+      | PronoteApiUserDataStudent;
+
+    const pronoteLoginCookies = pronoteUserDataResponse.headers["set-cookie"];
 
     res.status(200).json({
       success: true,
-      pronoteData: pronoteUserData
+      pronoteData: pronoteUserData,
+      pronoteLoginCookie: pronoteLoginCookies ? pronoteLoginCookies[0] : undefined
     });
   }
   else {

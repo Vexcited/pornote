@@ -151,7 +151,7 @@ export interface PronoteApiFonctionParametresStudent {
 
     donnees: {
       identifiantNav: string;
-  
+
       /** Array of available fonts. */
       listePolices: {
         _T: 24;
@@ -194,25 +194,25 @@ export interface PronoteApiFonctionParametresStudent {
           _T: 23;
           V: string;
         };
-  
+
         urlSiteInfosHebergement: {
           _T: 23;
           V: string;
         };
-  
+
         /** Complete version with name of the app.  */
         version: string;
         /** Pronote version. */
         versionPN: string;
-  
+
         /** Year of the version. */
         millesime: string;
-  
+
         /** Current language. */
         langue: string;
         /** Current language ID. */
         langID: number;
-  
+
         /** List of available languages. */
         listeLangues: {
           _T: 24;
@@ -292,7 +292,7 @@ export interface PronoteApiFonctionParametresStudent {
           _T: 7;
           V: string;
         };
-        
+
         JourOuvres: {
           _T: 11;
           V: string;
@@ -405,7 +405,7 @@ export interface PronoteApiFonctionParametresStudent {
             /** Name of the day. */
             L: string;
             N: string; // ID (?)
-            
+
             dateDebut: {
               _T: 7;
               V: string;
@@ -529,7 +529,7 @@ export interface PronoteApiAuthentication {
     donnees: {
       /** Key used to create new AES encryption key. */
       cle: string;
-      
+
       /** Last authentication date. */
       derniereConnexion: {
         _T: 7;
@@ -628,7 +628,7 @@ export interface PronoteApiUserDataStudent {
                     L: string;
                     /** ID. */
                     N: string;
-                    
+
                     G: number;
                     P: number;
 
@@ -693,10 +693,10 @@ export interface PronoteApiUserDataStudent {
           L: string;
           /** School ID. */
           N: string;
-          
+
           Logo: {
             _T: 25;
-            V: number; 
+            V: number;
           };
 
           /** School location. */
@@ -729,7 +729,7 @@ export interface PronoteApiUserDataStudent {
           axeInversePlanningHebdo: boolean;
           axeInversePlanningJour: boolean;
           axeInversePlanningJour2: boolean;
-          
+
           nbJours: number;
           nbRessources: number;
           nbJoursEDT: number;
@@ -761,11 +761,11 @@ export interface PronoteApiUserDataStudent {
         AvecDiscussionPersonnels: boolean;
         /** Allow messages with the teachers. */
         AvecDiscussionProfesseurs: boolean;
-        
+
         incidents: any;
         intendance: any;
         services: any;
-        
+
         cours: {
           domaineConsultationEDT: {
             _T: 8;
@@ -782,12 +782,12 @@ export interface PronoteApiUserDataStudent {
 
         tailleMaxDocJointEtablissement: number;
         tailleMaxRenduTafEleve: number;
-        
+
         compte: {
           avecSaisieMotDePasse: boolean;
           avecInformationsPersonnelles: boolean;
         };
-        
+
         consulterDonneesAdministrativesAutresEleves: boolean;
         autoriserImpression: boolean;
       };
@@ -818,7 +818,7 @@ export interface PronoteApiUserDataStudent {
     };
 
     nom: "ParametresUtilisateur";
-    
+
     _Signature_: {
       notifications: {
         compteurCentraleNotif: number;

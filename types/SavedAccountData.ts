@@ -37,13 +37,14 @@ export type SavedAccountData = {
     iv: string;
     key: Uint8Array;
     session: PronoteSession;
+    loginCookie?: string;
   }
 
   /** Response of 'FonctionParametres'. */
-  schoolInformations: 
+  schoolInformations:
     | PronoteApiFonctionParametresStudent["donneesSec"]["donnees"];
 
   /** Response of 'ParametresUtilisateur'. */
-  userInformations: 
+  userInformations:
     | PronoteApiUserDataStudent["donneesSec"]["donnees"];
 };

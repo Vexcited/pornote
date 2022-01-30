@@ -21,7 +21,7 @@ export interface ApiInformationsResponse {
     | PronoteApiFonctionParametresCommon
     | PronoteApiFonctionParametresStudent;
   pronoteEntUrl?: string;
-  
+
   /** Keys used when authenticating. */
   pronoteCryptoInformations?: {
     iv: string;
@@ -38,7 +38,7 @@ export interface ApiIdentificationResponse {
 
 export interface ApiAuthenticationResponse {
   success: true;
-  
+
   /** Server's response. */
   pronoteData: PronoteApiAuthentication;
 }
@@ -47,6 +47,7 @@ export interface ApiUserResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData: 
+  pronoteData:
     | PronoteApiUserDataStudent;
+  pronoteLoginCookie?: string;
 }
