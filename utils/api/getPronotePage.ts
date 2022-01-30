@@ -5,7 +5,7 @@ async function getPronotePage (pronoteUrl: string, cookie?: string): Promise<[bo
     const { body, headers } = await got.get(pronoteUrl, {
       followRedirect: false,
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36",
         "Cookie": cookie
       }
     });
