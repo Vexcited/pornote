@@ -1,16 +1,36 @@
-import got, { HTTPError } from "got";
+import request from "@/apiUtils/request";
+import { HTTPError } from "got";
 
-async function getPronotePage (pronoteUrl: string, cookie?: string): Promise<[boolean, string, string[]?]> {
+/**
+ * Fetch a Pronote page.
+ * @param pronoteUrl - URL to fetch.
+ * - It must be a Pronote URL and should look
+ * like this `https://xxxxx.index-education.net/pronote/accountPath.html`.
+ * @param cookies - Cookies to send with the request.
+ * - When a login cookie is provided, the request will provide another
+ * cookie that will be used on next login.
+ * @returns
+ * - `[0]: boolean`: Request succeeded or not.
+ * - `[1]: string`: Body of the Pronote page OR error message if `[0]` is false.
+ * - `[2]: string[]`: Login cookies when using ENT or restoring a session.
+ */
+async function getPronotePage (
+  pronoteUrl: string, cookie?: string
+): Promise<[boolean, string, string?]> {
   try {
-    const { body, headers } = await got.get(pronoteUrl, {
-      followRedirect: false,
+    const { body, headers } = await request().get(pronoteUrl, {
+      followRedirect: false, // Bypass ENT redirection.
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36",
+        // Append cookies to the request.
         "Cookie": cookie
       }
     });
 
-    return [true, body, headers["set-cookie"]];
+    // Login cookies when using ENT or restoring a session.
+    const loginCookies = headers["set-cookie"];
+    const loginCookie = loginCookies ? loginCookies[0] : undefined;
+
+    return [true, body, loginCookie];
   }
   catch (e) {
     const error = e as HTTPError;

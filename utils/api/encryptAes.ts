@@ -21,7 +21,7 @@ export default function encryptAes (data: string, {
 
   // We need to encrypt `data` (UTF-8).
   const bufferToEncrypt = forge.util.createBuffer(data, "utf8");
-  
+
   // Start the encryption.
   cipher.start({ iv });
   cipher.update(bufferToEncrypt);

@@ -13,7 +13,7 @@ import type {
 } from "types/PronoteApiData";
 
 import getServerUrl from "@/apiUtils/getServerUrl";
-import got from "got";
+import request from "@/apiUtils/request";
 
 export default async function handler (
   req: NextApiRequest,
@@ -28,7 +28,7 @@ export default async function handler (
     const pronoteSessionId: number = req.body.pronoteSessionId;
 
     if (!pronoteUrl || !pronoteAccountId || !pronoteSessionId) {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: "Missing informations about the Pronote account path."
       });
@@ -37,7 +37,7 @@ export default async function handler (
     /** Cleaned Pronote URL. */
     const pronoteServerUrl = getServerUrl(pronoteUrl);
 
-    // Creathe the API endpoint using the given session ID.
+    // Create the API endpoint using the given session ID.
     const pronoteApiUrl = `${pronoteServerUrl}appelfonction/${pronoteAccountId}/${pronoteSessionId}`;
 
     const pronoteOrder: string = req.body.pronoteOrder;
@@ -48,16 +48,12 @@ export default async function handler (
       });
     }
 
-    const userApiUrl = `${pronoteApiUrl}/${pronoteOrder}`;
-    const pronoteUserDataResponse = await got.post(userApiUrl, {
+    const pronoteUserDataResponse = await request(pronoteApiUrl).post(pronoteOrder, {
       json: {
         session: pronoteSessionId,
         numeroOrdre: pronoteOrder,
         nom: "ParametresUtilisateur",
         donneesSec: {}
-      },
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36"
       }
     });
 

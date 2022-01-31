@@ -15,6 +15,7 @@ import forge from "node-forge";
 
 import decryptAes from "@/apiUtils/decryptAes";
 import encryptAes from "@/apiUtils/encryptAes";
+import getServerUrl from "@/apiUtils/getServerUrl";
 
 type LoginToPronoteProps = {
   username?: string;
@@ -127,13 +128,22 @@ export default async function loginToPronote ({
      * and the user password concatenated
      * into a single string.
      */
-    const challengeAesKeyHash = forge.md.sha256
-      .create()
-      .update(usingEnt ? "" : challengeData.alea)
+    const challengeAesKeyHashCreation = forge.md.sha256.create();
+    let challengeAesKeyHashUpdate: forge.md.MessageDigest;
+
+    // If we use ENT, we don't use `alea`.
+    challengeAesKeyHashUpdate = !usingEnt
+      ? challengeAesKeyHashCreation.update(challengeData.alea)
+      : challengeAesKeyHashCreation;
+
+    // Continue hashing...
+    const challengeAesKeyHash = challengeAesKeyHashUpdate
       .update(forge.util.encodeUtf8(pronotePassword))
       .digest()
       .toHex()
       .toUpperCase();
+
+    console.log(pronotePassword, pronoteUsername);
 
     /**
      * Challenge key is an MD5 hash of the username,
@@ -231,6 +241,8 @@ export default async function loginToPronote ({
       const body: ApiServerError = await e.response.json();
       console.error(body.message, body.debug);
     }
+
+    console.error(e);
 
     return null;
   }

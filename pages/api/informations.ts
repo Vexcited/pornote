@@ -18,9 +18,9 @@ import getPronotePage from "@/apiUtils/getPronotePage";
 import checkEntAvailable from "@/apiUtils/checkEntAvailable";
 import extractSession from "@/apiUtils/extractSession";
 import encryptAes from "@/apiUtils/encryptAes";
+import request from "@/apiUtils/request";
 
 import forge from "node-forge";
-import got from "got";
 
 export default async function handler (
   req: NextApiRequest,
@@ -33,13 +33,13 @@ export default async function handler (
     // Given when authenticating with Pronote.
     const pronoteAccountPath: string | undefined = req.body.pronoteAccountPath ?? "";
     const pronoteAccountId: number | undefined = req.body.pronoteAccountId;
+    const pronoteAccountCookie: string | undefined = req.body.pronoteCookie;
 
     // We get URL origin and then get the DOM of account selection page.
     const pronoteServerUrl = getServerUrl(pronoteUrl);
     const pronoteHtmlUrl = pronoteServerUrl + pronoteAccountPath + "?login=true";
-    const [pronoteHtmlSuccess, pronoteHtmlBody, pronoteHtmlCookies] = await getPronotePage(
-      pronoteHtmlUrl,
-      req.body.pronoteCookie as string
+    const [pronoteHtmlSuccess, pronoteHtmlBody, pronoteHtmlCookie] = await getPronotePage(
+      pronoteHtmlUrl, pronoteAccountCookie
     );
 
     // Fetch Pronote server URL without the "?login=true" part
@@ -50,7 +50,7 @@ export default async function handler (
 
     // Checking if both functions executed successfully.
     if (!pronoteHtmlSuccess || !pronoteEntSuccess) {
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: `Failed to execute 'getPronotePage'${!pronoteAccountPath && " or 'checkEntAvailable'"}.`,
         debug: {
@@ -70,12 +70,12 @@ export default async function handler (
 
     // Request to Pronote server.
     // AccountID: 9 => Default for informations gathering (no account type).
-    const informationsApiUrl = pronoteServerUrl + `appelfonction/${pronoteAccountId ? pronoteAccountId : "9"}/` + session.h + "/" + orderEncrypted;
+    const informationsApiPath = `appelfonction/${pronoteAccountId ? pronoteAccountId : "9"}/` + session.h + "/" + orderEncrypted;
 
     // Append POST body to request only if we
     // want to get informations for an account login.
     const informationsPostBody: { identifiantNav?: null, Uuid?: string } = {};
-    let pronoteCryptoInformations: ApiInformationsResponse["pronoteCryptoInformations"] | undefined = undefined;
+    let pronoteCryptoInformations: ApiInformationsResponse["pronoteCryptoInformations"] | undefined;
     if (pronoteAccountId && pronoteAccountPath) {
       // Random IV that will be used for our session.
       const randomIv = forge.random.getBytesSync(16);
@@ -99,7 +99,7 @@ export default async function handler (
       };
     }
 
-    const pronoteData = await got.post(informationsApiUrl, {
+    const pronoteData = await request(pronoteServerUrl).post(informationsApiPath, {
       json: {
         session: sessionId,
         numeroOrdre: orderEncrypted,
@@ -107,9 +107,6 @@ export default async function handler (
         donneesSec: {
           donnees: informationsPostBody
         }
-      },
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36"
       }
     }).json<
       | PronoteApiFonctionParametresCommon
@@ -121,7 +118,7 @@ export default async function handler (
       pronoteData,
       pronoteEntUrl,
       pronoteCryptoInformations,
-      pronoteHtmlCookie: pronoteHtmlCookies ? pronoteHtmlCookies[0].split(";")[0] : undefined
+      pronoteHtmlCookie: pronoteHtmlCookie ? pronoteHtmlCookie[0].split(";")[0] : undefined
     });
   }
   else {

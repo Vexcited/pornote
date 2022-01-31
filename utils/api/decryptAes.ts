@@ -27,5 +27,5 @@ export default function decryptAes (data: string, {
 
   // Return the decrypted value.
   const decrypted = decipher.output.bytes();
-  return decrypted; 
+  return decrypted;
 }
