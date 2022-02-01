@@ -53,3 +53,13 @@ export interface ApiUserResponse {
     | PronoteApiUserDataStudent;
   pronoteLoginCookie?: string;
 }
+
+export interface ApiGetEntCookiesResponse {
+  success: true;
+  entCookies: string[];
+}
+
+export interface ApiGetPronoteTicketResponse {
+  success: true;
+  pronoteUrl: string;
+}

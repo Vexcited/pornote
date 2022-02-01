@@ -29,6 +29,7 @@ export default async function handler (
   if (req.method === "POST") {
     // Dirty Pronote URL.
     const pronoteUrl: string = req.body.pronoteUrl;
+    const usingRawPronoteUrl: boolean = req.body.usingRawPronoteUrl || false;
 
     // Given when authenticating with Pronote.
     const pronoteAccountPath: string | undefined = req.body.pronoteAccountPath ?? "";
@@ -37,7 +38,9 @@ export default async function handler (
 
     // We get URL origin and then get the DOM of account selection page.
     const pronoteServerUrl = getServerUrl(pronoteUrl);
-    const pronoteHtmlUrl = pronoteServerUrl + pronoteAccountPath + "?login=true";
+    const pronoteHtmlUrl = usingRawPronoteUrl
+      ? pronoteUrl
+      : pronoteServerUrl + pronoteAccountPath + "?login=true";
     const [pronoteHtmlSuccess, pronoteHtmlBody, pronoteHtmlCookie] = await getPronotePage(
       pronoteHtmlUrl, pronoteAccountCookie
     );
@@ -100,6 +103,9 @@ export default async function handler (
     }
 
     const pronoteData = await request(pronoteServerUrl).post(informationsApiPath, {
+      headers: {
+        "Cookie": pronoteHtmlCookie ? `${pronoteAccountCookie}; ${pronoteHtmlCookie.split(";")[0]}` : undefined
+      },
       json: {
         session: sessionId,
         numeroOrdre: orderEncrypted,
@@ -118,7 +124,7 @@ export default async function handler (
       pronoteData,
       pronoteEntUrl,
       pronoteCryptoInformations,
-      pronoteHtmlCookie: pronoteHtmlCookie ? pronoteHtmlCookie[0].split(";")[0] : undefined
+      pronoteHtmlCookie: pronoteHtmlCookie ? pronoteHtmlCookie.split(";")[0] : undefined
     });
   }
   else {

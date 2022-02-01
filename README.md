@@ -5,8 +5,13 @@
 ## Features
 
 - [x] Multi-accounts (in preview)
-- [ ] Local save of informations fetched
+- [x] Local save of informations fetched
 - [ ] Updating informations after timeout using [`swr`](https://github.com/Vercel/swr)
+
+## ENT Available
+
+- **OpenENT**
+  - `mon.lyceeconnecte.fr`
 
 ## TO-DO
 
@@ -14,9 +19,10 @@
   - [x] Add multiple steps (select school, then account type, then ask for username/password).
   - [x] Check if ENT is available.
   - [x] Pass `Identification` step.
-  - [ ] Solve challenge to achieve an auth request.
+  - [x] Solve challenge to achieve an auth request.
   - [x] Do username/password challenge on client-side only.
-  - [ ] On successful login, store it in localforage->accountsMetadata.
+  - [x] On successful login, store it in localforage->accounts.
+  - [ ] ENT for ac-limoges.
 
 ## Warning
 
@@ -28,3 +34,17 @@ or record yourself, or whatever that isn't in the
 `Features` part, you should use the **real** Pronote
 application. Note that **Index-Education** can take down
 this project at anytime.
+
+## Inner API
+
+### ENT - Steps
+
+- POST `getEntCookies`
+  - Parameters => `entUsername`, `entPassword`, `entUrl`.
+    - `entUsername` is the username for the ENT.
+    - `entPassword` is the password for the ENT
+    - `entUrl` is the URL for the ENT. It will be used to determine the ENT login function.
+- POST `getPronoteTicket`
+  - Parameters => `entCookies`, `pronoteUrl`.
+    - `entCookies` will be used in the header of the ENT login process to prevent re-login with credentials (prevent to store credentials locally also).
+    - `pronoteUrl` will be used to get the ticket for login into the Pronote account.

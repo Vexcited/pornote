@@ -57,6 +57,9 @@ export default async function handler (
     }
 
     const pronoteAuthenticationData = await request(pronoteApiUrl).post(pronoteOrder, {
+      headers: {
+        "Cookie": req.body.pronoteCookies ? (req.body.pronoteCookies as string[]).join("; ") : undefined
+      },
       json: {
         session: pronoteSessionId,
         numeroOrdre: pronoteOrder,

@@ -18,8 +18,8 @@ export default function InputText ({
   value,
   onChange,
   type = "text",
-  inputClass = "text-gray-50",
-  labelColor = "text-gray-100"
+  inputClass = "text-gray-800",
+  labelColor = "text-gray-600"
 }: InputTextProps) {
 
   return (

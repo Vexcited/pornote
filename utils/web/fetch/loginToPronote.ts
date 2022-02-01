@@ -10,12 +10,15 @@ import type {
   PronoteApiFonctionParametresStudent
 } from "types/PronoteApiData";
 
+import type {
+  SavedAccountData
+} from "types/SavedAccountData";
+
 import ky, { HTTPError } from "ky";
 import forge from "node-forge";
 
 import decryptAes from "@/apiUtils/decryptAes";
 import encryptAes from "@/apiUtils/encryptAes";
-import getServerUrl from "@/apiUtils/getServerUrl";
 
 type LoginToPronoteProps = {
   username?: string;
@@ -41,7 +44,7 @@ export default async function loginToPronote ({
   accountPath,
   usingEnt = false,
   cookie
-}: LoginToPronoteProps) {
+}: LoginToPronoteProps): Promise<(null | SavedAccountData)> {
   try {
     let pronoteUsername = username || "";
     let pronotePassword = password || "";
@@ -51,7 +54,7 @@ export default async function loginToPronote ({
         pronoteUrl,
         pronoteAccountId: accountId,
         pronoteAccountPath: accountPath,
-        ...(usingEnt ? { pronoteCookie: cookie } : {})
+        ...(usingEnt ? { pronoteCookie: cookie, usingRawPronoteUrl: true } : {})
       }
     }).json<ApiInformationsResponse>();
 
@@ -60,6 +63,8 @@ export default async function loginToPronote ({
       console.error("Missing crypto informations in response.", pronoteInformationsData);
       return null;
     }
+
+    const pronoteLoginCookies = [cookie, pronoteInformationsData.pronoteHtmlCookie];
 
     // IV used to decrypt AES datas.
     const iv = pronoteInformationsData.pronoteCryptoInformations.iv;
@@ -95,6 +100,7 @@ export default async function loginToPronote ({
         pronoteOrder: identificationOrderEncrypted,
 
         identifier: pronoteUsername,
+        ...(usingEnt ? { pronoteCookies: pronoteLoginCookies } : {}),
         usingEnt
       }
     }).json<ApiIdentificationResponse>();
@@ -135,7 +141,7 @@ export default async function loginToPronote ({
     challengeAesKeyHashUpdate = !usingEnt
       ? challengeAesKeyHashCreation.update(challengeData.alea)
       : challengeAesKeyHashCreation;
-
+      
     // Continue hashing...
     const challengeAesKeyHash = challengeAesKeyHashUpdate
       .update(forge.util.encodeUtf8(pronotePassword))
@@ -143,13 +149,14 @@ export default async function loginToPronote ({
       .toHex()
       .toUpperCase();
 
-    console.log(pronotePassword, pronoteUsername);
-
     /**
      * Challenge key is an MD5 hash of the username,
      * and the SHA256 hash created of "alea" and user password.
      */
-    const challengeAesKey = pronoteUsername + forge.util.encodeUtf8(challengeAesKeyHash);
+    const challengeAesKeyHashUtf8 = forge.util.encodeUtf8(challengeAesKeyHash);
+    const challengeAesKey = !usingEnt
+      ? pronoteUsername + challengeAesKeyHashUtf8
+      : challengeAesKeyHashUtf8;
     const challengeAesKeyBuffer = forge.util.createBuffer(challengeAesKey);
 
     const decryptedBytes = decryptAes(challengeData.challenge, {
@@ -178,7 +185,8 @@ export default async function loginToPronote ({
         pronoteSessionId: sessionId,
 
         pronoteOrder: authenticationOrderEncrypted,
-        pronoteSolvedChallenge: encrypted
+        pronoteSolvedChallenge: encrypted,
+        ...(usingEnt ? { pronoteCookies: pronoteLoginCookies } : {})
       }
     }).json<ApiAuthenticationResponse>();
 
@@ -215,7 +223,8 @@ export default async function loginToPronote ({
         pronoteAccountId: accountId,
         pronoteSessionId: sessionId,
 
-        pronoteOrder: encryptedUserDataOrder
+        pronoteOrder: encryptedUserDataOrder,
+        ...(usingEnt ? { pronoteCookie: cookie } : {}),
       }
     }).json<ApiUserResponse>();
 
@@ -228,7 +237,7 @@ export default async function loginToPronote ({
         iv,
         key: authenticationKeyBytesArray,
         session: pronoteInformationsData.pronoteCryptoInformations.session,
-        loginCookie: pronoteUserData.pronoteLoginCookie,
+        loginCookie: usingEnt ? cookie : pronoteUserData.pronoteLoginCookie,
         pronoteUrl,
         pronotePath: accountPath
       },
@@ -241,8 +250,9 @@ export default async function loginToPronote ({
       const body: ApiServerError = await e.response.json();
       console.error(body.message, body.debug);
     }
-
-    console.error(e);
+    else {
+      console.error(e);
+    }
 
     return null;
   }
