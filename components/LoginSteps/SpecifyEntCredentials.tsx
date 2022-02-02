@@ -24,6 +24,7 @@ import ky, { HTTPError } from "ky";
 
 import loginToPronote from "@/webUtils/fetch/loginToPronote";
 import getAccountTypeFromUrl from "@/webUtils/getAccountTypeFromUrl";
+import ModalSpecifySlug from "./utils/ModalSpecifySlug";
 
 type SpecifyEntCredentialsProps = {
   state: StateTypes;
@@ -31,6 +32,7 @@ type SpecifyEntCredentialsProps = {
 }
 
 function SpecifyEntCredentials ({ state, setState }: SpecifyEntCredentialsProps) {
+  const [buttonCurrentText, setButtonCurrentText] = useState("Se connecter à Pronote");
   const [formState, setFormState] = useState({
     username: "",
     password: ""
@@ -48,9 +50,11 @@ function SpecifyEntCredentials ({ state, setState }: SpecifyEntCredentialsProps)
   const handleEntLogin = async (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
 
+    const initialButtonText = buttonCurrentText;
     const entUrl = state.schoolInformations.entUrl;
 
     try {
+      setButtonCurrentText("Connexion à l'ENT...");
       const entCookiesData = await ky.post("/api/getEntCookies", {
         json: {
           entUrl,
@@ -58,6 +62,8 @@ function SpecifyEntCredentials ({ state, setState }: SpecifyEntCredentialsProps)
           entPassword: formState.password
         }
       }).json<ApiGetEntCookiesResponse>();
+
+      setButtonCurrentText("Récupération ticket Pronote...");
 
       // Pronote URL with 'identifiant=xxxxxxx'.
       const pronoteData = await ky.post("/api/getPronoteTicket", {
@@ -67,9 +73,8 @@ function SpecifyEntCredentials ({ state, setState }: SpecifyEntCredentialsProps)
         }
       }).json<ApiGetPronoteTicketResponse>();
 
+      setButtonCurrentText("Connexion à Pronote...");
       const accountType = getAccountTypeFromUrl(pronoteData.pronoteUrl);
-      console.log(accountType);
-
       const loginData = await loginToPronote({
         pronoteUrl: pronoteData.pronoteUrl,
         usingEnt: true,
@@ -78,9 +83,13 @@ function SpecifyEntCredentials ({ state, setState }: SpecifyEntCredentialsProps)
         accountId: accountType.id
       });
 
-      console.log(loginData);
-
-      // console.info(entCookiesData.entCookies, pronoteCookies.pronoteCookies);
+      if (loginData) {
+        setButtonCurrentText("Connexion réussie !");
+        setAuthData(loginData);
+      }
+      else {
+        setButtonCurrentText(initialButtonText);
+      }
     }
     catch (e) {
       if (e instanceof HTTPError) {
@@ -91,6 +100,10 @@ function SpecifyEntCredentials ({ state, setState }: SpecifyEntCredentialsProps)
       console.error(e);
     }
   };
+
+  if (authData) return <ModalSpecifySlug
+    authData={authData}
+  />;
 
   return (
     <div>
@@ -104,7 +117,8 @@ function SpecifyEntCredentials ({ state, setState }: SpecifyEntCredentialsProps)
           id="entUsername"
           onChange={updateFormStateInput("username")}
           value={formState.username}
-          placeholder="Nom d'utilisateur"
+          label="Nom d'utilisateur (ENT)"
+          placeholder="nom.utilisateur"
         />
 
         <InputText
@@ -112,14 +126,15 @@ function SpecifyEntCredentials ({ state, setState }: SpecifyEntCredentialsProps)
           id="entUsername"
           onChange={updateFormStateInput("password")}
           value={formState.password}
-          placeholder="Mot de passe"
+          label="Mot de passe (ENT)"
+          placeholder="(caché)"
         />
 
         <Button
           buttonType="submit"
           isButton={true}
         >
-          Se connecter à l&apos;ENT
+          {buttonCurrentText}
         </Button>
       </form>
     </div>

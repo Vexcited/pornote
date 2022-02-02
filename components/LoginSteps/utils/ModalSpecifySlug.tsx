@@ -35,7 +35,7 @@ export default function ModalSpecifySlug ({ authData }: ModalSpecifySlugProps) {
   return (
     <div
       className="
-        absolute top-0 left-0 h-screen w-screen bg-brand-dark bg-opacity-40
+        absolute top-0 left-0 h-screen w-full bg-brand-dark bg-opacity-40
         flex flex-col justify-center items-center gap-8
       "
     >
@@ -47,6 +47,8 @@ export default function ModalSpecifySlug ({ authData }: ModalSpecifySlugProps) {
           id="modalSpecifySlug-slugInput"
           placeholder="Slug, nom du compte qui sera sauvegardé locallement."
           value={slug}
+          labelColor="text-gray-50"
+          inputClass="text-gray-800"
           onChange={handleSlugInput}
         />
         <Button

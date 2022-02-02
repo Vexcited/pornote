@@ -16,6 +16,9 @@ import getInformationsFrom from "@/webUtils/getInformationsFrom";
 /** Used on the `useEffect` to DRY with `SpecifyUrlGeolocation`. */
 import specifyUrlCheckState from "./utils/specifyUrlCheckState";
 
+import InputText from "components/InputText";
+import Button from "components/Button";
+
 type SpecifyUrlManualProps = {
   state: StateTypes;
   setState: Dispatch<SetStateAction<StateTypes>>;
@@ -71,11 +74,20 @@ function SpecifyUrlManual ({ state, setState }: SpecifyUrlManualProps) {
         <p>Saisissez l&apos;URL Pronote de votre établissement.</p>
 
         <form onSubmit={handlePronoteConnect}>
-          <input type="text" onChange={(e => setPronoteUrl(e.target.value))} value={pronoteUrl} />
+          <InputText
+            id="manualPronoteUrl"
+            label="URL Pronote"
+            placeholder="https://xxxxxx.index-education.net/pronote/"
+            value={pronoteUrl}
+            onChange={e => setPronoteUrl(e.target.value)}
+          />
 
-          <button type="submit">
-            Connexion
-          </button>
+          <Button
+            isButton={true}
+            buttonType="submit"
+          >
+            Connexion au serveur
+          </Button>
         </form>
       </div>
 

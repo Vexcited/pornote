@@ -1,7 +1,8 @@
 import type { ChangeEventHandler } from "react";
 
 type InputTextProps = {
-  placeholder: string;
+  label?: string;
+  placeholder?: string;
   id: string;
   type?: string;
 
@@ -14,6 +15,7 @@ type InputTextProps = {
 
 export default function InputText ({
   id,
+  label,
   placeholder,
   value,
   onChange,
@@ -28,12 +30,12 @@ export default function InputText ({
         htmlFor={id}
         className={`font-semibold leading-none ${labelColor}`}
       >
-        {placeholder}
+        {label}
       </label>
       <input
         id={id}
         type={type}
-        placeholder=" "
+        placeholder={placeholder}
         className={`leading-none p-3 focus:outline-none mt-4 rounded ${inputClass}`}
         value={value}
         onChange={onChange}

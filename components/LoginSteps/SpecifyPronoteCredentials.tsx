@@ -18,6 +18,7 @@ type SpecifyPronoteCredentialsProps = {
 }
 
 function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
+  const [buttonCurrentText, setButtonCurrentText] = useState("Se connecter à Pronote");
   const [formState, setFormState] = useState({
     username: "",
     password: ""
@@ -35,6 +36,9 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
   const handlePronoteLogin = async (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
 
+    const initialButtonText = buttonCurrentText;
+
+    setButtonCurrentText("Connexion à Pronote...");
     const accountData = await loginToPronote({
       username: formState.username,
       password: formState.password,
@@ -44,7 +48,11 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
     });
 
     if (accountData) {
+      setButtonCurrentText("Connexion réussie !");
       setAuthData(accountData);
+    }
+    else {
+      setButtonCurrentText(initialButtonText);
     }
   };
 
@@ -80,7 +88,8 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
           labelColor="text-brand-light"
           inputClass="w-full border-gray-100 bg-transparent border-2 border-gray-100 text-gray-100 text-opacity-80 focus:bg-green-600 focus:bg-opacity-20 transition-colors"
 
-          placeholder="Nom d'utilisateur"
+          label="Nom d'utilisateur (Pronote)"
+          placeholder="nomutilisateur"
           onChange={updateFormStateInput("username")}
           value={formState.username}
         />
@@ -92,7 +101,8 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
           labelColor="text-brand-light"
           inputClass="w-full border-gray-100 bg-transparent border-2 border-gray-100 text-gray-100 text-opacity-80 focus:bg-green-600 focus:bg-opacity-20 transition-colors"
 
-          placeholder="Mot de passe"
+          placeholder="(caché)"
+          label="Mot de passe (Pronote)"
           onChange={updateFormStateInput("password")}
           value={formState.password}
         />
@@ -101,7 +111,7 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
           buttonType="submit"
           className="text-brand-dark bg-brand-light"
         >
-          Se connecter !
+          Se connecter à Pronote
         </Button>
       </form>
     </div>
