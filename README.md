@@ -2,27 +2,42 @@
 
 > Project still in development.
 
+Remake of Pronote using real data from their functions.
+It provides a better UI - *currently this is not true because the UI isn't finished* -,
+local saves to access even offline - *this works* - and notifications - *currently not finished*.
+
 ## Features
 
-- [x] Multi-accounts (in preview)
-- [x] Local save of informations fetched
+- [x] Multi-accounts (using **slugs**)
+- [x] Local save of informations fetched (with **localForage**)
 - [ ] Updating informations after timeout using [`swr`](https://github.com/Vercel/swr)
 
 ## ENT Available
 
-- **OpenENT**
-  - `mon.lyceeconnecte.fr`
+### OpenENT
+  - [x] `mon.lyceeconnecte.fr`
+
+### Missing ?
+
+If your ENT is missing, please feel free to do a pull request or open
+an Issue to see if it can be added.
+
+ENT files and configurations are [here](./utils/api/cas).
 
 ## TO-DO
 
-- [ ] Finish login.tsx.
+- [x] Finish login.tsx.
   - [x] Add multiple steps (select school, then account type, then ask for username/password).
   - [x] Check if ENT is available.
   - [x] Pass `Identification` step.
   - [x] Solve challenge to achieve an auth request.
-  - [x] Do username/password challenge on client-side only.
-  - [x] On successful login, store it in localforage->accounts.
-  - [ ] ENT for ac-limoges.
+  - [x] Do username/password challenge on **client-side only** (for security purposes).
+  - [x] On successful login, store it in localForage(pornote)->accounts->(slug is key).
+  - [x] ENT login support.
+- [ ] Saved account data
+  - [ ] Add `entCookies` with `loginCookie` (for ENT auto-reconnection).
+  - [ ] Add `PageAccueil` to data.
+  - [ ] Write optional types to `SavedAccountData` (for data about timetable, grades, ...).
 
 ## Warning
 
@@ -37,6 +52,11 @@ this project at anytime.
 
 ## Inner API
 
+> Currently in build, it may change often !
+
+This API is limited with CORS and was created to proxy Pronote's CORS
+and to provide more easier requests to their functions.
+
 ### ENT - Steps
 
 - POST `getEntCookies`
@@ -44,7 +64,7 @@ this project at anytime.
     - `entUsername` is the username for the ENT.
     - `entPassword` is the password for the ENT
     - `entUrl` is the URL for the ENT. It will be used to determine the ENT login function.
-- POST `getPronoteTicket`
+<!-- - POST `getPronoteTicket`
   - Parameters => `entCookies`, `pronoteUrl`.
     - `entCookies` will be used in the header of the ENT login process to prevent re-login with credentials (prevent to store credentials locally also).
-    - `pronoteUrl` will be used to get the ticket for login into the Pronote account.
+    - `pronoteUrl` will be used to get the ticket for login into the Pronote account. -->

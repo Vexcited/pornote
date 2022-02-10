@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import usePush from "@/webUtils/routerPush";
 
 import { accountsStore, setAccountData } from "@/webUtils/accountsStore";
-import loginToPronote from "@/webUtils/fetch/loginToPronote";
+import loginToPronote from "@/webUtils/loginToPronote";
 
 export default function Dashboard () {
   const router = useRouter();
@@ -53,13 +53,19 @@ export default function Dashboard () {
       >
         <ul>
           <li>
-            user
+            Emploi du temps
           </li>
           <li>
-            user
+            Devoirs
           </li>
           <li>
-            user
+            Contenu des cours
+          </li>
+          <li>
+            Notes
+          </li>
+          <li>
+            Mon Compte
           </li>
         </ul>
 
@@ -70,6 +76,7 @@ export default function Dashboard () {
         </nav>
       </header>
 
+      
     </div>
   );
 }

@@ -22,7 +22,7 @@ import InputText from "components/InputText";
 import Button from "components/Button";
 import ky, { HTTPError } from "ky";
 
-import loginToPronote from "@/webUtils/fetch/loginToPronote";
+import loginToPronote from "@/webUtils/loginToPronote";
 import getAccountTypeFromUrl from "@/webUtils/getAccountTypeFromUrl";
 import ModalSpecifySlug from "./utils/ModalSpecifySlug";
 
@@ -123,7 +123,7 @@ function SpecifyEntCredentials ({ state, setState }: SpecifyEntCredentialsProps)
 
         <InputText
           type="password"
-          id="entUsername"
+          id="entPassword"
           onChange={updateFormStateInput("password")}
           value={formState.password}
           label="Mot de passe (ENT)"

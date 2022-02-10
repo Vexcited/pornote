@@ -11,7 +11,7 @@ import InputText from "components/InputText";
 import Button from "components/Button";
 import ModalSpecifySlug from "./utils/ModalSpecifySlug";
 
-import loginToPronote from "@/webUtils/fetch/loginToPronote";
+import loginToPronote from "@/webUtils/loginToPronote";
 
 type SpecifyPronoteCredentialsProps = {
   state: StateTypes;
