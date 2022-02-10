@@ -31,19 +31,21 @@ export default function Home () {
           : Object.keys(accounts).length > 0
             ? (
               Object.entries(accounts).map(([slug, accountData]) =>
-                <div
-                  key={slug}
+                <NextLink
+                  href={`/app/${slug}/dashboard`}
                 >
-                  <h2>{accountData.userInformations.ressource.L} ({accountData.userInformations.ressource.classeDEleve.L})</h2>
-                  <p>
-                    {accountData.schoolInformations.General.NomEtablissement}
-                  </p>
-                  <NextLink
-                    href={`/app/${slug}/dashboard`}
-                  >
-                    <a>Accès au compte</a>
-                  </NextLink>
-                </div>
+                  <div
+                    className="bg-brand-white rounded-xl text-brand-primary"
+                    key={slug}
+                    >
+                    <h2 className="font-semibold">
+                      {accountData.userInformations.ressource.L} ({accountData.userInformations.ressource.classeDEleve.L})
+                    </h2>
+                    <p className="text-opacity-60">
+                      {accountData.schoolInformations.General.NomEtablissement}
+                    </p>
+                  </div>
+                </NextLink>
               )
             )
             : (
