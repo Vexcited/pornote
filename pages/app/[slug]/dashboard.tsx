@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import usePush from "@/webUtils/routerPush";
 
 import { accountsStore, setAccountData } from "@/webUtils/accountsStore";
-import loginToPronote from "@/webUtils/loginToPronote";
+// import loginToPronote from "@/webUtils/loginToPronote";
 
 export default function Dashboard () {
   const router = useRouter();
@@ -15,6 +15,7 @@ export default function Dashboard () {
   const slug = router.query.slug as string;
 
   const [userData, setUserData] = useState<SavedAccountData | null>(null);
+  const [navBarOpened, setNavBarOpened] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -44,14 +45,21 @@ export default function Dashboard () {
   if (!userData) return <p>Loading...</p>;
 
   return (
-    <div className="w-full h-full bg-brand-light">
+    <div className="w-screen h-screen bg-[#FFBECE]">
       <header
         className="
-          h-20 w-full bg-brand-primary
-          flex flex-row
+          fixed h-20 w-full bg-transparent
+          flex flex-row justify-end
+          items-center gap-4
+          md:top-0 bottom-0
+          px-6
         "
       >
-        <ul>
+        <ul
+          className="
+            flex flex-row gap-2
+          "
+        >
           <li>
             Emploi du temps
           </li>
@@ -69,14 +77,35 @@ export default function Dashboard () {
           </li>
         </ul>
 
-        <nav
-          className="fixed top-0 left-0 w-24 h-full bg-brand-primary"
+        <button
+          onClick={() => setNavBarOpened(!navBarOpened)}
         >
+          Open menu
+        </button>
 
+        <nav
+          className={`
+            fixed top-0 left-0 h-screen
+            md:w-72 md:bg-transparent md:block
+            w-full bg-[#FFBECE] pt-20 p-4
+            ${navBarOpened ? "" : "hidden"}          
+          `}
+        >
+          
         </nav>
       </header>
 
-      
+      <main
+        className="
+          fixed left-0 top-0 bottom-0 right-0
+          w-full h-full transition-all
+          md:rounded-tl-2xl md:ml-72 md:mt-20 mb-20
+
+          bg-brand-white
+        "
+      >
+        
+      </main>
     </div>
   );
 }

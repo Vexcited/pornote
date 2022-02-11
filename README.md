@@ -38,6 +38,11 @@ ENT files and configurations are [here](./utils/api/cas).
   - [ ] Add `entCookies` with `loginCookie` (for ENT auto-reconnection).
   - [ ] Add `PageAccueil` to data.
   - [ ] Write optional types to `SavedAccountData` (for data about timetable, grades, ...).
+- [ ] Multi-theme support
+  - Create a 'theme' object key in localForage->pornote->(slug).
+  - This object will contains HEX color values for each objects.
+  - On load we add 'style' props to modified colors.
+  - If the color isn't modified => keep default (from Tailwind) 
 
 ## Warning
 

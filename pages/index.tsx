@@ -4,10 +4,14 @@ import NextLink from "next/link";
 import { useState, useEffect } from "react";
 
 import { accountsStore } from "@/webUtils/accountsStore";
+import { useTheme } from 'next-themes'
 
 export default function Home () {
   type SavedAccounts = { [slug: string]: SavedAccountData };
   const [accounts, setAccounts] = useState<SavedAccounts | null>(null);
+  
+  const { theme, setTheme } = useTheme();
+  const toggleTheme = () => theme === "dark" ? setTheme("light") : setTheme("dark");
 
   useEffect(() => {
     const tempAccounts: SavedAccounts = {};
@@ -20,10 +24,21 @@ export default function Home () {
   }, []);
 
   return (
-    <div className="h-screen w-screen bg-brand-primary text-brand-white">
+    <div className="h-screen w-screen bg-brand-primary dark:bg-brand-dark text-brand-white">
       <header className="fixed top-0 h-32 w-full flex flex-col items-center justify-center">
-        <h1 className="font-bold text-3xl">Pornote</h1>
-        <p className="text-lg">Client Pronote non-officiel.</p>
+        <h1 className="font-bold text-3xl dark:text-brand-primary">Pornote</h1>
+        <p className="text-lg text-brand-primary dark:text-green-100">Client Pronote non-officiel.</p>
+        <button
+          className="
+            rounded-full px-4 py-2
+            bg-brand-dark dark:bg-brand-primary
+            hover:opacity-80 focus:opacity-100
+            transition-opacity
+          "
+          onClick={toggleTheme}
+        >
+          Toggle Theme
+        </button>
       </header>
 
       <section className="h-full w-full flex items-center justify-center py-32 px-4">
@@ -32,12 +47,17 @@ export default function Home () {
             ? (
               Object.entries(accounts).map(([slug, accountData]) =>
                 <NextLink
+                  key={slug}
                   href={`/app/${slug}/dashboard`}
                 >
                   <div
-                    className="bg-brand-white rounded-xl text-brand-primary"
+                    className="
+                      bg-brand-white rounded-xl text-brand-primary
+                      p-4 cursor-pointer hover:bg-opacity-80 transition-colors
+                      hover:shadow-sm
+                    "
                     key={slug}
-                    >
+                  >
                     <h2 className="font-semibold">
                       {accountData.userInformations.ressource.L} ({accountData.userInformations.ressource.classeDEleve.L})
                     </h2>
@@ -62,7 +82,12 @@ export default function Home () {
       </section>
 
       <footer className="w-full fixed bottom-0 flex flex-col items-center justify-center h-16">
-        <a className="font-medium text-brand-light hover:text-opacity-60 transition-colors" href="https://github.com/Vexcited/pornote">GitHub</a>
+        <a
+          className="font-medium text-brand-light hover:text-opacity-60 transition-colors"
+          href="https://github.com/Vexcited/pornote"
+        >
+          GitHub
+        </a>
       </footer>
     </div>
   );

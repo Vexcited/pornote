@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable no-undef */
+const defaultTheme = require("tailwindcss/defaultTheme");
+
 module.exports = {
   darkMode: "class",
   content: [
@@ -15,6 +19,9 @@ module.exports = {
           dark: "#222222"
         }
       }
+    },
+    fontFamily: {
+      sans: ["Poppins", ...defaultTheme.fontFamily.sans]
     }
   }
 };
