@@ -91,7 +91,7 @@ export default function Dashboard () {
             ${navBarOpened ? "" : "hidden"}          
           `}
         >
-          
+
         </nav>
       </header>
 
@@ -104,7 +104,7 @@ export default function Dashboard () {
           bg-brand-white
         "
       >
-        
+
       </main>
     </div>
   );

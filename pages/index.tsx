@@ -4,12 +4,12 @@ import NextLink from "next/link";
 import { useState, useEffect } from "react";
 
 import { accountsStore } from "@/webUtils/accountsStore";
-import { useTheme } from 'next-themes'
+import { useTheme } from "next-themes";
 
 export default function Home () {
   type SavedAccounts = { [slug: string]: SavedAccountData };
   const [accounts, setAccounts] = useState<SavedAccounts | null>(null);
-  
+
   const { theme, setTheme } = useTheme();
   const toggleTheme = () => theme === "dark" ? setTheme("light") : setTheme("dark");
 
