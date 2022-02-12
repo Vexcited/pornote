@@ -3,7 +3,7 @@ import NextLink from "next/link";
 
 export default function Page404 () {
   const { theme, setTheme } = useTheme();
-  
+
   const toggleTheme = () => theme === "dark"
     ? setTheme("light")
     : setTheme("dark");
@@ -39,18 +39,18 @@ export default function Page404 () {
         <h1>
           404
         </h1>
-        
+
         <p>
-          Cette page n'existe pas ou a été déplacée.  
+          Cette page n&apos;existe pas ou a été déplacée.
         </p>
 
         <NextLink href="/">
           <a className="
             rounded-full px-4 py-2
             bg-brand-light dark:bg-brand-primary
-            text-brand-dark dark:text-brand-white  
+            text-brand-dark dark:text-brand-white
           ">
-            Revenir à la page d'accueil
+            Revenir à la page d&apos;accueil
           </a>
         </NextLink>
       </main>
