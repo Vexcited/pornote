@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Remove blue highlight on tap (mobile). */
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
