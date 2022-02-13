@@ -33,7 +33,8 @@ export async function connect ({
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
             email: username as string,
-            password: password as string
+            password: password as string,
+            rememberMe: "true" // Keep cookies in local.
           }).toString()
         }
 
