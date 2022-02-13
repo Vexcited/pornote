@@ -1,8 +1,10 @@
 import type { MouseEventHandler } from "react";
+import NextLink from "next/link";
 
 type ButtonProps = {
   children: React.ReactNode;
   isButton?: boolean;
+  linkHref?: string;
   buttonType?: "submit" | "button";
   onClick?: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
 };
@@ -11,6 +13,7 @@ export default function Button ({
   children,
   isButton = true,
   buttonType = "button",
+  linkHref = "./",
   onClick
 }: ButtonProps) {
 
@@ -31,11 +34,15 @@ export default function Button ({
       </button>
     )
     : (
-      <a
-        onClick={onClick}
-        className={className}
+      <NextLink
+        href={linkHref}
       >
-        {children}
-      </a>
+        <a
+          onClick={onClick}
+          className={`${className} cursor-pointer`}
+        >
+          {children}
+        </a>
+      </NextLink>
     );
 }

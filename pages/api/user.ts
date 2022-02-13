@@ -38,7 +38,7 @@ export default async function handler (
     const pronoteServerUrl = getServerUrl(pronoteUrl);
 
     // Create the API endpoint using the given session ID.
-    const pronoteApiUrl = `${pronoteServerUrl}appelfonction/${pronoteAccountId}/${pronoteSessionId}`;
+    const pronoteApiUrl = `${pronoteServerUrl}/appelfonction/${pronoteAccountId}/${pronoteSessionId}`;
 
     const pronoteOrder: string = req.body.pronoteOrder;
     if (!pronoteOrder) {

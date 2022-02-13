@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { accountsStore } from "@/webUtils/accountsStore";
 import { useTheme } from "next-themes";
 
+import Button from "components/Button";
+
 export default function Home () {
   type SavedAccounts = { [slug: string]: SavedAccountData };
   const [accounts, setAccounts] = useState<SavedAccounts | null>(null);
@@ -28,17 +30,11 @@ export default function Home () {
       <header className="fixed top-0 h-32 w-full flex flex-col items-center justify-center">
         <h1 className="font-bold text-3xl dark:text-brand-primary">Pornote</h1>
         <p className="text-lg text-brand-primary dark:text-green-100">Client Pronote non-officiel.</p>
-        <button
-          className="
-            rounded-full px-4 py-2
-            bg-brand-dark dark:bg-brand-primary
-            hover:opacity-80 focus:opacity-100
-            transition-opacity
-          "
+        <Button
           onClick={toggleTheme}
         >
           Toggle Theme
-        </button>
+        </Button>
       </header>
 
       <section className="h-full w-full flex items-center justify-center py-32 px-4">
@@ -71,11 +67,12 @@ export default function Home () {
             : (
               <div className="flex flex-col justify-center items-center">
                 <p className="text-md">Aucun compte sauvegardé localement</p>
-                <NextLink href="/login">
-                  <a className="m-2 px-6 py-4 rounded font-medium bg-brand-light bg-opacity-60 text-green-800 hover:bg-opacity-80 transition-colors">
-                    Ajouter un compte Pronote
-                  </a>
-                </NextLink>
+                <Button
+                  isButton={false}
+                  linkHref="/login"
+                >
+                  Ajouter un compte Pronote
+                </Button>
               </div>
             )
         }

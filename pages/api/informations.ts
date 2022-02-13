@@ -40,7 +40,7 @@ export default async function handler (
     const pronoteServerUrl = getServerUrl(pronoteUrl);
     const pronoteHtmlUrl = usingRawPronoteUrl
       ? pronoteUrl
-      : pronoteServerUrl + pronoteAccountPath + "?login=true";
+      : pronoteServerUrl + "/" + pronoteAccountPath + "?login=true";
     const [pronoteHtmlSuccess, pronoteHtmlBody, pronoteHtmlCookie] = await getPronotePage(
       pronoteHtmlUrl, pronoteAccountCookie
     );

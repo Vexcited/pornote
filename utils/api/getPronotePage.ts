@@ -4,7 +4,7 @@ import { HTTPError } from "got";
 /**
  * Fetch a Pronote page.
  * @param pronoteUrl - URL to fetch.
- * - It must be a Pronote URL and should look
+ * - It must be a Pronote URL and may look
  * like this `https://xxxxx.index-education.net/pronote/accountPath.html`.
  * @param cookies - Cookies to send with the request.
  * - When a login cookie is provided, the request will provide another

@@ -12,6 +12,8 @@ import {
   SetStateAction
 } from "react";
 
+import haversine from "haversine-distance";
+
 import getPosition from "@/webUtils/getPosition";
 import sendPronoteGeolocation from "@/webUtils/sendPronoteGeolocation";
 import getInformationsFrom from "@/webUtils/getInformationsFrom";
@@ -22,6 +24,14 @@ import specifyUrlCheckState from "./utils/specifyUrlCheckState";
 import { SelectInput, SelectInputOption } from "components/SelectInput";
 import Button from "components/Button";
 
+type PronoteApiGeolocationParsedItem = {
+  /** Pronote URL. */
+  url: string;
+  /** Distance from current location in kilometers. */
+  distance: number;
+  name: string;
+}
+
 type SpecifyUrlGeolocationProps = {
   state: StateTypes;
   setState: Dispatch<SetStateAction<StateTypes>>;
@@ -29,8 +39,30 @@ type SpecifyUrlGeolocationProps = {
 
 /** Step 2-1: Specify Pronote URL using Geolocation. */
 function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps) {
-  const [geolocationResults, setGeolocationResults] = useState<PronoteApiGeolocationItem[]>([]);
-  const [selectedSchool, setSelectedSchool] = useState<PronoteApiGeolocationItem | null>(null);
+  const [geolocationResults, setGeolocationResults] = useState<PronoteApiGeolocationParsedItem[]>([]);
+  const [selectedSchool, setSelectedSchool] = useState<PronoteApiGeolocationParsedItem | null>(null);
+
+  /**
+   * Returns the school distance in kilometers
+   * with the school's latitude and longitude.
+   */
+  const getSchoolDistance = (
+    currentLocation: { latitude: number; longitude: number },
+    schoolLocation: { latitude: number; longitude: number }
+  ) => {
+    const distanceInMeters = haversine({
+      latitude: currentLocation.latitude,
+      longitude: currentLocation.longitude
+    }, {
+      latitude: schoolLocation.latitude,
+      longitude: schoolLocation.longitude
+    });
+
+    const distanceInKilometers = distanceInMeters / 1000;
+    const fixedDistance = distanceInKilometers.toFixed(1);
+
+    return +fixedDistance;
+  };
 
   // On component mount, use Pronote geolocation.
   useEffect(() => {
@@ -44,13 +76,39 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
           coords: { longitude, latitude }
         } = await getPosition();
 
+        /** Taken from Pronote APK. */
+        const results_sort_function = (
+          a: PronoteApiGeolocationParsedItem,
+          b: PronoteApiGeolocationParsedItem
+        ) =>
+          a.distance > b.distance
+            ? 1
+            : a.distance < b.distance
+              ? -1
+              : a.name > b.name
+                ? 1
+                : a.name < b.name
+                  ? -1
+                  : 0;
+
         /**
          * Send our geolocation to Pronote
          * to get the nearest schools.
          */
         const data = await sendPronoteGeolocation(latitude, longitude);
-        setGeolocationResults(data);
-        setSelectedSchool(data[0]);
+        const parsed_data: PronoteApiGeolocationParsedItem[] = data.map(result => ({
+          url: result.url,
+          name: result.nomEtab,
+          distance: getSchoolDistance({
+            latitude, longitude
+          }, {
+            latitude: +result.lat,
+            longitude: +result.long
+          })
+        })).sort(results_sort_function);
+
+        setGeolocationResults(parsed_data);
+        setSelectedSchool(parsed_data[0]);
       }
       else {
         alert("La géolocalisation n'est pas disponible dans votre navigateur.");
@@ -105,13 +163,13 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
         <SelectInput
           value={selectedSchool}
           onChange={setSelectedSchool}
-          placeholder={selectedSchool.nomEtab}
+          placeholder={selectedSchool.name}
         >
-          {geolocationResults.map(result => (
+          {geolocationResults.map((result, id) => (
             <SelectInputOption
-              key={`${result.lat}-${result.long}`}
+              key={id}
               value={result}
-              name={result.nomEtab}
+              name={`(${result.distance}km) ${result.name}`}
             />
           ))}
         </SelectInput>
