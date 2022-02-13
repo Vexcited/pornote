@@ -1,5 +1,4 @@
 import { URL } from "url";
-import path from "path";
 
 /** Get the Pronote root path URL from any given URL. */
 export default function getServerUrl (pronoteUrl: string) {
