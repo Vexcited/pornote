@@ -60,6 +60,8 @@ export async function connect ({
     return [true, onlyEntCookies ? parsedCookies : headers["location"] as string]
   }
   catch (e) {
+    // If the login is successful and it redirects to the Pronote
+    // ticket, get the redirected URL (for 'identifiant' parsing).
     if (e instanceof MaxRedirectsError) {
       return [true, e.response.headers["location"] as string]
     }

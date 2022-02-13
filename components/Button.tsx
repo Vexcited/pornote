@@ -5,33 +5,35 @@ type ButtonProps = {
   isButton?: boolean;
   buttonType?: "submit" | "button";
   onClick?: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
-  className?: string;
 };
 
 export default function Button ({
   children,
   isButton = true,
   buttonType = "button",
-  onClick,
-  className = "text-white bg-green-600 hover:bg-green-700"
+  onClick
 }: ButtonProps) {
-  const classWithCustom = `inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md ${className}`;
+
+  const className = `
+    rounded-full px-4 py-2
+    bg-brand-light dark:bg-brand-primary
+    text-brand-dark dark:text-brand-white
+  `;
 
   return isButton
     ? (
       <button
-        onClick={onClick}
         type={buttonType}
-        className={classWithCustom}
+        onClick={onClick}
+        className={className}
       >
         {children}
       </button>
     )
-    :
-    (
+    : (
       <a
         onClick={onClick}
-        className={classWithCustom}
+        className={className}
       >
         {children}
       </a>

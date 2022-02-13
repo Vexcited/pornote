@@ -20,6 +20,7 @@ import getInformationsFrom from "@/webUtils/getInformationsFrom";
 import specifyUrlCheckState from "./utils/specifyUrlCheckState";
 
 import { SelectInput, SelectInputOption } from "components/SelectInput";
+import Button from "components/Button";
 
 type SpecifyUrlGeolocationProps = {
   state: StateTypes;
@@ -121,11 +122,11 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
         </Fragment>
       )}
 
-      <button
+      <Button
         onClick={handlePronoteConnect}
       >
         Valider votre choix d&apos;établissement
-      </button>
+      </Button>
     </div>
   );
 }

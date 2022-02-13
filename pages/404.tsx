@@ -1,6 +1,8 @@
 import { useTheme } from "next-themes";
 import NextLink from "next/link";
 
+import Button from "components/Button";
+
 export default function Page404 () {
   const { theme, setTheme } = useTheme();
 
@@ -21,22 +23,24 @@ export default function Page404 () {
         <span>
           Pornote
         </span>
-        <button
-          className="
-            rounded-full px-4 py-2
-            bg-brand-light dark:bg-brand-primary
-            text-brand-dark dark:text-brand-white
-          "
+        <Button
           onClick={toggleTheme}
         >
           Theme
-        </button>
+        </Button>
       </header>
 
       <main
-        className="flex flex-col gap-2 items-center justify-center"
+        className="
+          flex flex-col gap-2
+          items-center justify-center
+        "
       >
-        <h1>
+        <h1
+          className="
+            font-semibold text-lg
+          "
+        >
           404
         </h1>
 
@@ -45,13 +49,11 @@ export default function Page404 () {
         </p>
 
         <NextLink href="/">
-          <a className="
-            rounded-full px-4 py-2
-            bg-brand-light dark:bg-brand-primary
-            text-brand-dark dark:text-brand-white
-          ">
+          <Button
+            isButton={false}
+          >
             Revenir à la page d&apos;accueil
-          </a>
+          </Button>
         </NextLink>
       </main>
     </div>
