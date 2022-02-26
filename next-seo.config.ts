@@ -1,6 +1,6 @@
 import type { DefaultSeoProps } from "next-seo";
 
-const projectDescription = "Redesign de l'application web Pronote. Celle-ci est complétement personnalisable et inclues de nouvelles fonctionnalitées."
+const projectDescription = "Redesign de l'application web Pronote. Celle-ci est complétement personnalisable et inclues de nouvelles fonctionnalitées.";
 const projectUrl = "https://pornote.vexcited.me";
 const projectName = "Pornote";
 
@@ -13,7 +13,7 @@ const SeoProps: DefaultSeoProps = {
   openGraph: {
     type: "website",
     locale: "fr_FR",
-      
+
     url: projectUrl,
     title: projectName,
     description: projectDescription
@@ -49,6 +49,6 @@ const SeoProps: DefaultSeoProps = {
       href: "/favicon.ico"
     }
   ]
-}
+};
 
 export default SeoProps;

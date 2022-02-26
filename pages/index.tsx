@@ -3,27 +3,27 @@ import type { SavedAccountData } from "types/SavedAccountData";
 import NextLink from "next/link";
 import { useState, useEffect } from "react";
 
-import { accountsStore } from "@/webUtils/accountsStore";
+import { useStore } from "@/webUtils/store";
 import { useTheme } from "next-themes";
 
 import Button from "components/Button";
 
 export default function Home () {
   type SavedAccounts = { [slug: string]: SavedAccountData };
-  const [accounts, setAccounts] = useState<SavedAccounts | null>(null);
+  const accounts = useStore(state => state.accounts);
 
   const { theme, setTheme } = useTheme();
   const toggleTheme = () => theme === "dark" ? setTheme("light") : setTheme("dark");
 
-  useEffect(() => {
-    const tempAccounts: SavedAccounts = {};
-    accountsStore.iterate((accountData: SavedAccountData, slug) => {
-      tempAccounts[slug] = accountData;
-    })
-      .then(() => {
-        setAccounts(tempAccounts);
-      });
-  }, []);
+  // useEffect(() => {
+  //   const tempAccounts: SavedAccounts = {};
+  //   accountsStore.iterate((accountData: SavedAccountData, slug) => {
+  //     tempAccounts[slug] = accountData;
+  //   })
+  //     .then(() => {
+  //       setAccounts(tempAccounts);
+  //     });
+  // }, []);
 
   return (
     <div className="h-screen w-screen bg-brand-primary dark:bg-brand-dark text-brand-white">
@@ -39,12 +39,12 @@ export default function Home () {
 
       <section className="h-full w-full flex items-center justify-center py-32 px-4">
         {!accounts ? <p>Loading...</p>
-          : Object.keys(accounts).length > 0
+          : accounts.length > 0
             ? (
-              Object.entries(accounts).map(([slug, accountData]) =>
+              accounts.map(account =>
                 <NextLink
-                  key={slug}
-                  href={`/app/${slug}/dashboard`}
+                  key={account.slug}
+                  href={`/app/${account.slug}/dashboard`}
                 >
                   <div
                     className="
@@ -52,13 +52,13 @@ export default function Home () {
                       p-4 cursor-pointer hover:bg-opacity-80 transition-colors
                       hover:shadow-sm
                     "
-                    key={slug}
+                    key={account.slug}
                   >
                     <h2 className="font-semibold">
-                      {accountData.userInformations.ressource.L} ({accountData.userInformations.ressource.classeDEleve.L})
+                      {account.data.userInformations.ressource.L} ({account.data.userInformations.ressource.classeDEleve.L})
                     </h2>
                     <p className="text-opacity-60">
-                      {accountData.schoolInformations.General.NomEtablissement}
+                      {account.data.schoolInformations.General.NomEtablissement}
                     </p>
                   </div>
                 </NextLink>

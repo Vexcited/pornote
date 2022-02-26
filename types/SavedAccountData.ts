@@ -49,4 +49,9 @@ export type SavedAccountData = {
   /** Response of 'ParametresUtilisateur'. */
   userInformations:
     | PronoteApiUserDataStudent["donneesSec"]["donnees"];
-};
+}
+
+export type PreloadedAccountData = {
+  slug: string;
+  data: SavedAccountData;
+}

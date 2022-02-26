@@ -109,7 +109,6 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
 
         <Button
           buttonType="submit"
-          className="text-brand-dark bg-brand-light"
         >
           Se connecter à Pronote
         </Button>

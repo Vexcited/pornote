@@ -62,14 +62,4 @@ this project at anytime.
 This API is limited with CORS and was created to proxy Pronote's CORS
 and to provide more easier requests to their functions.
 
-### ENT - Steps
-
-- POST `getEntCookies`
-  - Parameters => `entUsername`, `entPassword`, `entUrl`.
-    - `entUsername` is the username for the ENT.
-    - `entPassword` is the password for the ENT
-    - `entUrl` is the URL for the ENT. It will be used to determine the ENT login function.
-<!-- - POST `getPronoteTicket`
-  - Parameters => `entCookies`, `pronoteUrl`.
-    - `entCookies` will be used in the header of the ENT login process to prevent re-login with credentials (prevent to store credentials locally also).
-    - `pronoteUrl` will be used to get the ticket for login into the Pronote account. -->
+### Not finished...

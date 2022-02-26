@@ -141,7 +141,7 @@ export default async function loginToPronote ({
     challengeAesKeyHashUpdate = !usingEnt
       ? challengeAesKeyHashCreation.update(challengeData.alea)
       : challengeAesKeyHashCreation;
-      
+
     // Continue hashing...
     const challengeAesKeyHash = challengeAesKeyHashUpdate
       .update(forge.util.encodeUtf8(pronotePassword))

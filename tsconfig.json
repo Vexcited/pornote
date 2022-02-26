@@ -30,6 +30,7 @@
   },
   "include": [
     "next-env.d.ts",
+    "next-seo.config.ts",
     "**/*.ts",
     "**/*.tsx"
   ],

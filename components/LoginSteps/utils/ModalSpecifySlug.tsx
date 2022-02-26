@@ -12,11 +12,13 @@ import { useRouter } from "next/router";
 import InputText from "components/InputText";
 import Button from "components/Button";
 
-import { setAccountData } from "@/webUtils/accountsStore";
+import { useStore } from "@/webUtils/store";
 
 export default function ModalSpecifySlug ({ authData }: ModalSpecifySlugProps) {
   const [slug, setSlug] = useState("");
   const router = useRouter();
+
+  const updateAccount = useStore(state => state.updateAccount);
 
   const handleSlugInput = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const value = evt.target.value;
@@ -28,7 +30,7 @@ export default function ModalSpecifySlug ({ authData }: ModalSpecifySlugProps) {
   const handleSlugSubmit = async (evt: React.FormEvent) => {
     evt.preventDefault();
 
-    await setAccountData(slug, authData);
+    await updateAccount(slug, authData);
     router.push("/");
   };
 
