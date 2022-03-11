@@ -1,29 +1,31 @@
 import type {
-  SavedAccountData
+  PreloadedAccountData
 } from "types/SavedAccountData";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import usePush from "@/webUtils/routerPush";
 
-import { accountsStore, setAccountData } from "@/webUtils/accountsStore";
+import { useStore } from "@/webUtils/store";
 // import loginToPronote from "@/webUtils/loginToPronote";
 
 export default function Dashboard () {
   const router = useRouter();
-  const routerPush = usePush();
-  const slug = router.query.slug as string;
+  const navigate = usePush();
+  const url_slug = router.query.slug;
 
-  const [userData, setUserData] = useState<SavedAccountData | null>(null);
+  const [userData, setUserData] = useState<PreloadedAccountData | null>(null);
   const [navBarOpened, setNavBarOpened] = useState(false);
 
+  const accounts = useStore(store => store.accounts);
+
   useEffect(() => {
-    if (!slug) return;
+    console.info("Rendered dashboard !");
+    if (!url_slug) return;
 
     (async () => {
-      const data: SavedAccountData | null = await accountsStore.getItem(slug);
-
-      if (!data) return routerPush("/login");
+      const data = accounts.find(account => account.slug === url_slug);
+      if (!data) return navigate("/login");
 
       // const loginData = await loginToPronote({
       //   pronoteUrl: data.currentSessionData.pronoteUrl,
@@ -40,12 +42,12 @@ export default function Dashboard () {
 
       setUserData(data);
     })();
-  }, [slug, routerPush]);
+  }, [accounts, url_slug, navigate]);
 
   if (!userData) return <p>Loading...</p>;
 
   return (
-    <div className="w-screen h-screen bg-[#FFBECE]">
+    <div className="w-screen h-screen bg-brand-primary">
       <header
         className="
           fixed h-20 w-full bg-transparent
@@ -87,7 +89,7 @@ export default function Dashboard () {
           className={`
             fixed top-0 left-0 h-screen
             md:w-72 md:bg-transparent md:block
-            w-full bg-[#FFBECE] pt-20 p-4
+            w-full bg-brand-primary pt-20 p-4
             ${navBarOpened ? "" : "hidden"}          
           `}
         >
