@@ -3,7 +3,7 @@ import { URL } from "url";
 /** Get the Pronote root path URL from any given URL. */
 export default function getServerUrl (pronoteUrl: string) {
   const parsed = new URL(pronoteUrl);
-  const pronote_path = parsed.origin + parsed.pathname;
+  const pronote_path = parsed.origin + "/pronote"; // + parsed.pathname;
 
   // Return Pronote root path and remove the
   // trailing slash.

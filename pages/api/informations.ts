@@ -66,6 +66,17 @@ export default async function handler (
 
     // We extract session informations from the DOM.
     const session = extractSession(pronoteHtmlBody);
+    if (!session) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to extract session informations from the DOM.",
+        debug: {
+          pronoteHtmlBody,
+          pronoteHtmlUrl
+        }
+      });
+    }
+
     const sessionId = parseInt(session.h);
 
     // Generate encrypted order for request.
@@ -102,30 +113,49 @@ export default async function handler (
       };
     }
 
-    const pronoteData = await request(pronoteServerUrl).post(informationsApiPath, {
-      headers: {
-        "Cookie": pronoteHtmlCookie ? `${pronoteAccountCookie}; ${pronoteHtmlCookie.split(";")[0]}` : undefined
-      },
-      json: {
-        session: sessionId,
-        numeroOrdre: orderEncrypted,
-        nom: "FonctionParametres",
-        donneesSec: {
-          donnees: informationsPostBody
-        }
-      }
-    }).json<
-      | PronoteApiFonctionParametresCommon
-      | PronoteApiFonctionParametresStudent
-    >();
+    try {
+      console.log(pronoteServerUrl, informationsApiPath);
 
-    res.status(200).json({
-      success: true,
-      pronoteData,
-      pronoteEntUrl,
-      pronoteCryptoInformations,
-      pronoteHtmlCookie: pronoteHtmlCookie ? pronoteHtmlCookie.split(";")[0] : undefined
-    });
+      const { body, url, headers } = await request(pronoteServerUrl).post(informationsApiPath, {
+        headers: {
+          "Cookie": pronoteHtmlCookie ? `${pronoteAccountCookie ? pronoteAccountCookie + "; " : ""}${pronoteHtmlCookie.split(";")[0]}` : undefined
+        },
+        json: {
+          session: sessionId,
+          numeroOrdre: orderEncrypted,
+          nom: "FonctionParametres",
+          donneesSec: {
+            donnees: informationsPostBody
+          }
+        }
+      });
+
+      console.log(body, url, headers);
+      const pronoteData = JSON.parse(body) as
+        | PronoteApiFonctionParametresCommon
+        | PronoteApiFonctionParametresStudent;
+
+      res.status(200).json({
+        success: true,
+        pronoteData,
+        pronoteEntUrl,
+        pronoteCryptoInformations,
+        pronoteHtmlCookie: pronoteHtmlCookie ? pronoteHtmlCookie.split(";")[0] : undefined
+      });
+    }
+    catch (e) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to execute 'request'",
+        debug: {
+          error: e,
+          pronoteHtmlUrl,
+          pronoteHtmlBody,
+          pronoteEntUrl
+        }
+      });
+    }
+
   }
   else {
     res.status(404).json({

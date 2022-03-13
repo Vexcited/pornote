@@ -63,24 +63,11 @@ function SpecifyEntCredentials ({ state, setState }: SpecifyEntCredentialsProps)
         }
       }).json<ApiGetEntCookiesResponse>();
 
-      setButtonCurrentText("Récupération ticket Pronote...");
-
-      // Pronote URL with 'identifiant=xxxxxxx'.
-      const pronoteData = await ky.post("/api/getPronoteTicket", {
-        json: {
-          entUrl,
-          entCookies: entCookiesData.entCookies
-        }
-      }).json<ApiGetPronoteTicketResponse>();
-
       setButtonCurrentText("Connexion à Pronote...");
-      const accountType = getAccountTypeFromUrl(pronoteData.pronoteUrl);
       const loginData = await loginToPronote({
-        pronoteUrl: pronoteData.pronoteUrl,
+        entCookies: entCookiesData.entCookies,
         usingEnt: true,
-        cookie: "",
-        accountPath: accountType.path,
-        accountId: accountType.id
+        entUrl
       });
 
       if (loginData) {

@@ -2,7 +2,7 @@ import type { PronoteSession } from "types/PronoteApiData";
 
 export default function extractSession (
   pronoteHtml: string
-): PronoteSession {
+): PronoteSession | null {
   if (pronoteHtml.includes("Votre adresse IP est provisoirement suspendue")) {
     throw Error("TempBanIp");
   }
@@ -31,5 +31,11 @@ export default function extractSession (
     replace(/'/gu, "\"");
 
   // Return the parsed JSON.
-  return JSON.parse(sessionData);
+  try {
+    return JSON.parse(sessionData);
+  }
+  catch (e) {
+    console.error(e);
+    return null;
+  }
 }

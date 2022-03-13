@@ -7,7 +7,12 @@ import { useRouter } from "next/router";
 import usePush from "@/webUtils/routerPush";
 
 import { useStore } from "@/webUtils/store";
-// import loginToPronote from "@/webUtils/loginToPronote";
+import Link from "next/link";
+
+import forge from "node-forge";
+import encryptAes from "@/apiUtils/encryptAes";
+import loginToPronote from "@/webUtils/loginToPronote";
+import getServerUrl from "@/apiUtils/getServerUrl";
 
 export default function Dashboard () {
   const router = useRouter();
@@ -15,46 +20,79 @@ export default function Dashboard () {
   const url_slug = router.query.slug;
 
   const [userData, setUserData] = useState<PreloadedAccountData | null>(null);
-  const [navBarOpened, setNavBarOpened] = useState(false);
+  // Using default Pronote profile picture.
+  const [userProfilePicture, setUserProfilePicture] = useState<string | null>(null);
 
-  const accounts = useStore(store => store.accounts);
+  const {
+    accounts,
+    updateAccount
+  } = useStore(store => ({
+    accounts: store.accounts,
+    updateAccount: store.updateAccount
+  }));
 
   useEffect(() => {
     console.info("Rendered dashboard !");
     if (!url_slug) return;
 
     (async () => {
-      const data = accounts.find(account => account.slug === url_slug);
-      if (!data) return navigate("/login");
+      const account = accounts.find(account => account.slug === url_slug);
+      if (!account) return navigate("/login");
 
-      // const loginData = await loginToPronote({
-      //   pronoteUrl: data.currentSessionData.pronoteUrl,
-      //   accountId: data.currentSessionData.session.a,
-      //   accountPath: data.currentSessionData.pronotePath,
-      //   usingEnt: true,
-      //   cookie: data.currentSessionData.loginCookie
-      // });
+      const loginData = await loginToPronote({
+        pronoteUrl: account.data.currentSessionData.pronoteUrl,
+        cookie: account.data.currentSessionData.loginCookie,
+        usingEnt: account.data.currentSessionData.usingEnt,
+        entCookies: account.data.currentSessionData.entCookies,
+        entUrl: account.data.currentSessionData.entUrl
+      });
 
-      // if (loginData) {
-      //   setAccountData(slug, loginData);
-      //   setUserData(loginData);
-      // }
-
-      setUserData(data);
+      if (loginData) {
+        updateAccount(account.slug, loginData);
+        setUserData({ slug: account.slug, data: loginData });
+      }
     })();
-  }, [accounts, url_slug, navigate]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url_slug]);
+
+  useEffect(() => {
+    if (!userData) return;
+
+    const pronoteBaseUrl = getServerUrl(userData.data.currentSessionData.pronoteUrl);
+
+    if (userData.data.userInformations.ressource.avecPhoto) {
+      const fileSessionData = JSON.stringify({
+        Actif: true,
+        N: userData.data.userInformations.ressource.N
+      });
+
+      const encryptedFilePath = encryptAes(fileSessionData, {
+        iv: forge.util.createBuffer(userData.data.currentSessionData.iv),
+        key: forge.util.createBuffer(userData.data.currentSessionData.key)
+      });
+
+      const fileName = "photo.jpg";
+      const profilePicturePath = `FichiersExternes/${encryptedFilePath}/${fileName}?Session=${userData.data.currentSessionData.session.h}`;
+      setUserProfilePicture(pronoteBaseUrl + profilePicturePath);
+    }
+    else {
+      const profilePicturePath = "FichiersRessource/PortraitSilhouette.png";
+      setUserProfilePicture(pronoteBaseUrl + profilePicturePath);
+    }
+  }, [userData]);
 
   if (!userData) return <p>Loading...</p>;
 
   return (
-    <div className="w-screen h-screen bg-brand-primary">
-      <header
+    <div className="w-screen h-screen bg-brand-white dark:bg-brand-dark">
+      <nav
         className="
-          fixed h-20 w-full bg-transparent
+          fixed h-16 w-auto bg-brand-primary
           flex flex-row justify-end
           items-center gap-4
+          right-0
           md:top-0 bottom-0
-          px-6
+          px-6 m-2 rounded-2xl
         "
       >
         <ul
@@ -74,40 +112,30 @@ export default function Dashboard () {
           <li>
             Notes
           </li>
-          <li>
-            Mon Compte
-          </li>
         </ul>
 
-        <button
-          onClick={() => setNavBarOpened(!navBarOpened)}
-        >
-          Open menu
-        </button>
+        <Link href={`/app/${url_slug}/settings`} passHref>
+          <a>
+            <span
+              className="
+                cursor-pointer py-1 px-2 rounded-lg
+                bg-brand-light dark:bg-brand-dark
+                bg-opacity-60 hover:bg-opacity-80
+                dark:bg-opacity-80 dark:hover:bg-opacity-100
+                transition-colors
+              "
+            >
+              {userData.data.userInformations.ressource.L}
+            </span>
 
-        <nav
-          className={`
-            fixed top-0 left-0 h-screen
-            md:w-72 md:bg-transparent md:block
-            w-full bg-brand-primary pt-20 p-4
-            ${navBarOpened ? "" : "hidden"}          
-          `}
-        >
-
-        </nav>
-      </header>
-
-      <main
-        className="
-          fixed left-0 top-0 bottom-0 right-0
-          w-full h-full transition-all
-          md:rounded-tl-2xl md:ml-72 md:mt-20 mb-20
-
-          bg-brand-white
-        "
-      >
-
-      </main>
+            {/* {userData.data.userInformations.ressource.avecPhoto && (
+              <img
+                src={userData.data.userInformations.ressource.avecPhoto}
+              />
+            )} */}
+          </a>
+        </Link>
+      </nav>
     </div>
   );
 }

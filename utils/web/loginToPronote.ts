@@ -1,5 +1,6 @@
 import type {
   ApiAuthenticationResponse,
+  ApiGetPronoteTicketResponse,
   ApiIdentificationResponse,
   ApiInformationsResponse,
   ApiServerError,
@@ -19,17 +20,17 @@ import forge from "node-forge";
 
 import decryptAes from "@/apiUtils/decryptAes";
 import encryptAes from "@/apiUtils/encryptAes";
+import getAccountTypeFromUrl from "./getAccountTypeFromUrl";
 
 type LoginToPronoteProps = {
   username?: string;
   password?: string;
 
-  accountId: number;
+  pronoteUrl?: string;
 
-  pronoteUrl: string;
-  accountPath: string;
-
+  entUrl?: string;
   usingEnt?: boolean;
+  entCookies?: string[];
   cookie?: string;
 };
 
@@ -39,22 +40,49 @@ const getNextOrderNumber = (current: string) => (parseInt(current) + 1).toString
 export default async function loginToPronote ({
   username,
   password,
-  accountId,
   pronoteUrl,
-  accountPath,
   usingEnt = false,
+  entUrl,
+  entCookies,
   cookie
 }: LoginToPronoteProps): Promise<(null | SavedAccountData)> {
   try {
+    if (usingEnt) {
+      // Pronote URL with 'identifiant=xxxxxxx'.
+      const pronoteData = await ky.post("/api/getPronoteTicket", {
+        json: {
+          entUrl,
+          entCookies
+        }
+      }).json<ApiGetPronoteTicketResponse>();
+
+      pronoteUrl = pronoteData.pronoteUrl;
+    } else if (!pronoteUrl) return null;
+
+    const accountType = getAccountTypeFromUrl(pronoteUrl);
+
     let pronoteUsername = username || "";
     let pronotePassword = password || "";
 
     const pronoteInformationsData = await ky.post("/api/informations", {
       json: {
         pronoteUrl,
-        pronoteAccountId: accountId,
-        pronoteAccountPath: accountPath,
-        ...(usingEnt ? { pronoteCookie: cookie, usingRawPronoteUrl: true } : {})
+        pronoteAccountId: accountType.id,
+        pronoteAccountPath: accountType.path,
+        // Relogin to Pronote using ENT cookie.
+        ...(usingEnt ? {
+          pronoteCookie: cookie || undefined,
+          usingRawPronoteUrl: true
+        } :
+        // When passed a cookie but not using ENT, we just relogin to Pronote.
+        // When re-login to Pronote, we should re-use the exact same URL
+        // that we used to first time.
+          cookie ? {
+            pronoteCookie: cookie,
+            usingRawPronoteUrl: false
+          }
+          // We just login to Pronote for the first time.
+            : {})
       }
     }).json<ApiInformationsResponse>();
 
@@ -74,11 +102,14 @@ export default async function loginToPronote ({
     const currentSession = pronoteInformationsData.pronoteCryptoInformations.session;
     const sessionId = parseInt(currentSession.h);
 
-    // When using ENT, e is the username, f is the password.
-    if (usingEnt && currentSession.e && currentSession.f) {
+    // When using a cookie from Pronote or ENT, identifiers are given.
+    // `e` is the username, `f` is the password.
+    if (currentSession.e && currentSession.f) {
       pronoteUsername = currentSession.e;
       pronotePassword = currentSession.f;
     }
+    const isUsingPronoteIdentifiers = !! (currentSession.e && currentSession.f);
+    console.info("[loginToPronote]: `isUsingPronoteIdentifiers`:", isUsingPronoteIdentifiers);
 
     // Check 'numeroOrdre' from 'pronoteInformationsData'.
     // It should be equal to '2'.
@@ -95,12 +126,12 @@ export default async function loginToPronote ({
     const pronoteIdentificationData = await ky.post("/api/identification", {
       json: {
         pronoteUrl,
-        pronoteAccountId: accountId,
+        pronoteAccountId: accountType.id,
         pronoteSessionId: sessionId,
         pronoteOrder: identificationOrderEncrypted,
 
         identifier: pronoteUsername,
-        ...(usingEnt ? { pronoteCookies: pronoteLoginCookies } : {}),
+        ...(isUsingPronoteIdentifiers ? { pronoteCookies: pronoteLoginCookies } : {}),
         usingEnt
       }
     }).json<ApiIdentificationResponse>();
@@ -137,8 +168,8 @@ export default async function loginToPronote ({
     const challengeAesKeyHashCreation = forge.md.sha256.create();
     let challengeAesKeyHashUpdate: forge.md.MessageDigest;
 
-    // If we use ENT, we don't use `alea`.
-    challengeAesKeyHashUpdate = !usingEnt
+    // If we use a Pronote cookie (ENT or simple re-login), we don't use `alea`.
+    challengeAesKeyHashUpdate = !isUsingPronoteIdentifiers
       ? challengeAesKeyHashCreation.update(challengeData.alea)
       : challengeAesKeyHashCreation;
 
@@ -154,7 +185,7 @@ export default async function loginToPronote ({
      * and the SHA256 hash created of "alea" and user password.
      */
     const challengeAesKeyHashUtf8 = forge.util.encodeUtf8(challengeAesKeyHash);
-    const challengeAesKey = !usingEnt
+    const challengeAesKey = !isUsingPronoteIdentifiers
       ? pronoteUsername + challengeAesKeyHashUtf8
       : challengeAesKeyHashUtf8;
     const challengeAesKeyBuffer = forge.util.createBuffer(challengeAesKey);
@@ -181,12 +212,12 @@ export default async function loginToPronote ({
     const pronoteAuthenticationData = await ky.post("/api/authentication", {
       json: {
         pronoteUrl,
-        pronoteAccountId: accountId,
+        pronoteAccountId: accountType.id,
         pronoteSessionId: sessionId,
 
         pronoteOrder: authenticationOrderEncrypted,
         pronoteSolvedChallenge: encrypted,
-        ...(usingEnt ? { pronoteCookies: pronoteLoginCookies } : {})
+        ...(isUsingPronoteIdentifiers ? { pronoteCookies: pronoteLoginCookies } : {})
       }
     }).json<ApiAuthenticationResponse>();
 
@@ -220,11 +251,11 @@ export default async function loginToPronote ({
     const pronoteUserData = await ky.post("/api/user", {
       json: {
         pronoteUrl,
-        pronoteAccountId: accountId,
+        pronoteAccountId: accountType.id,
         pronoteSessionId: sessionId,
 
         pronoteOrder: encryptedUserDataOrder,
-        ...(usingEnt ? { pronoteCookie: cookie } : {}),
+        ...(cookie ? { pronoteCookie: cookie } : {}),
       }
     }).json<ApiUserResponse>();
 
@@ -237,9 +268,11 @@ export default async function loginToPronote ({
         iv,
         key: authenticationKeyBytesArray,
         session: pronoteInformationsData.pronoteCryptoInformations.session,
-        loginCookie: usingEnt ? cookie : pronoteUserData.pronoteLoginCookie,
+        loginCookie: cookie ? cookie : pronoteUserData.pronoteLoginCookie,
+        usingEnt,
         pronoteUrl,
-        pronotePath: accountPath
+        entCookies,
+        entUrl
       },
       schoolInformations: pronoteInformationsOnlyData.donneesSec.donnees,
       userInformations: pronoteUserData.pronoteData.donneesSec.donnees
