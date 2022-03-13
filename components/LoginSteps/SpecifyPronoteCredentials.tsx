@@ -42,8 +42,6 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
     const accountData = await loginToPronote({
       username: formState.username,
       password: formState.password,
-      accountId: selectedAccountType.id,
-      accountPath: selectedAccountType.path,
       pronoteUrl: state.pronoteUrl
     });
 
