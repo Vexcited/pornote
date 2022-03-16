@@ -1,19 +1,29 @@
-import request from "@/apiUtils/request";
+import { api } from "@/apiUtils/request";
 import { HTTPError } from "got";
+
+type CheckEntAvailableSuccess = {
+  success: true;
+  entAvailable: boolean;
+  /** URL of ENT is `entAvailable` is `true`. */
+  entUrl?: string;
+}
+
+type CheckEntAvailableFail = {
+  success: false;
+  message: string;
+  body?: any;
+}
 
 /**
  * Used in /api/informations.ts to check if an ENT is available.
  * If an ENT is available, it returns the ENT URL.
  * @param pronoteUrl - Pronote URL to check.
- * @returns
- * - `[0]: boolean`: Request succeeded or not.
- * - `[1]: string`: ENT URL if found else undefined; or error message if `[0]` is false.
  */
 async function checkEntAvailable (
   pronoteUrl: string
-): Promise<[boolean, string | undefined]> {
+): Promise<CheckEntAvailableSuccess | CheckEntAvailableFail> {
   try {
-    const { url } = await request().get(pronoteUrl, {
+    const { url } = await api.get(pronoteUrl, {
       followRedirect: true
     });
 
@@ -26,11 +36,28 @@ async function checkEntAvailable (
     // Check if Pronote URL hostname is same as redirected URL hostname.
     // If they aren't the same, an ENT is available.
     const entAvailable = pronoteUrlHostname !== newUrlHostname;
-    return [true, entAvailable ? url : undefined];
+
+    return {
+      success: true,
+      entAvailable,
+      entUrl: entAvailable ? url : undefined
+    };
   }
   catch (e) {
-    const error = e as HTTPError;
-    return [false, error.message];
+    if (e instanceof HTTPError) {
+      const body = e.response.body;
+
+      return {
+        success: false,
+        message: "Erreur lors de la requête.",
+        body
+      };
+    }
+
+    return {
+      success: false,
+      message: "Erreur inconnue."
+    };
   }
 }
 

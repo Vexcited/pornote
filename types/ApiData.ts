@@ -13,13 +13,21 @@ export interface ApiServerError {
   debug?: any;
 }
 
+export type ApiRequestResponse<T> = {
+  error: any;
+  usedOrder: [string, number];
+  returnedOrder?: [string, number];
+  data: T | null;
+}
+
 export interface ApiInformationsResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData:
+  pronoteData: ApiRequestResponse<
     | PronoteApiFonctionParametresCommon
-    | PronoteApiFonctionParametresStudent;
+    | PronoteApiFonctionParametresStudent
+  >;
   pronoteEntUrl?: string;
 
   /** Keys used when authenticating. */
@@ -35,22 +43,23 @@ export interface ApiIdentificationResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData: PronoteApiIdentification;
+  pronoteData: ApiRequestResponse<PronoteApiIdentification>;
 }
 
 export interface ApiAuthenticationResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData: PronoteApiAuthentication;
+  pronoteData: ApiRequestResponse<PronoteApiAuthentication>;
 }
 
 export interface ApiUserResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData:
-    | PronoteApiUserDataStudent;
+  pronoteData: ApiRequestResponse<
+    | PronoteApiUserDataStudent
+  >;
   pronoteLoginCookie?: string;
 }
 
