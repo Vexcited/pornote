@@ -13,13 +13,14 @@ import type {
   PronoteApiFonctionParametresStudent
 } from "types/PronoteApiData";
 
-import getServerUrl from "@/apiUtils/getServerUrl";
 import getPronotePage from "@/apiUtils/getPronotePage";
 import checkEntAvailable from "@/apiUtils/checkEntAvailable";
-import extractSession from "@/apiUtils/extractSession";
 
 import objectChecker from "@/apiUtils/objectChecker";
 import { request } from "@/apiUtils/request";
+
+import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
+import extractSession from "@/apiUtils/extractSession";
 import accountTypes from "@/apiUtils/accountTypes";
 
 import forge from "node-forge";
@@ -47,7 +48,7 @@ export type ApiInformationsRequestBody = {
 
 type BodyCheckerSuccess = {
   success: true;
-  body: ApiInformationsRequestBody!
+  body: ApiInformationsRequestBody;
 }
 
 type BodyCheckerFail = {
@@ -105,7 +106,7 @@ export default async function handler (
     });
 
     // Get a clean Pronote URL without the ENT bypass.
-    const pronoteUrl = body.pronoteUrl.replace("login=true", "").replace(/[?&]/g, "");
+    const pronoteUrl = getBasePronoteUrl(body.pronoteUrl);
     // Get the raw URL for later reference.
     const rawPronoteUrl = body.pronoteUrl;
 
@@ -113,7 +114,7 @@ export default async function handler (
     // When we use raw URL, it's often for ENT or restore session purposes.
     const pronoteHtmlUrl = body.usingRawPronoteUrl
       ? rawPronoteUrl
-      : pronoteUrl + "?login=true";
+      : pronoteUrl + `/${accountType.path}?login=true`;
 
     // Get the Pronote HTML page to parse session data.
     const pronotePageData = await getPronotePage(
@@ -199,45 +200,30 @@ export default async function handler (
     }
 
     try {
-      const pronoteData = await apiRequest<
+      const pronoteData = await request<
         | PronoteApiFonctionParametresCommon
         | PronoteApiFonctionParametresStudent
       >({
         name: "FonctionParametres",
         body: informationsPostBody,
+        pronoteUrl,
         order: 1,
         sessionId: parseInt(session.h),
-        accountId: pronoteAccountId ? pronoteAccountId : 0,
-        cookie: pronoteHtmlCookie ? `${pronoteAccountCookie ? pronoteAccountCookie + "; " : ""}${pronoteHtmlCookie.split(";")[0]}` : undefined,
+        accountId: accountType.id,
+        cookie: pronotePageData.loginCookie ? `${body.pronoteAccountCookie ? body.pronoteAccountCookie + "; " : ""}${pronotePageData.loginCookie.split(";")[0]}` : undefined,
         isCompressed: !session.sCoA,
         isEncrypted: !session.sCrA
       });
 
-      // const { body } = await request(pronoteServerUrl).post(informationsApiPath, {
-      //   headers: {
-      //     "Cookie":
-      //   },
-      //   json: {
-      //     session: sessionId,
-      //     numeroOrdre: orderEncrypted,
-      //     nom: "FonctionParametres",
-      //     donneesSec: {
-      //       donnees: informationsPostBody
-      //     }
-      //   }
-      // });
+      pronoteData.
 
-      // const pronoteData = JSON.parse(body) as
-      //   | PronoteApiFonctionParametresCommon
-      //   | PronoteApiFonctionParametresStudent;
-
-      res.status(200).json({
-        success: true,
-        pronoteData,
-        pronoteEntUrl,
-        pronoteCryptoInformations,
-        pronoteHtmlCookie: pronoteHtmlCookie ? pronoteHtmlCookie.split(";")[0] : undefined
-      });
+        res.status(200).json({
+          success: true,
+          pronoteData,
+          pronoteEntUrl: pronoteEntCheckData ? pronoteEntCheckData.entUrl : undefined,
+          pronoteCryptoInformations,
+          pronoteHtmlCookie: pronotePageData.loginCookie ? pronotePageData.loginCookie.split(";")[0] : undefined
+        });
     }
     catch (e) {
       res.status(500).json({
@@ -245,9 +231,7 @@ export default async function handler (
         message: "Failed to execute 'request'",
         debug: {
           error: e,
-          pronoteHtmlUrl,
-          pronoteHtmlBody,
-          pronoteEntUrl
+          pronoteHtmlUrl
         }
       });
     }

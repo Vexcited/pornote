@@ -61,6 +61,20 @@ type RequestProps = {
   isCompressed?: boolean;
 }
 
+export type RequestSuccess<T> = {
+  success: true;
+  data: T;
+  usedOrder: [string, number];
+  returnedOrder: [string, number];
+}
+
+export type RequestFail = {
+  success: false;
+  message: string;
+  usedOrder: [string, number];
+  body?: any;
+}
+
 export async function request<T> ({
   name,
   sessionId,
@@ -72,7 +86,7 @@ export async function request<T> ({
   isCompressed = false,
   accountId = 0,
   encryption
-}: RequestProps) {
+}: RequestProps): Promise<RequestSuccess<T> | RequestFail> {
 
   // Get the AES encryption IV and key.
   const aesIv = encryption?.aesIv ? forge.util.createBuffer(encryption.aesIv) : undefined;
@@ -137,29 +151,33 @@ export async function request<T> ({
       receivedData = forge.util.decodeUtf8(receivedData);
     }
 
+    if (typeof receivedData === "string") {
+      receivedData = JSON.parse(receivedData) as T;
+    }
+
     return {
+      success: true,
       usedOrder: [orderEncrypted, order],
-      returnedOrder: [data.numeroOrdre, decryptedOrder],
-      data: data.donneesSec
+      returnedOrder: [data.numeroOrdre, parseInt(decryptedOrder)],
+      data: receivedData
     };
   }
   catch (e) {
     if (e instanceof HTTPError) {
-      const data = e.response.body as PronoteApiError;
+      const body = e.response.body as PronoteApiError;
 
       return {
+        success: false,
         message: "Erreur serveur Pronote API",
-        status: e.response.statusCode,
         usedOrder: [orderEncrypted, order],
-        data
+        body
       };
     }
 
     return {
+      success: false,
       message: "Erreur inconnue",
-      usedOrder: [orderEncrypted, order],
-      status: -1,
-      data: null
+      usedOrder: [orderEncrypted, order]
     };
   }
 }

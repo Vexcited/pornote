@@ -34,8 +34,7 @@ export function aesDecrypt (data: string, {
   decipher.finish();
 
   // Return the decrypted value.
-  const decrypted = decipher.output.bytes();
-  return decrypted;
+  return decipher.output.bytes();
 }
 
 export function aesEncrypt (data: string, {
@@ -57,7 +56,8 @@ export function aesEncrypt (data: string, {
   // Start the encryption.
   cipher.start({ iv });
   cipher.update(bufferToEncrypt);
+  cipher.finish();
 
   // Return the encrypted buffer in HEX.
-  return cipher.finish() && cipher.output.toHex();
+  return cipher.output.toHex();
 }
