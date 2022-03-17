@@ -62,4 +62,36 @@ this project at anytime.
 This API is limited with CORS and was created to proxy Pronote's CORS
 and to provide more easier requests to their functions.
 
-### Not finished...
+Every request's `Content-Type` is `application/json` and every response are also given in JSON.
+
+### Summary
+
+- [API Error](#api-error)
+- [Common Informations](#apicommoninformations)
+
+### `/api/common_informations`
+
+> [See code from source](./pages/api/common_informations.ts)
+
+Route that sends a call to `FonctionParametres` without any data.
+It is used to get informations about a school and its different account types available.
+
+#### Request Body
+
+```typescript
+
+```
+
+### API Error
+
+When an error is thrown, the API always respond with an error message.
+
+```typescript
+{
+  success: false,
+  message: string,
+  // This contains different informations
+  // depending on the request and the error.
+  debug?: any
+}
+```

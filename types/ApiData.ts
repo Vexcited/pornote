@@ -20,6 +20,13 @@ export type ApiRequestResponse<T> = {
   data: T | null;
 }
 
+export interface ApiCommonInformationsResponse {
+  success: true;
+
+  pronoteData: ApiRequestResponse<PronoteApiFonctionParametresCommon>;
+  pronoteEntUrl?: string;
+}
+
 export interface ApiInformationsResponse {
   success: true;
 
@@ -28,10 +35,9 @@ export interface ApiInformationsResponse {
     | PronoteApiFonctionParametresCommon
     | PronoteApiFonctionParametresStudent
   >;
-  pronoteEntUrl?: string;
 
   /** Keys used when authenticating. */
-  pronoteCryptoInformations?: {
+  pronoteCryptoInformations: {
     iv: string;
     session: PronoteSession;
   };
