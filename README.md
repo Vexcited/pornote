@@ -79,7 +79,9 @@ It is used to get informations about a school and its different account types av
 #### Request Body
 
 ```typescript
-
+{
+  pronoteUrl: string;
+}
 ```
 
 ### API Error

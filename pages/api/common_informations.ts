@@ -9,8 +9,7 @@ import type {
 } from "types/ApiData";
 
 import type {
-  PronoteApiFonctionParametresCommon,
-  PronoteApiFonctionParametresStudent
+  PronoteApiFonctionParametresCommon
 } from "types/PronoteApiData";
 
 import getPronotePage from "@/apiUtils/getPronotePage";
@@ -21,8 +20,6 @@ import { request } from "@/apiUtils/request";
 
 import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
 import extractSession from "@/apiUtils/extractSession";
-import accountTypes from "@/apiUtils/accountTypes";
-
 
 export type ApiCommonInformationsRequestBody = {
   pronoteUrl: string;
@@ -110,51 +107,40 @@ export default async function handler (
     if (!sessionData.success) {
       return res.status(500).json({
         success: false,
-        message: "Erreur lors de l'extraction des informations de session.",
+        message: sessionData.message,
         debug: {
           pronotePageBody: pronotePageData.body,
+          sessionDebug: sessionData.debug,
           pronoteUrl
         }
       });
     }
 
-    // We get the session object.
-    const { session } = sessionData;
-    const sessionId = parseInt(session.h);
+    const pronoteRequest = await request<PronoteApiFonctionParametresCommon>({
+      order: 1,
+      pronoteUrl,
+      name: "FonctionParametres",
+      body: {},
+      sessionId: parseInt(sessionData.session.h),
+      accountId: 0, // Common: `0`.
+      isCompressed: !sessionData.session.sCoA,
+      isEncrypted: !sessionData.session.sCrA
+    });
 
-    try {
-      const pronoteData = await request<
-        | PronoteApiFonctionParametresCommon
-        | PronoteApiFonctionParametresStudent
-      >({
-        order: 1,
+    if (!pronoteRequest.success) return res.status(500).json({
+      success: false,
+      message: pronoteRequest.message,
+      debug: {
         pronoteUrl,
-        name: "FonctionParametres",
-        body: {},
-        sessionId: parseInt(session.h),
-        accountId: 0, // Common: `0`.
-        isCompressed: !session.sCoA,
-        isEncrypted: !session.sCrA
-      });
+        request: pronoteRequest
+      }
+    });
 
-      res.status(200).json({
-        success: true,
-        pronoteData,
-        pronoteEntUrl: pronoteEntCheckData ? pronoteEntCheckData.entUrl : undefined,
-        pronoteCryptoInformations,
-        pronoteHtmlCookie: pronotePageData.loginCookie ? pronotePageData.loginCookie.split(";")[0] : undefined
-      });
-    }
-    catch (e) {
-      res.status(500).json({
-        success: false,
-        message: "Erreur lors de l'envoi de la requête `FonctionParametres` à Pronote.",
-        debug: {
-          error: e,
-          pronoteUrl
-        }
-      });
-    }
+    res.status(200).json({
+      success: true,
+      request: pronoteRequest,
+      pronoteEntUrl: entCheckData.entAvailable ? entCheckData.entUrl : undefined
+    });
   }
   else {
     res.status(404).json({

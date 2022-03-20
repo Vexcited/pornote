@@ -72,7 +72,7 @@ export type RequestFail = {
   success: false;
   message: string;
   usedOrder: [string, number];
-  body?: any;
+  debug?: any;
 }
 
 export async function request<T> ({
@@ -97,19 +97,23 @@ export async function request<T> ({
   });
 
   if (isCompressed) {
-    body = JSON.stringify(body);
-    body = forge.util.encodeUtf8("" + body);
-
+    // We get the JSON as string.
+    body = forge.util.encodeUtf8("" + JSON.stringify(body));
+    // We compress it using zlib, level 6, without headers.
     body = pako.deflateRaw(forge.util.createBuffer(body).toHex(), { level: 6, to: "string" });
-
-    if (!isEncrypted) {
-      // convert the output to hex
-      body = forge.util.bytesToHex(body);
-    }
+    // We output it to HEX.
+    // When encrypted, we should get the bytes from this hex.
+    // When not encrypted, we send this HEX.
+    body = forge.util.bytesToHex(body).toUpperCase();
   }
 
   if (isEncrypted) {
-    const data = isCompressed ? body : JSON.stringify(body);
+    const data = isCompressed
+      // If the data has been compressed, we get the bytes
+      // of the compressed data (from HEX).
+      ? forge.util.hexToBytes(body)
+      // Otherwise, we get the JSON as string.
+      : forge.util.encodeUtf8("" + JSON.stringify(body));
 
     const encrypted_data = aesEncrypt(data, {
       iv: aesIv, key: aesKey
@@ -135,23 +139,35 @@ export async function request<T> ({
       }
     }).json<PronoteApiResponse<T | string>>();
 
+
     let receivedData = data.donneesSec;
     const decryptedOrder = aesDecrypt(data.numeroOrdre, {
       iv: aesIv, key: aesKey
     });
 
     if (isEncrypted) {
-      receivedData = aesDecrypt(receivedData as string, {
+      const decrypted_data = aesDecrypt(receivedData as string, {
         iv: aesIv, key: aesKey
       });
+
+      receivedData = decrypted_data;
     }
 
     if (isCompressed) {
-      receivedData = pako.inflateRaw(receivedData as string, { to: "string" });
-      receivedData = forge.util.decodeUtf8(receivedData);
+      const d = forge.util.createBuffer(receivedData as string);
+      return {
+        success: false,
+        message: "Compressed data received, but not decompressed",
+        usedOrder: [name, order],
+        debug: d,
+      };
+      // receivedData = pako.inflateRaw(d.bytes(), { to: "string" });
+
+      console.log(receivedData);
     }
 
     if (typeof receivedData === "string") {
+      receivedData = forge.util.decodeUtf8(receivedData);
       receivedData = JSON.parse(receivedData) as T;
     }
 
@@ -170,14 +186,17 @@ export async function request<T> ({
         success: false,
         message: "Erreur serveur Pronote API",
         usedOrder: [orderEncrypted, order],
-        body
+        debug: { body }
       };
     }
 
+    console.error(e);
+
     return {
       success: false,
-      message: "Erreur inconnue",
-      usedOrder: [orderEncrypted, order]
+      message: "Erreur inconnue.",
+      usedOrder: [orderEncrypted, order],
+      debug: { e }
     };
   }
 }

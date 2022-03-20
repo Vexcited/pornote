@@ -7,23 +7,20 @@ import type {
   PronoteSession
 } from "types/PronoteApiData";
 
+import type {
+  RequestSuccess
+} from "@/apiUtils/request";
+
 export interface ApiServerError {
   success: false;
   message: string;
   debug?: any;
 }
 
-export type ApiRequestResponse<T> = {
-  error: any;
-  usedOrder: [string, number];
-  returnedOrder?: [string, number];
-  data: T | null;
-}
-
 export interface ApiCommonInformationsResponse {
   success: true;
 
-  pronoteData: ApiRequestResponse<PronoteApiFonctionParametresCommon>;
+  request: RequestSuccess<PronoteApiFonctionParametresCommon>;
   pronoteEntUrl?: string;
 }
 
@@ -31,7 +28,7 @@ export interface ApiInformationsResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData: ApiRequestResponse<
+  pronoteData: RequestSuccess<
     | PronoteApiFonctionParametresCommon
     | PronoteApiFonctionParametresStudent
   >;
@@ -49,23 +46,21 @@ export interface ApiIdentificationResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData: ApiRequestResponse<PronoteApiIdentification>;
+  pronoteData: RequestSuccess<PronoteApiIdentification>;
 }
 
 export interface ApiAuthenticationResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData: ApiRequestResponse<PronoteApiAuthentication>;
+  pronoteData: RequestSuccess<PronoteApiAuthentication>;
 }
 
 export interface ApiUserResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData: ApiRequestResponse<
-    | PronoteApiUserDataStudent
-  >;
+  pronoteData: RequestSuccess<PronoteApiUserDataStudent>;
   pronoteLoginCookie?: string;
 }
 
