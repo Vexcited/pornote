@@ -16,7 +16,7 @@ import haversine from "haversine-distance";
 
 import getPosition from "@/webUtils/getPosition";
 import sendPronoteGeolocation from "@/webUtils/sendPronoteGeolocation";
-import getInformationsFrom from "@/webUtils/getInformationsFrom";
+import { getCommonInformationsFrom } from "@/webUtils/fetchPronote";
 
 /** Used on the `useEffect` to DRY with `SpecifyUrlManual`. */
 import specifyUrlCheckState from "./utils/specifyUrlCheckState";
@@ -122,9 +122,10 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
    */
   const handlePronoteConnect = async () => {
     if (selectedSchool) {
-      const [success, data] = await getInformationsFrom(selectedSchool.url);
-      if (success) {
-        const schoolInformations = data as SchoolInformations;
+      const informationsData = await getCommonInformationsFrom(selectedSchool.url);
+
+      if (informationsData.success) {
+        const schoolInformations = informationsData.data;
 
         setState({
           ...state,
@@ -133,7 +134,7 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
         });
       }
       else {
-        console.error("Error while getting informations from Pronote.", data);
+        console.error("Error while getting informations from Pronote.", informationsData);
       }
     }
   };

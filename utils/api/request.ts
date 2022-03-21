@@ -3,6 +3,8 @@ import type {
   PronoteApiError
 } from "types/PronoteApiData";
 
+import type { IncomingHttpHeaders } from "http";
+
 import forge from "node-forge";
 import pako from "pako";
 import got, { HTTPError } from "got";
@@ -66,6 +68,7 @@ export type RequestSuccess<T> = {
   data: T;
   usedOrder: [string, number];
   returnedOrder: [string, number];
+  headers: IncomingHttpHeaders;
 }
 
 export type RequestFail = {
@@ -126,7 +129,7 @@ export async function request<T> ({
   const url = `appelfonction/${accountId}/${sessionId}/${orderEncrypted}`;
 
   try {
-    const data = await api.post(url, {
+    const response = await api.post(url, {
       prefixUrl: pronoteUrl,
       json: {
         session: sessionId,
@@ -137,8 +140,9 @@ export async function request<T> ({
       headers: {
         "Cookie": cookie
       }
-    }).json<PronoteApiResponse<T | string>>();
+    });
 
+    const data = JSON.parse(response.body) as PronoteApiResponse<T | string>;
 
     let receivedData = data.donneesSec;
     const decryptedOrder = aesDecrypt(data.numeroOrdre, {
@@ -169,7 +173,8 @@ export async function request<T> ({
       success: true,
       usedOrder: [orderEncrypted, order],
       returnedOrder: [data.numeroOrdre, parseInt(decryptedOrder)],
-      data: receivedData
+      data: receivedData,
+      headers: response.headers
     };
   }
   catch (e) {
@@ -184,6 +189,7 @@ export async function request<T> ({
       };
     }
 
+    // Debug
     console.error(e);
 
     return {

@@ -11,7 +11,7 @@ import {
   SetStateAction
 } from "react";
 
-import getInformationsFrom from "@/webUtils/getInformationsFrom";
+import { getCommonInformationsFrom } from "@/webUtils/fetchPronote";
 
 /** Used on the `useEffect` to DRY with `SpecifyUrlGeolocation`. */
 import specifyUrlCheckState from "./utils/specifyUrlCheckState";
@@ -36,9 +36,10 @@ function SpecifyUrlManual ({ state, setState }: SpecifyUrlManualProps) {
     e.preventDefault();
 
     if (pronoteUrl) {
-      const [success, data] = await getInformationsFrom(pronoteUrl);
-      if (success) {
-        const schoolInformations = data as SchoolInformations;
+      const informationsData = await getCommonInformationsFrom(pronoteUrl);
+
+      if (informationsData.success) {
+        const schoolInformations = informationsData.data;
 
         setState({
           ...state,
@@ -47,7 +48,7 @@ function SpecifyUrlManual ({ state, setState }: SpecifyUrlManualProps) {
         });
       }
       else {
-        console.error("Error while getting informations from Pronote.", data);
+        console.error("Error while getting informations from Pronote.", informationsData);
       }
     }
   };

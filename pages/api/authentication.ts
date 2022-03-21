@@ -12,8 +12,8 @@ import type {
   PronoteApiAuthentication
 } from "types/PronoteApiData";
 
-import getServerUrl from "@/apiUtils/getServerUrl";
-import request from "@/apiUtils/request";
+import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
+import { request } from "@/apiUtils/request";
 
 export default async function handler (
   req: NextApiRequest,
@@ -35,12 +35,9 @@ export default async function handler (
     }
 
     /** Cleaned Pronote URL. */
-    const pronoteServerUrl = getServerUrl(pronoteUrl);
+    const pronoteServerUrl = getBasePronoteUrl(pronoteUrl);
 
-    // Create API endpoint using the given session ID.
-    const pronoteApiUrl = `${pronoteServerUrl}/appelfonction/${pronoteAccountId}/${pronoteSessionId}`;
-
-    const pronoteOrder: string = req.body.pronoteOrder;
+    const pronoteOrder: number = req.body.pronoteOrder;
     if (!pronoteOrder) {
       return res.status(400).json({
         success: false,
@@ -56,23 +53,27 @@ export default async function handler (
       });
     }
 
-    const pronoteAuthenticationData = await request(pronoteApiUrl).post(pronoteOrder, {
-      headers: {
-        "Cookie": req.body.pronoteCookies ? (req.body.pronoteCookies as string[]).join("; ") : undefined
-      },
-      json: {
-        session: pronoteSessionId,
-        numeroOrdre: pronoteOrder,
-        nom: "Authentification",
-        donneesSec: {
-          donnees: {
-            connexion: 0,
-            challenge: pronoteSolvedChallenge,
-            espace: pronoteAccountId
-          }
+    const pronoteAuthenticationData = await request<PronoteApiAuthentication>({
+      pronoteUrl: pronoteServerUrl,
+      name: "Authentification",
+      sessionId: pronoteSessionId,
+      accountId: pronoteAccountId,
+      order: pronoteOrder,
+      body: {
+        donnees: {
+          connexion: 0,
+          challenge: pronoteSolvedChallenge,
+          espace: pronoteAccountId
         }
-      }
-    }).json<PronoteApiAuthentication>();
+      },
+      cookie: req.body.pronoteCookies ? (req.body.pronoteCookies as string[]).join("; ") : undefined
+    });
+
+    if (!pronoteAuthenticationData.success) return res.status(401).json({
+      success: false,
+      message: pronoteAuthenticationData.message,
+      debug: pronoteAuthenticationData.debug
+    });
 
     res.status(200).json({
       success: true,

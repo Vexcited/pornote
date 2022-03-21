@@ -12,8 +12,8 @@ import type {
   PronoteApiIdentification
 } from "types/PronoteApiData";
 
-import getServerUrl from "@/apiUtils/getServerUrl";
-import request from "@/apiUtils/request";
+import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
+import { request } from "@/apiUtils/request";
 
 export default async function handler (
   req: NextApiRequest,
@@ -45,12 +45,9 @@ export default async function handler (
     const usingEnt = req.body.usingEnt as boolean || false;
 
     /** Cleaned Pronote URL. */
-    const pronoteServerUrl = getServerUrl(pronoteUrl);
+    const pronoteServerUrl = getBasePronoteUrl(pronoteUrl);
 
-    // Create the API endpoint using the given session ID.
-    const pronoteApiUrl = `${pronoteServerUrl}/appelfonction/${pronoteAccountId}/${pronoteSessionId}`;
-
-    const pronoteOrder: string = req.body.pronoteOrder;
+    const pronoteOrder: number = req.body.pronoteOrder;
     if (!pronoteOrder) {
       return res.status(400).json({
         success: false,
@@ -58,30 +55,34 @@ export default async function handler (
       });
     }
 
-    const pronoteIdentificationData = await request(pronoteApiUrl).post(pronoteOrder, {
-      headers: {
-        "Cookie": req.body.pronoteCookies ? (req.body.pronoteCookies as string[]).join("; ") : undefined
-      },
-      json: {
-        session: pronoteSessionId,
-        numeroOrdre: pronoteOrder,
-        nom: "Identification",
-        donneesSec: {
-          donnees: {
-            genreConnexion: 0,
-            genreEspace: pronoteAccountId,
-            identifiant: accountIdentifier,
-            pourENT: usingEnt,
-            enConnexionAuto: false,
-            demandeConnexionAuto: false,
-            demandeConnexionAppliMobile: false,
-            demandeConnexionAppliMobileJeton: false,
-            uuidAppliMobile: "",
-            loginTokenSAV: ""
-          }
+    const pronoteIdentificationData = await request<PronoteApiIdentification>({
+      pronoteUrl: pronoteServerUrl,
+      accountId: pronoteAccountId,
+      sessionId: pronoteSessionId,
+      order: pronoteOrder,
+      name: "Identification",
+      body: {
+        donnees: {
+          genreConnexion: 0,
+          genreEspace: pronoteAccountId,
+          identifiant: accountIdentifier,
+          pourENT: usingEnt,
+          enConnexionAuto: false,
+          demandeConnexionAuto: false,
+          demandeConnexionAppliMobile: false,
+          demandeConnexionAppliMobileJeton: false,
+          uuidAppliMobile: "",
+          loginTokenSAV: ""
         }
-      }
-    }).json<PronoteApiIdentification>();
+      },
+      cookie: req.body.pronoteCookies ? (req.body.pronoteCookies as string[]).join("; ") : undefined
+    });
+
+    if (!pronoteIdentificationData.success) return res.status(401).json({
+      success: false,
+      message: pronoteIdentificationData.message,
+      debug: pronoteIdentificationData.debug
+    });
 
     res.status(200).json({
       success: true,

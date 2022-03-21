@@ -12,8 +12,8 @@ import type {
   PronoteApiUserDataStudent
 } from "types/PronoteApiData";
 
-import getServerUrl from "@/apiUtils/getServerUrl";
-import request from "@/apiUtils/request";
+import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
+import { request } from "@/apiUtils/request";
 
 export default async function handler (
   req: NextApiRequest,
@@ -35,12 +35,10 @@ export default async function handler (
     }
 
     /** Cleaned Pronote URL. */
-    const pronoteServerUrl = getServerUrl(pronoteUrl);
+    const pronoteServerUrl = getBasePronoteUrl(pronoteUrl);
 
-    // Create the API endpoint using the given session ID.
-    const pronoteApiUrl = `${pronoteServerUrl}/appelfonction/${pronoteAccountId}/${pronoteSessionId}`;
 
-    const pronoteOrder: string = req.body.pronoteOrder;
+    const pronoteOrder: number = req.body.pronoteOrder;
     if (!pronoteOrder) {
       return res.status(400).json({
         success: false,
@@ -48,26 +46,30 @@ export default async function handler (
       });
     }
 
-    const pronoteUserDataResponse = await request(pronoteApiUrl).post(pronoteOrder, {
-      headers: {
-        "Cookie": req.body.pronoteCookie ? req.body.pronoteCookie : undefined
-      },
-      json: {
-        session: pronoteSessionId,
-        numeroOrdre: pronoteOrder,
-        nom: "ParametresUtilisateur",
-        donneesSec: {}
-      }
+    const pronoteUserDataResponse = await request<
+      | PronoteApiUserDataStudent
+    >({
+      pronoteUrl: pronoteServerUrl,
+      sessionId: pronoteSessionId,
+      accountId: pronoteAccountId,
+      order: pronoteOrder,
+      name: "ParametresUtilisateur",
+      body: {},
+      cookie: req.body.pronoteCookie ? req.body.pronoteCookie : undefined
     });
 
-    const pronoteUserData = JSON.parse(pronoteUserDataResponse.body) as
-      | PronoteApiUserDataStudent;
+    if (!pronoteUserDataResponse.success) return res.status(401).json({
+      success: false,
+      message: pronoteUserDataResponse.message,
+      debug: pronoteUserDataResponse.debug
+    });
+
 
     const pronoteLoginCookies = pronoteUserDataResponse.headers["set-cookie"];
 
     res.status(200).json({
       success: true,
-      pronoteData: pronoteUserData,
+      pronoteData: pronoteUserDataResponse,
       pronoteLoginCookie: pronoteLoginCookies ? pronoteLoginCookies[0].split(";")[0] : undefined
     });
   }

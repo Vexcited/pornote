@@ -29,7 +29,6 @@ export interface ApiInformationsResponse {
 
   /** Server's response. */
   pronoteData: RequestSuccess<
-    | PronoteApiFonctionParametresCommon
     | PronoteApiFonctionParametresStudent
   >;
 

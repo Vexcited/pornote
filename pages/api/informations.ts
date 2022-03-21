@@ -9,12 +9,10 @@ import type {
 } from "types/ApiData";
 
 import type {
-  PronoteApiFonctionParametresCommon,
   PronoteApiFonctionParametresStudent
 } from "types/PronoteApiData";
 
 import getPronotePage from "@/apiUtils/getPronotePage";
-import checkEntAvailable from "@/apiUtils/checkEntAvailable";
 
 import objectChecker from "@/apiUtils/objectChecker";
 import { request } from "@/apiUtils/request";
@@ -28,16 +26,12 @@ import forge from "node-forge";
 export type ApiInformationsRequestBody = {
   pronoteUrl: string;
   /**
-   * Whether to parse the Pronote URL or no.
-   * Defaults to `false`.
-   */
-  usingRawPronoteUrl?: boolean;
-
-  /**
    * Account ID of the type of user to use.
    * Defaults to `0` (common).
    */
-  pronoteAccountId?: number;
+  pronoteAccountId: number;
+
+  useRawUrl: boolean;
 
   /**
    * Cookie used when getting Pronote HTML page.
@@ -61,16 +55,17 @@ const bodyChecker = (req: NextApiRequest): BodyCheckerSuccess | BodyCheckerFail 
 
   try {
     const pronoteUrl = body.get("pronoteUrl", "string", { required: true });
-    const usingRawPronoteUrl = body.get("usingRawPronoteUrl", "boolean") ?? false;
 
     const pronoteAccountId = body.get("pronoteAccountId", "number") ?? 0;
     const pronoteAccountCookie = body.get("pronoteAccountCookie", "string");
 
+    const useRawUrl = body.get("useRawUrl", "boolean") ?? false;
+
     return {
       success: true,
       body: {
+        useRawUrl,
         pronoteUrl,
-        usingRawPronoteUrl,
         pronoteAccountId,
         pronoteAccountCookie
       }
@@ -107,13 +102,11 @@ export default async function handler (
 
     // Get a clean Pronote URL without the ENT bypass.
     const pronoteUrl = getBasePronoteUrl(body.pronoteUrl);
-    // Get the raw URL for later reference.
-    const rawPronoteUrl = body.pronoteUrl;
 
     // Get the URL of the Pronote page to fetch.
     // When we use raw URL, it's often for ENT or restore session purposes.
-    const pronoteHtmlUrl = body.usingRawPronoteUrl
-      ? rawPronoteUrl
+    const pronoteHtmlUrl = body.useRawUrl
+      ? body.pronoteUrl
       : pronoteUrl + `/${accountType.path}?login=true`;
 
     // Get the Pronote HTML page to parse session data.
@@ -132,24 +125,6 @@ export default async function handler (
       }
     });
 
-    // Fetch Pronote server URL without the "?login=true" part
-    // to see if an ENT is available.
-    const pronoteEntCheckData = accountType.id === 0
-      ? await checkEntAvailable(pronoteUrl)
-      : null;
-
-    // Checking if both functions executed successfully.
-    if (pronoteEntCheckData && !pronoteEntCheckData.success) {
-      return res.status(500).json({
-        success: false,
-        message: pronoteEntCheckData.message,
-        debug: {
-          pronoteUrl,
-          pronoteEntBody: pronoteEntCheckData.body
-        }
-      });
-    }
-
     // We extract session informations from the DOM.
     const sessionResults = extractSession(pronotePageData.body);
     if (!sessionResults.success) {
@@ -165,43 +140,30 @@ export default async function handler (
     }
 
     const { session } = sessionResults;
-    const sessionId = parseInt(session.h);
 
+    // Random IV that will be used for our session.
+    const randomIv = forge.random.getBytesSync(16);
 
-    // Request to Pronote server.
-    // AccountID: 9 => Default for informations gathering (no account type).
-    // const informationsApiPath = `appelfonction/${pronoteAccountId ? pronoteAccountId : "0"}/` + session.h + "/" + orderEncrypted;
+    // Create RSA using given modulos.
+    const rsaKey = forge.pki.rsa.setPublicKey(
+      new forge.jsbn.BigInteger(session.MR, 16),
+      new forge.jsbn.BigInteger(session.ER, 16)
+    );
 
-    // Append POST body to request only if we
-    // want to get informations for an account login.
-    const informationsPostBody: { identifiantNav?: null, Uuid?: string } = {};
-    let pronoteCryptoInformations: ApiInformationsResponse["pronoteCryptoInformations"] | undefined;
-    if (accountType.id !== 0) {
-      // Random IV that will be used for our session.
-      const randomIv = forge.random.getBytesSync(16);
+    // Create Uuid for 'FonctionParametres'.
+    const rsaUuid = forge.util.encode64(rsaKey.encrypt(randomIv), 64);
 
-      // Create RSA using given modulos.
-      const rsaKey = forge.pki.rsa.setPublicKey(
-        new forge.jsbn.BigInteger(session.MR, 16),
-        new forge.jsbn.BigInteger(session.ER, 16)
-      );
+    const informationsPostBody = {
+      identifiantNav: null,
+      Uuid: rsaUuid
+    };
 
-      // Create Uuid for 'FonctionParametres'.
-      const rsaUuid = forge.util.encode64(rsaKey.encrypt(randomIv), 64);
+    const pronoteCryptoInformations = {
+      iv: randomIv,
+      session
+    };
 
-      informationsPostBody.identifiantNav = null;
-      informationsPostBody.Uuid = rsaUuid;
-
-      // Append crypto informations we used to response.
-      pronoteCryptoInformations = {
-        iv: randomIv,
-        session
-      };
-    }
-
-    try {
-      const pronoteData = await request<
-        | PronoteApiFonctionParametresCommon
+    const pronoteData = await request<
         | PronoteApiFonctionParametresStudent
       >({
         name: "FonctionParametres",
@@ -215,27 +177,21 @@ export default async function handler (
         isEncrypted: !session.sCrA
       });
 
-      pronoteData.
+    if (!pronoteData.success) return res.status(500).json({
+      success: false,
+      message: pronoteData.message,
+      debug: {
+        pronoteUrl,
+        request: pronoteData
+      }
+    });
 
-        res.status(200).json({
-          success: true,
-          pronoteData,
-          pronoteEntUrl: pronoteEntCheckData ? pronoteEntCheckData.entUrl : undefined,
-          pronoteCryptoInformations,
-          pronoteHtmlCookie: pronotePageData.loginCookie ? pronotePageData.loginCookie.split(";")[0] : undefined
-        });
-    }
-    catch (e) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to execute 'request'",
-        debug: {
-          error: e,
-          pronoteHtmlUrl
-        }
-      });
-    }
-
+    res.status(200).json({
+      success: true,
+      pronoteData,
+      pronoteCryptoInformations,
+      pronoteHtmlCookie: pronotePageData.loginCookie ? pronotePageData.loginCookie.split(";")[0] : undefined
+    });
   }
   else {
     res.status(404).json({
