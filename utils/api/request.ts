@@ -146,24 +146,18 @@ export async function request<T> ({
     });
 
     if (isEncrypted) {
-      const decrypted_data = aesDecrypt(receivedData as string, {
+      const decrypted = aesDecrypt(receivedData as string, {
         iv: aesIv, key: aesKey
       });
 
-      receivedData = decrypted_data;
+      if (!isCompressed) {
+        receivedData = JSON.parse(decrypted);
+      } else receivedData = forge.util.bytesToHex(decrypted);
     }
 
     if (isCompressed) {
-      const d = forge.util.createBuffer(receivedData as string);
-      return {
-        success: false,
-        message: "Compressed data received, but not decompressed",
-        usedOrder: [name, order],
-        debug: d,
-      };
-      // receivedData = pako.inflateRaw(d.bytes(), { to: "string" });
-
-      console.log(receivedData);
+      const toDecompress = Buffer.from(receivedData as string, "hex");
+      receivedData = pako.inflateRaw(toDecompress, { to: "string" });
     }
 
     if (typeof receivedData === "string") {
