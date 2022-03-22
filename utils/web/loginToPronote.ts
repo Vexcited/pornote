@@ -7,6 +7,9 @@ import type {
   ApiUserResponse
 } from "types/ApiData";
 
+import type { ApiInformationsRequestBody } from "pages/api/informations";
+import type {  } from "pages/api/identification";
+
 import type {
   PronoteApiFonctionParametresStudent
 } from "types/PronoteApiData";
@@ -18,16 +21,16 @@ import type {
 import ky, { HTTPError } from "ky";
 import forge from "node-forge";
 
-import decryptAes from "@/apiUtils/decryptAes";
-import encryptAes from "@/apiUtils/encryptAes";
-import getAccountTypeFromUrl from "./getAccountTypeFromUrl";
+import accountTypes from "@/apiUtils/accountTypes";
 
 type LoginToPronoteProps = {
   username?: string;
   password?: string;
 
+  /** Pronote URL to login to when not using ENT. */
   pronoteUrl?: string;
 
+  /** ENT URL to login to when using ENT. */
   entUrl?: string;
   usingEnt?: boolean;
   entCookies?: string[];
@@ -59,31 +62,37 @@ export default async function loginToPronote ({
       pronoteUrl = pronoteData.pronoteUrl;
     } else if (!pronoteUrl) return null;
 
-    const accountType = getAccountTypeFromUrl(pronoteUrl);
+    const pronoteUrlObject = new URL(pronoteUrl);
+    const pronoteUrlAccountPath = pronoteUrlObject.pathname.split("/").pop();
+    console.log(pronoteUrlAccountPath);
+
+    const accountType = accountTypes.find(a => a.path === pronoteUrlAccountPath);
+    if (!accountType) return null;
 
     let pronoteUsername = username || "";
     let pronotePassword = password || "";
 
-    const pronoteInformationsData = await ky.post("/api/informations", {
-      json: {
-        pronoteUrl,
-        pronoteAccountId: accountType.id,
-        pronoteAccountPath: accountType.path,
-        // Relogin to Pronote using ENT cookie.
-        ...(usingEnt ? {
-          pronoteCookie: cookie || undefined,
-          usingRawPronoteUrl: true
-        } :
-        // When passed a cookie but not using ENT, we just relogin to Pronote.
+    const pronoteInformationsBody: ApiInformationsRequestBody = {
+      pronoteAccountId: accountType.id,
+      pronoteUrl,
+      // Relogin to Pronote using ENT cookie.
+      ...(usingEnt ? {
+        pronoteAccountCookie: cookie || undefined,
+        useRawUrl: true
+      } :
+      // When passed a cookie but not using ENT, we just relogin to Pronote.
         // When re-login to Pronote, we should re-use the exact same URL
         // that we used to first time.
-          cookie ? {
-            pronoteCookie: cookie,
-            usingRawPronoteUrl: false
-          }
-          // We just login to Pronote for the first time.
-            : {})
-      }
+        cookie ? {
+          pronoteAccountCookie: cookie,
+          useRawUrl: false
+        }
+        // We just login to Pronote for the first time.
+          : { useRawUrl: false })
+    };
+
+    const pronoteInformationsData = await ky.post("/api/informations", {
+      json: pronoteInformationsBody
     }).json<ApiInformationsResponse>();
 
     // Check if fields are missing in response.
@@ -111,17 +120,9 @@ export default async function loginToPronote ({
     const isUsingPronoteIdentifiers = !! (currentSession.e && currentSession.f);
     console.info("[loginToPronote]: `isUsingPronoteIdentifiers`:", isUsingPronoteIdentifiers);
 
-    // Check 'numeroOrdre' from 'pronoteInformationsData'.
-    // It should be equal to '2'.
-    const decryptedInformationsOrder = decryptAes(
-      pronoteInformationsData.pronoteData.numeroOrdre,
-      { iv: bufferIv }
-    );
+    const pronoteIdentificationBody = {
 
-    const identificationOrderEncrypted = encryptAes(
-      getNextOrderNumber(decryptedInformationsOrder),
-      { iv: bufferIv }
-    );
+    };
 
     const pronoteIdentificationData = await ky.post("/api/identification", {
       json: {

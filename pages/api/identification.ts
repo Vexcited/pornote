@@ -13,6 +13,7 @@ import type {
 } from "types/PronoteApiData";
 
 import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
+import objectChecker from "@/apiUtils/objectChecker";
 import { request } from "@/apiUtils/request";
 
 export default async function handler (

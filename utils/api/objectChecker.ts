@@ -1,3 +1,5 @@
+import type { NextApiRequest } from "next";
+
 /**
  * Use any object as parameter with its type.
  *
@@ -31,3 +33,39 @@ export default function objectTypeChecker <T> (object: any) {
     }
   };
 }
+
+type BodyCheckerSuccess<T> = {
+  success: true;
+  body: T;
+}
+
+type BodyCheckerFail = {
+  success: false;
+  message: string;
+}
+
+export const bodyChecker = <T, K extends keyof T>(req: NextApiRequest, values: {
+  param: K;
+  type: "string" | "number" | "boolean" | "object";
+  required: boolean;
+}[]): BodyCheckerSuccess<T> | BodyCheckerFail => {
+  const body = objectTypeChecker<T>(req.body);
+
+  try {
+    const returnBody = values.reduce((o, { param, type, required }) => ({
+      ...o, [param]: body.get(param, type, { required })}), {}) as T;
+
+    return {
+      success: true,
+      body: returnBody
+    };
+  }
+  catch (e) {
+    const error = e as Error;
+
+    return {
+      success: false,
+      message: error.message
+    };
+  }
+};

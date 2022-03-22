@@ -15,7 +15,7 @@ import type {
 import getPronotePage from "@/apiUtils/getPronotePage";
 import checkEntAvailable from "@/apiUtils/checkEntAvailable";
 
-import objectChecker from "@/apiUtils/objectChecker";
+import { bodyChecker } from "@/apiUtils/objectChecker";
 import { request } from "@/apiUtils/request";
 
 import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
@@ -25,45 +25,16 @@ export type ApiCommonInformationsRequestBody = {
   pronoteUrl: string;
 }
 
-type BodyCheckerSuccess = {
-  success: true;
-  body: ApiCommonInformationsRequestBody;
-}
-
-type BodyCheckerFail = {
-  success: false;
-  message: string;
-}
-
-const bodyChecker = (req: NextApiRequest): BodyCheckerSuccess | BodyCheckerFail => {
-  const body = objectChecker<ApiCommonInformationsRequestBody>(req.body);
-
-  try {
-    const pronoteUrl = body.get("pronoteUrl", "string", { required: true });
-
-    return {
-      success: true,
-      body: {
-        pronoteUrl
-      }
-    };
-  }
-  catch (e) {
-    const error = e as Error;
-
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-};
-
 export default async function handler (
   req: NextApiRequest,
   res: NextApiResponse<ApiCommonInformationsResponse | ApiServerError>
 ) {
   if (req.method === "POST") {
-    const bodyCheckResults = bodyChecker(req);
+    const bodyCheckResults = bodyChecker<ApiCommonInformationsRequestBody, keyof ApiCommonInformationsRequestBody>(req, [{
+      param: "pronoteUrl",
+      type: "string",
+      required: true
+    }]);
     if (!bodyCheckResults.success) return res.status(401).json({
       success: false,
       message: bodyCheckResults.message
