@@ -8,7 +8,7 @@ import type {
 } from "types/ApiData";
 
 import type { ApiInformationsRequestBody } from "pages/api/informations";
-import type {  } from "pages/api/identification";
+import type { ApiIdentificationRequestBody } from "pages/api/identification";
 
 import type {
   PronoteApiFonctionParametresStudent

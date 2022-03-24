@@ -13,87 +13,108 @@ import type {
 } from "types/PronoteApiData";
 
 import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
-import objectChecker from "@/apiUtils/objectChecker";
+import { bodyChecker } from "@/apiUtils/objectChecker";
 import { request } from "@/apiUtils/request";
+
+export type ApiIdentificationRequestBody = {
+  pronote_url: string;
+
+  /** Account Type ID of the user to authenticate. */
+  pronote_account_type_id: number;
+
+  /** Session from Pronote HTML: `parseInt(session.h)` */
+  pronote_session_id: number;
+
+  /** **Unencrypted** order to send to Pronote. */
+  pronote_session_order: number;
+
+  /** Username of the user to authenticate. */
+  pronote_username: string;
+
+  using_ent?: boolean;
+}
 
 export default async function handler (
   req: NextApiRequest,
   res: NextApiResponse<ApiIdentificationResponse | ApiServerError>
 ) {
-  if (req.method === "POST") {
-    /** Dirty Pronote URL. */
-    const pronoteUrl: string = req.body.pronoteUrl;
-    // Informations about the Pronote account path.
-    const pronoteAccountId: number = req.body.pronoteAccountId;
-    const pronoteSessionId: number = req.body.pronoteSessionId;
+  if (req.method !== "POST") return res.status(404).json({
+    success: false,
+    message: "Method doesn't exist."
+  });
 
-    if (!pronoteUrl || !pronoteAccountId || !pronoteSessionId) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing informations about the Pronote account path."
-      });
+  const bodyCheckResults = bodyChecker<ApiIdentificationRequestBody>(req, [
+    {
+      param: "pronote_url",
+      type: "string",
+      required: true
+    },
+    {
+      param: "pronote_account_type_id",
+      type: "number",
+      required: true
+    },
+    {
+      param: "pronote_session_id",
+      type: "number",
+      required: true
+    },
+    {
+      param: "pronote_session_order",
+      type: "number",
+      required: true
+    },
+    {
+      param: "pronote_username",
+      type: "string",
+      required: true
+    },
+    {
+      param: "using_ent",
+      type: "boolean",
+      required: false
     }
+  ]);
 
-    // 'identifiant' on 'Identification' request POST body.
-    const accountIdentifier: string = req.body.identifier;
-    if (!accountIdentifier) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing account 'identifier'."
-      });
-    }
+  if (!bodyCheckResults.success) return res.status(401).json({
+    success: false,
+    message: bodyCheckResults.message
+  });
 
-    const usingEnt = req.body.usingEnt as boolean || false;
+  const body = bodyCheckResults.body;
+  const pronoteBaseUrl = getBasePronoteUrl(body.pronote_url);
 
-    /** Cleaned Pronote URL. */
-    const pronoteServerUrl = getBasePronoteUrl(pronoteUrl);
+  const pronoteIdentificationData = await request<PronoteApiIdentification>({
+    pronoteUrl: pronoteBaseUrl,
+    accountId: body.pronote_account_type_id,
+    sessionId: body.pronote_session_id,
+    order: body.pronote_session_order,
+    name: "Identification",
+    body: {
+      donnees: {
+        genreConnexion: 0,
+        genreEspace: body.pronote_account_type_id,
+        identifiant: body.pronote_username,
+        pourENT: body.using_ent ?? false,
+        enConnexionAuto: false,
+        demandeConnexionAuto: false,
+        demandeConnexionAppliMobile: false,
+        demandeConnexionAppliMobileJeton: false,
+        uuidAppliMobile: "",
+        loginTokenSAV: ""
+      }
+    },
+    cookie: req.body.pronoteCookies ? (req.body.pronoteCookies as string[]).join("; ") : undefined
+  });
 
-    const pronoteOrder: number = req.body.pronoteOrder;
-    if (!pronoteOrder) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing 'pronoteOrder' for 'numeroOrdre'."
-      });
-    }
+  if (!pronoteIdentificationData.success) return res.status(401).json({
+    success: false,
+    message: pronoteIdentificationData.message,
+    debug: pronoteIdentificationData.debug
+  });
 
-    const pronoteIdentificationData = await request<PronoteApiIdentification>({
-      pronoteUrl: pronoteServerUrl,
-      accountId: pronoteAccountId,
-      sessionId: pronoteSessionId,
-      order: pronoteOrder,
-      name: "Identification",
-      body: {
-        donnees: {
-          genreConnexion: 0,
-          genreEspace: pronoteAccountId,
-          identifiant: accountIdentifier,
-          pourENT: usingEnt,
-          enConnexionAuto: false,
-          demandeConnexionAuto: false,
-          demandeConnexionAppliMobile: false,
-          demandeConnexionAppliMobileJeton: false,
-          uuidAppliMobile: "",
-          loginTokenSAV: ""
-        }
-      },
-      cookie: req.body.pronoteCookies ? (req.body.pronoteCookies as string[]).join("; ") : undefined
-    });
-
-    if (!pronoteIdentificationData.success) return res.status(401).json({
-      success: false,
-      message: pronoteIdentificationData.message,
-      debug: pronoteIdentificationData.debug
-    });
-
-    res.status(200).json({
-      success: true,
-      pronoteData: pronoteIdentificationData
-    });
-  }
-  else {
-    res.status(404).json({
-      success: false,
-      message: "Method doesn't exist."
-    });
-  }
+  res.status(200).json({
+    success: true,
+    pronoteData: pronoteIdentificationData
+  });
 }

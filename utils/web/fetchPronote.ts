@@ -8,6 +8,10 @@ import type {
   SchoolInformations
 } from "types/SavedAccountData";
 
+import type {
+  ApiCommonInformationsRequestBody
+} from "pages/api/common_informations";
+
 import ky, { HTTPError } from "ky";
 import fixSchoolName from "@/webUtils/fixSchoolName";
 
@@ -21,16 +25,20 @@ interface RequestSuccess {
   success: true;
 }
 
-interface GetCommonInformationsFromSuccess extends RequestSuccess {
+interface GetCommonInformationsResponse extends RequestSuccess {
   data: SchoolInformations;
 }
 
 export async function getCommonInformationsFrom (
   pronoteUrl: string
-): Promise<GetCommonInformationsFromSuccess | RequestFail> {
+): Promise<GetCommonInformationsResponse | RequestFail> {
   try {
+    const body: ApiCommonInformationsRequestBody = {
+      pronoteUrl
+    };
+
     const data = await ky.post("/api/common_informations", {
-      json: { pronoteUrl }
+      json: body
     }).json<ApiCommonInformationsResponse>();
 
     // Initializing default returned values.

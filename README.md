@@ -84,6 +84,22 @@ It is used to get informations about a school and its different account types av
 }
 ```
 
+### `/api/informations`
+
+> [See code from source](./pages/api/informations.ts)
+
+Route that sends a call to `FonctionParametres` without any data.
+It is used to get informations about a school and its different account types available.
+
+#### Request Body
+
+```typescript
+{
+  pronote_url: string;
+  
+}
+```
+
 ### API Error
 
 When an error is thrown, the API always respond with an error message.

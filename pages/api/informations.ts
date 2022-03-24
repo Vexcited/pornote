@@ -14,79 +14,61 @@ import type {
 
 import getPronotePage from "@/apiUtils/getPronotePage";
 
-import objectChecker from "@/apiUtils/objectChecker";
+import { bodyChecker } from "@/apiUtils/objectChecker";
 import { request } from "@/apiUtils/request";
 
 import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
 import extractSession from "@/apiUtils/extractSession";
-import accountTypes from "@/apiUtils/accountTypes";
+import { getAccountTypeById } from "@/apiUtils/accountTypes";
 
 import forge from "node-forge";
 
 export type ApiInformationsRequestBody = {
-  pronoteUrl: string;
-  /**
-   * Account ID of the type of user to use.
-   * Defaults to `0` (common).
-   */
-  pronoteAccountId: number;
+  pronote_url: string;
 
-  useRawUrl: boolean;
+  /** Account Type ID to use. */
+  pronote_account_type_id: number;
+
+  /** Whether to parse (`getBasePronoteUrl`) Pronote URL or not. */
+  use_raw_pronote_url: boolean;
 
   /**
    * Cookie used when getting Pronote HTML page.
    * Needed when creating a new session from ENT or an already set-up session.
+   *
+   * This will append `e` and `f` in to the HTML session object.
    */
-  pronoteAccountCookie?: string;
+  pronote_setup_account_cookie?: string;
 }
-
-type BodyCheckerSuccess = {
-  success: true;
-  body: ApiInformationsRequestBody;
-}
-
-type BodyCheckerFail = {
-  success: false;
-  message: string;
-}
-
-const bodyChecker = (req: NextApiRequest): BodyCheckerSuccess | BodyCheckerFail => {
-  const body = objectChecker<ApiInformationsRequestBody>(req.body);
-
-  try {
-    const pronoteUrl = body.get("pronoteUrl", "string", { required: true });
-
-    const pronoteAccountId = body.get("pronoteAccountId", "number") ?? 0;
-    const pronoteAccountCookie = body.get("pronoteAccountCookie", "string");
-
-    const useRawUrl = body.get("useRawUrl", "boolean") ?? false;
-
-    return {
-      success: true,
-      body: {
-        useRawUrl,
-        pronoteUrl,
-        pronoteAccountId,
-        pronoteAccountCookie
-      }
-    };
-  }
-  catch (e) {
-    const error = e as Error;
-
-    return {
-      success: false,
-      message: error.message
-    };
-  }
-};
 
 export default async function handler (
   req: NextApiRequest,
   res: NextApiResponse<ApiInformationsResponse | ApiServerError>
 ) {
   if (req.method === "POST") {
-    const bodyCheckResults = bodyChecker(req);
+    const bodyCheckResults = bodyChecker<ApiInformationsRequestBody>(req, [
+      {
+        param: "pronote_url",
+        type: "string",
+        required: true
+      },
+      {
+        param: "pronote_account_type_id",
+        type: "number",
+        required: true
+      },
+      {
+        param: "use_raw_pronote_url",
+        type: "boolean",
+        required: true
+      },
+      {
+        param: "pronote_setup_account_cookie",
+        type: "string",
+        required: false
+      }
+    ]);
+
     if (!bodyCheckResults.success) return res.status(401).json({
       success: false,
       message: bodyCheckResults.message
@@ -94,24 +76,25 @@ export default async function handler (
 
     const body = bodyCheckResults.body;
 
-    const accountType = accountTypes.find(type => type.id === body.pronoteAccountId!);
+    // Getting the account type ID
+    const accountType = getAccountTypeById(body.pronote_account_type_id);
     if (!accountType) return res.status(401).json({
       success: false,
-      message: "La valeur de la clé `pronoteAccountId` est incorrecte."
+      message: "La valeur de la clé `pronote_account_type_id` est incorrecte."
     });
 
     // Get a clean Pronote URL without the ENT bypass.
-    const pronoteUrl = getBasePronoteUrl(body.pronoteUrl);
+    const pronoteUrl = getBasePronoteUrl(body.pronote_url);
 
     // Get the URL of the Pronote page to fetch.
     // When we use raw URL, it's often for ENT or restore session purposes.
-    const pronoteHtmlUrl = body.useRawUrl
-      ? body.pronoteUrl
+    const pronoteHtmlUrl = body.use_raw_pronote_url
+      ? body.pronote_url
       : pronoteUrl + `/${accountType.path}?login=true`;
 
     // Get the Pronote HTML page to parse session data.
     const pronotePageData = await getPronotePage(
-      pronoteHtmlUrl, body.pronoteAccountCookie
+      pronoteHtmlUrl, body.pronote_setup_account_cookie
     );
 
     // Check if the request was successful.
@@ -120,7 +103,7 @@ export default async function handler (
       message: pronotePageData.message,
       debug: {
         pronoteHtmlUrl,
-        pronoteAccountCookie: body.pronoteAccountCookie,
+        pronoteSetupAccountCookie: body.pronote_setup_account_cookie,
         pronotePageBody: pronotePageData.body
       }
     });
@@ -163,19 +146,28 @@ export default async function handler (
       session
     };
 
-    const pronoteData = await request<
-        | PronoteApiFonctionParametresStudent
-      >({
-        name: "FonctionParametres",
-        body: informationsPostBody,
-        pronoteUrl,
-        order: 1,
-        sessionId: parseInt(session.h),
-        accountId: accountType.id,
-        cookie: pronotePageData.loginCookie ? `${body.pronoteAccountCookie ? body.pronoteAccountCookie + "; " : ""}${pronotePageData.loginCookie.split(";")[0]}` : undefined,
-        isCompressed: !session.sCoA,
-        isEncrypted: !session.sCrA
-      });
+    let cookie: string | undefined = undefined;
+    if (pronotePageData.loginCookie) {
+      if (body.pronote_setup_account_cookie)
+        cookie = body.pronote_setup_account_cookie + "; ";
+      else
+        cookie = "";
+
+      cookie += pronotePageData.loginCookie.split(";")[0];
+    }
+
+
+    const pronoteData = await request<PronoteApiFonctionParametresStudent>({
+      name: "FonctionParametres",
+      body: informationsPostBody,
+      pronoteUrl,
+      order: 1,
+      sessionId: parseInt(session.h),
+      accountId: accountType.id,
+      cookie,
+      isCompressed: !session.sCoA,
+      isEncrypted: !session.sCrA
+    });
 
     if (!pronoteData.success) return res.status(500).json({
       success: false,

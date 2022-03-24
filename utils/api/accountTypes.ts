@@ -1,41 +1,82 @@
+export enum AccountTypeIds {
+  Commun = 0,
+  Eleve = 3,
+  Parent = 2,
+  Professeur = 1,
+  Accompagnant = 25,
+  Entreprise = 4,
+  VieScolaire = 13,
+  Direction = 16,
+  Academie = 5
+};
+
 /** Default account on root path. */
 export const commun = {
-  id: 0,
+  id: AccountTypeIds.Commun,
+  name: "Commun",
   path: ""
 };
 
 export const eleve = {
-  id: 3,
+  id: AccountTypeIds.Eleve,
+  name: "Élèves",
   path: "eleve.html"
 };
 
 export const parent = {
-  id: 3,
+  id: AccountTypeIds.Parent,
+  name: "Parents",
   path: "parent.html"
 };
 
 export const professeur = {
-  id: 1,
+  id: AccountTypeIds.Professeur,
+  name: "Professeurs",
   path: "professeur.html"
 };
 
 export const accompagnant = {
-  id: 25,
+  id: AccountTypeIds.Accompagnant,
+  name: "Accompagnants",
   path: "accompagnant.html"
 };
 
 export const entreprise = {
-  id: 4,
+  id: AccountTypeIds.Entreprise,
+  name: "Entreprises",
   path: "entreprise.html"
 };
 
 export const viescolaire = {
-  id: 13,
+  id: AccountTypeIds.VieScolaire,
+  name: "Vie scolaire",
   path: "viescolaire.html"
 };
 
-const accountTypes = [
-  commun, eleve, parent, professeur, accompagnant, entreprise, viescolaire
-];
+export const direction = {
+  id: AccountTypeIds.Direction,
+  name: "Direction",
+  path: "direction.html"
+};
 
-export default accountTypes;
+export const academie = {
+  id: AccountTypeIds.Academie,
+  name: "Académie",
+  path: "academie.html"
+};
+
+const accountTypes = [
+  commun,
+  eleve,
+  parent,
+  professeur,
+  accompagnant,
+  entreprise,
+  viescolaire,
+  direction,
+  academie
+]; export default accountTypes;
+
+export function getAccountTypeById (id: AccountTypeIds) {
+  return accountTypes.find(type => type.id === id);
+}
