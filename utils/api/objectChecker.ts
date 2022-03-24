@@ -44,8 +44,8 @@ type BodyCheckerFail = {
   message: string;
 }
 
-export const bodyChecker = <T, K extends keyof T>(req: NextApiRequest, values: {
-  param: K;
+export const bodyChecker = <T>(req: NextApiRequest, values: {
+  param: keyof T;
   type: "string" | "number" | "boolean" | "object";
   required: boolean;
 }[]): BodyCheckerSuccess<T> | BodyCheckerFail => {

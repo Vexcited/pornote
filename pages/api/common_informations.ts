@@ -30,11 +30,14 @@ export default async function handler (
   res: NextApiResponse<ApiCommonInformationsResponse | ApiServerError>
 ) {
   if (req.method === "POST") {
-    const bodyCheckResults = bodyChecker<ApiCommonInformationsRequestBody, keyof ApiCommonInformationsRequestBody>(req, [{
-      param: "pronoteUrl",
-      type: "string",
-      required: true
-    }]);
+    const bodyCheckResults = bodyChecker<ApiCommonInformationsRequestBody>(req, [
+      {
+        param: "pronoteUrl",
+        type: "string",
+        required: true
+      }
+    ]);
+
     if (!bodyCheckResults.success) return res.status(401).json({
       success: false,
       message: bodyCheckResults.message
