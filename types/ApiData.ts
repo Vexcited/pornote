@@ -36,7 +36,7 @@ export interface ApiInformationsResponse {
     session: PronoteSession;
   };
 
-  pronoteHtmlCookie?: string;
+  pronote_setup_account_cookie_response_cookies?: string;
 }
 
 export interface ApiIdentificationResponse {

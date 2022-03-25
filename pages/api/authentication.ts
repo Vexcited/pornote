@@ -31,6 +31,9 @@ export type ApiAuthenticationRequestBody = {
   /** Challenge, from `Identification`, solved. */
   pronote_auth_solved_challenge: string;
 
+  /** Cookies given when sending `/api/informations` with `pronote_setup_account_cookie`. */
+  pronote_setup_account_cookie_response_cookies?: string;
+
   using_ent?: boolean;
 }
 
@@ -40,53 +43,66 @@ export default async function handler (
   res: NextApiResponse<ApiAuthenticationResponse | ApiServerError>
 ) {
   if (req.method === "POST") {
-    /** Dirty Pronote URL. */
-    const pronoteUrl: string = req.body.pronoteUrl;
+    const bodyCheckResults = bodyChecker<ApiAuthenticationRequestBody>(req, [
+      {
+        param: "pronote_url",
+        type: "string",
+        required: true
+      },
+      {
+        param: "pronote_account_type_id",
+        type: "number",
+        required: true
+      },
+      {
+        param: "pronote_session_id",
+        type: "number",
+        required: true
+      },
+      {
+        param: "pronote_session_order",
+        type: "number",
+        required: true
+      },
+      {
+        param: "pronote_auth_solved_challenge",
+        type: "string",
+        required: true
+      },
+      {
+        param: "pronote_setup_account_cookie_response_cookies",
+        type: "string",
+        required: false
+      },
+      {
+        param: "using_ent",
+        type: "boolean",
+        required: false
+      }
+    ]);
 
-    // Informations about the Pronote account path.
-    const pronoteAccountId: number = req.body.pronoteAccountId;
-    const pronoteSessionId: number = req.body.pronoteSessionId;
+    if (!bodyCheckResults.success) return res.status(401).json({
+      success: false,
+      message: bodyCheckResults.message
+    });
 
-    if (!pronoteUrl || !pronoteAccountId || !pronoteSessionId) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing informations about the Pronote account path."
-      });
-    }
-
-    /** Cleaned Pronote URL. */
-    const pronoteServerUrl = getBasePronoteUrl(pronoteUrl);
-
-    const pronoteOrder: number = req.body.pronoteOrder;
-    if (!pronoteOrder) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing 'pronoteOrder' for 'numeroOrdre'."
-      });
-    }
-
-    const pronoteSolvedChallenge: string = req.body.pronoteSolvedChallenge;
-    if (!pronoteSolvedChallenge) {
-      return res.status(401).json({
-        success: false,
-        message: "Missing 'pronoteSolvedChallenge'."
-      });
-    }
+    const body = bodyCheckResults.body;
+    const pronoteBaseUrl = getBasePronoteUrl(body.pronote_url);
 
     const pronoteRequest = await request<PronoteApiAuthentication>({
-      pronoteUrl: pronoteServerUrl,
+      pronoteUrl: pronoteBaseUrl,
       name: "Authentification",
-      sessionId: pronoteSessionId,
-      accountId: pronoteAccountId,
-      order: pronoteOrder,
+      sessionId: body.pronote_session_id,
+      accountId: body.pronote_account_type_id,
+      order: body.pronote_session_order,
       body: {
         donnees: {
           connexion: 0,
-          challenge: pronoteSolvedChallenge,
-          espace: pronoteAccountId
+          challenge: body.pronote_auth_solved_challenge,
+          espace: body.pronote_account_type_id
         }
       },
-      cookie: req.body.pronoteCookies ? (req.body.pronoteCookies as string[]).join("; ") : undefined
+      cookie: body.pronote_setup_account_cookie_response_cookies
     });
 
     if (!pronoteRequest.success) return res.status(401).json({

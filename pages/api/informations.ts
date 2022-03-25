@@ -181,7 +181,7 @@ export default async function handler (
       success: true,
       request: pronoteRequest,
       pronoteCryptoInformations,
-      pronoteHtmlCookie: pronotePageData.loginCookie ? pronotePageData.loginCookie.split(";")[0] : undefined
+      pronote_setup_account_cookie_response_cookies: pronotePageData.loginCookie ? pronotePageData.loginCookie.split(";")[0] : undefined
     });
   }
   else {

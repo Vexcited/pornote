@@ -167,6 +167,23 @@ Send `Authentification` (`/api/authentication`) to Pronote with the resolved cha
 
 ```typescript
 {
-  
+  pronote_url: string;
+
+  /** Account Type ID of the user to authenticate. */
+  pronote_account_type_id: number;
+
+  /** Session from Pronote HTML: `parseInt(session.h)` */
+  pronote_session_id: number;
+
+  /** **Unencrypted** order to send to Pronote. */
+  pronote_session_order: number;
+
+  /** Challenge, from `Identification`, solved. */
+  pronote_auth_solved_challenge: string;
+
+  /** Cookies given when sending `/api/informations` with `pronote_setup_account_cookie`. */
+  pronote_setup_account_cookie_response_cookies?: string;
+
+  using_ent?: boolean;
 }
 ```
