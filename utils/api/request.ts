@@ -48,7 +48,7 @@ type RequestProps = {
    */
   body: any;
   encryption?: {
-    aesKey: Uint8Array;
+    aesKey?: string;
     aesIv: string;
   }
 
@@ -66,15 +66,32 @@ type RequestProps = {
 export type RequestSuccess<T> = {
   success: true;
   data: T;
-  usedOrder: [string, number];
-  returnedOrder: [string, number];
+
+  /** Order in the request body. */
+  usedOrder: {
+    encrypted: string;
+    unencrypted: number;
+  };
+
+  /** Order from the response. */
+  returnedOrder: {
+    encrypted: string;
+    unencrypted: number;
+  };
+
   headers: IncomingHttpHeaders;
 }
 
 export type RequestFail = {
   success: false;
   message: string;
-  usedOrder: [string, number];
+
+  /** Order in the request body. */
+  usedOrder: {
+    encrypted: string;
+    unencrypted: number;
+  };
+
   debug?: any;
 }
 
@@ -171,8 +188,14 @@ export async function request<T> ({
 
     return {
       success: true,
-      usedOrder: [orderEncrypted, order],
-      returnedOrder: [data.numeroOrdre, parseInt(decryptedOrder)],
+      usedOrder: {
+        encrypted: orderEncrypted,
+        unencrypted: order
+      },
+      returnedOrder: {
+        encrypted: data.numeroOrdre,
+        unencrypted: parseInt(decryptedOrder)
+      },
       data: receivedData,
       headers: response.headers
     };
@@ -184,7 +207,10 @@ export async function request<T> ({
       return {
         success: false,
         message: "Erreur serveur Pronote API",
-        usedOrder: [orderEncrypted, order],
+        usedOrder: {
+          encrypted: orderEncrypted,
+          unencrypted: order
+        },
         debug: { body }
       };
     }
@@ -195,7 +221,10 @@ export async function request<T> ({
     return {
       success: false,
       message: "Erreur inconnue.",
-      usedOrder: [orderEncrypted, order],
+      usedOrder: {
+        encrypted: orderEncrypted,
+        unencrypted: order
+      },
       debug: { e }
     };
   }

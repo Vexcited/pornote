@@ -9,6 +9,7 @@ import type {
 
 import type { ApiInformationsRequestBody } from "pages/api/informations";
 import type { ApiIdentificationRequestBody } from "pages/api/identification";
+import type { ApiAuthenticationRequestBody } from "pages/api/authentication";
 
 import type {
   PronoteApiFonctionParametresStudent
@@ -20,6 +21,11 @@ import type {
 
 import ky, { HTTPError } from "ky";
 import forge from "node-forge";
+
+import {
+  aesEncrypt,
+  aesDecrypt
+} from "@/apiUtils/encryption";
 
 import accountTypes from "@/apiUtils/accountTypes";
 
@@ -50,45 +56,55 @@ export default async function loginToPronote ({
   cookie
 }: LoginToPronoteProps): Promise<(null | SavedAccountData)> {
   try {
+    /** Only for debug purposes. */
+    console.group("[loginToPronote] Connecting to Pronote.");
+
+    console.info("Using ENT:", usingEnt);
     if (usingEnt) {
+      const ticket_request_body = {
+        entUrl,
+        entCookies
+      };
+
       // Pronote URL with 'identifiant=xxxxxxx'.
-      const pronoteData = await ky.post("/api/getPronoteTicket", {
-        json: {
-          entUrl,
-          entCookies
-        }
+      console.info("[ENT] Sending `/api/getPronoteTicket` request, with body:", ticket_request_body);
+      const ticket_response_data = await ky.post("/api/getPronoteTicket", {
+        json: ticket_request_body
       }).json<ApiGetPronoteTicketResponse>();
 
-      pronoteUrl = pronoteData.pronoteUrl;
+      console.info("[ENT] Got response:", ticket_response_data);
+      pronoteUrl = ticket_response_data.pronote_url;
     } else if (!pronoteUrl) return null;
 
     const pronoteUrlObject = new URL(pronoteUrl);
     const pronoteUrlAccountPath = pronoteUrlObject.pathname.split("/").pop();
-    console.log(pronoteUrlAccountPath);
+    console.info("[Pronote URL] Guessed account_type_path:", pronoteUrlAccountPath);
 
+    // Get account_type from guessed path.
     const accountType = accountTypes.find(a => a.path === pronoteUrlAccountPath);
-    if (!accountType) return null;
+    if (accountType) console.info("[Pronote URL] account_type:", accountType);
+    else return null;
 
     let pronoteUsername = username || "";
     let pronotePassword = password || "";
 
     const pronoteInformationsBody: ApiInformationsRequestBody = {
-      pronoteAccountId: accountType.id,
-      pronoteUrl,
+      pronote_account_type_id: accountType.id,
+      pronote_url: pronoteUrl,
       // Relogin to Pronote using ENT cookie.
       ...(usingEnt ? {
-        pronoteAccountCookie: cookie || undefined,
-        useRawUrl: true
+        pronote_setup_account_cookie: cookie || undefined,
+        use_raw_pronote_url: true
       } :
-      // When passed a cookie but not using ENT, we just relogin to Pronote.
+        // When passed a cookie but not using ENT, we just re-login to Pronote.
         // When re-login to Pronote, we should re-use the exact same URL
-        // that we used to first time.
+        // that we used the first time.
         cookie ? {
-          pronoteAccountCookie: cookie,
-          useRawUrl: false
+          pronote_setup_account_cookie: cookie,
+          use_raw_pronote_url: false
         }
         // We just login to Pronote for the first time.
-          : { useRawUrl: false })
+          : { use_raw_pronote_url: false })
     };
 
     const pronoteInformationsData = await ky.post("/api/informations", {
@@ -101,11 +117,13 @@ export default async function loginToPronote ({
       return null;
     }
 
-    const pronoteLoginCookies = [cookie, pronoteInformationsData.pronoteHtmlCookie];
+    const pronoteLoginCookies = [
+      cookie,
+      pronoteInformationsData.pronote_setup_account_cookie_response_cookies
+    ];
 
-    // IV used to decrypt AES datas.
+    // IV used for AES encryption.
     const iv = pronoteInformationsData.pronoteCryptoInformations.iv;
-    const bufferIv = forge.util.createBuffer(iv);
 
     // Parse current session ID.
     const currentSession = pronoteInformationsData.pronoteCryptoInformations.session;
@@ -117,39 +135,29 @@ export default async function loginToPronote ({
       pronoteUsername = currentSession.e;
       pronotePassword = currentSession.f;
     }
+
     const isUsingPronoteIdentifiers = !! (currentSession.e && currentSession.f);
-    console.info("[loginToPronote]: `isUsingPronoteIdentifiers`:", isUsingPronoteIdentifiers);
+    console.info("[loginToPronote] `isUsingPronoteIdentifiers`:", isUsingPronoteIdentifiers);
 
-    const pronoteIdentificationBody = {
-
+    const pronoteIdentificationBody: ApiIdentificationRequestBody = {
+      pronote_url: pronoteUrl,
+      session_encryption_iv: iv,
+      pronote_account_type_id: accountType.id,
+      pronote_session_id: sessionId,
+      pronote_session_order: pronoteInformationsData.request.returnedOrder.unencrypted,
+      pronote_username: pronoteUsername,
+      using_ent: usingEnt,
+      pronote_setup_account_cookie_response_cookies: isUsingPronoteIdentifiers
+        ? pronoteLoginCookies.join("; ")
+        : undefined
     };
 
+    console.info("[Identification] Request body:", pronoteIdentificationBody);
     const pronoteIdentificationData = await ky.post("/api/identification", {
-      json: {
-        pronoteUrl,
-        pronoteAccountId: accountType.id,
-        pronoteSessionId: sessionId,
-        pronoteOrder: identificationOrderEncrypted,
-
-        identifier: pronoteUsername,
-        ...(isUsingPronoteIdentifiers ? { pronoteCookies: pronoteLoginCookies } : {}),
-        usingEnt
-      }
+      json: pronoteIdentificationBody
     }).json<ApiIdentificationResponse>();
 
-    // Check 'numeroOrdre' from 'pronoteIdentificationData'.
-    // It should be equal to '4'.
-    const decryptedIdentificationOrder = decryptAes(
-      pronoteIdentificationData.pronoteData.numeroOrdre,
-      { iv: bufferIv }
-    );
-
-    const authenticationOrderEncrypted = encryptAes(
-      getNextOrderNumber(decryptedIdentificationOrder),
-      { iv: bufferIv }
-    );
-
-    const challengeData = pronoteIdentificationData.pronoteData.donneesSec.donnees;
+    const challengeData = pronoteIdentificationData.request.data.donnees;
 
     // Update username with `modeCompLog`.
     if (challengeData.modeCompLog === 1)
@@ -191,8 +199,8 @@ export default async function loginToPronote ({
       : challengeAesKeyHashUtf8;
     const challengeAesKeyBuffer = forge.util.createBuffer(challengeAesKey);
 
-    const decryptedBytes = decryptAes(challengeData.challenge, {
-      iv: bufferIv,
+    const decryptedBytes = aesDecrypt(challengeData.challenge, {
+      iv: forge.util.createBuffer(iv),
       key: challengeAesKeyBuffer
     });
 
@@ -205,31 +213,36 @@ export default async function loginToPronote ({
     }
 
     const splittedDecrypted = unscrambled.join("");
-    const encrypted = encryptAes(splittedDecrypted, {
-      iv: bufferIv,
+    const encrypted = aesEncrypt(splittedDecrypted, {
+      iv: forge.util.createBuffer(iv),
       key: challengeAesKeyBuffer
     });
 
-    const pronoteAuthenticationData = await ky.post("/api/authentication", {
-      json: {
-        pronoteUrl,
-        pronoteAccountId: accountType.id,
-        pronoteSessionId: sessionId,
+    const pronoteAuthenticationBody: ApiAuthenticationRequestBody = {
+      pronote_url: pronoteUrl,
+      session_encryption_iv: iv,
+      pronote_account_type_id: accountType.id,
+      pronote_session_id: sessionId,
+      pronote_session_order: pronoteIdentificationData.request.returnedOrder.unencrypted,
+      pronote_auth_solved_challenge: encrypted,
+      pronote_setup_account_cookie_response_cookies: isUsingPronoteIdentifiers
+        ? pronoteLoginCookies.join("; ")
+        : undefined
+    };
 
-        pronoteOrder: authenticationOrderEncrypted,
-        pronoteSolvedChallenge: encrypted,
-        ...(isUsingPronoteIdentifiers ? { pronoteCookies: pronoteLoginCookies } : {})
-      }
+    console.info("[Authentification] Request body:", pronoteAuthenticationBody);
+    const pronoteAuthenticationData = await ky.post("/api/authentication", {
+      json: pronoteAuthenticationBody
     }).json<ApiAuthenticationResponse>();
 
-    const authenticationData = pronoteAuthenticationData.pronoteData.donneesSec.donnees;
+    const authenticationData = pronoteAuthenticationData.request.data.donnees;
     if (!authenticationData.cle) {
-      console.error("Incorrect login.");
+      console.error("[Auth->Cle][NotFound]: Incorrect login.");
       return null;
     }
 
-    const decryptedAuthenticationKey = decryptAes(authenticationData.cle, {
-      iv: bufferIv,
+    const decryptedAuthenticationKey = aesDecrypt(authenticationData.cle, {
+      iv: forge.util.createBuffer(iv),
       key: challengeAesKeyBuffer
     });
 
@@ -237,17 +250,10 @@ export default async function loginToPronote ({
     const authenticationKeyBytesArray = new Uint8Array(decryptedAuthenticationKey.split(",").map(a => parseInt(a)));
     const authenticationKey = forge.util.createBuffer(authenticationKeyBytesArray);
 
-    // Check 'numeroOrdre' from 'pronoteIdentificationData'.
-    // It should be equal to '6'.
-    const decryptedAuthenticationOrder = decryptAes(
-      pronoteAuthenticationData.pronoteData.numeroOrdre,
-      { iv: bufferIv }
-    );
-
-    const encryptedUserDataOrder = encryptAes(
-      getNextOrderNumber(decryptedAuthenticationOrder),
-      { iv: bufferIv, key: authenticationKey }
-    );
+    // const encryptedUserDataOrder = encryptAes(
+    //   getNextOrderNumber(decryptedAuthenticationOrder),
+    //   { iv: bufferIv, key: authenticationKey }
+    // );
 
     const pronoteUserData = await ky.post("/api/user", {
       json: {

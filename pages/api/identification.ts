@@ -19,6 +19,9 @@ import { request } from "@/apiUtils/request";
 export type ApiIdentificationRequestBody = {
   pronote_url: string;
 
+  // IV for encryption.
+  session_encryption_iv: string;
+
   /** Account Type ID of the user to authenticate. */
   pronote_account_type_id: number;
 
@@ -30,6 +33,9 @@ export type ApiIdentificationRequestBody = {
 
   /** Username of the user to authenticate. */
   pronote_username: string;
+
+  /** Cookies given when sending `/api/informations` with `pronote_setup_account_cookie`. */
+  pronote_setup_account_cookie_response_cookies?: string;
 
   using_ent?: boolean;
 }
@@ -46,6 +52,11 @@ export default async function handler (
   const bodyCheckResults = bodyChecker<ApiIdentificationRequestBody>(req, [
     {
       param: "pronote_url",
+      type: "string",
+      required: true
+    },
+    {
+      param: "session_encryption_iv",
       type: "string",
       required: true
     },
@@ -70,6 +81,11 @@ export default async function handler (
       required: true
     },
     {
+      param: "pronote_setup_account_cookie_response_cookies",
+      type: "string",
+      required: false
+    },
+    {
       param: "using_ent",
       type: "boolean",
       required: false
@@ -90,6 +106,9 @@ export default async function handler (
     sessionId: body.pronote_session_id,
     order: body.pronote_session_order,
     name: "Identification",
+    encryption: {
+      aesIv: body.session_encryption_iv
+    },
     body: {
       donnees: {
         genreConnexion: 0,
@@ -104,7 +123,7 @@ export default async function handler (
         loginTokenSAV: ""
       }
     },
-    cookie: req.body.pronoteCookies ? (req.body.pronoteCookies as string[]).join("; ") : undefined
+    cookie: body.pronote_setup_account_cookie_response_cookies
   });
 
   if (!pronoteRequest.success) return res.status(401).json({

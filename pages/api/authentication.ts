@@ -19,6 +19,9 @@ import { request } from "@/apiUtils/request";
 export type ApiAuthenticationRequestBody = {
   pronote_url: string;
 
+  // IV for encryption.
+  session_encryption_iv: string;
+
   /** Account Type ID of the user to authenticate. */
   pronote_account_type_id: number;
 
@@ -33,10 +36,7 @@ export type ApiAuthenticationRequestBody = {
 
   /** Cookies given when sending `/api/informations` with `pronote_setup_account_cookie`. */
   pronote_setup_account_cookie_response_cookies?: string;
-
-  using_ent?: boolean;
 }
-
 
 export default async function handler (
   req: NextApiRequest,
@@ -46,6 +46,11 @@ export default async function handler (
     const bodyCheckResults = bodyChecker<ApiAuthenticationRequestBody>(req, [
       {
         param: "pronote_url",
+        type: "string",
+        required: true
+      },
+      {
+        param: "session_encryption_iv",
         type: "string",
         required: true
       },
@@ -73,11 +78,6 @@ export default async function handler (
         param: "pronote_setup_account_cookie_response_cookies",
         type: "string",
         required: false
-      },
-      {
-        param: "using_ent",
-        type: "boolean",
-        required: false
       }
     ]);
 
@@ -94,6 +94,9 @@ export default async function handler (
       name: "Authentification",
       sessionId: body.pronote_session_id,
       accountId: body.pronote_account_type_id,
+      encryption: {
+        aesIv: body.session_encryption_iv
+      },
       order: body.pronote_session_order,
       body: {
         donnees: {

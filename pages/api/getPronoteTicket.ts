@@ -43,7 +43,7 @@ export default async function handler (
   if (fetchStatus) {
     res.status(200).json({
       success: true,
-      pronoteUrl: fetchValue as string
+      pronote_url: fetchValue as string
     });
   }
   else {
