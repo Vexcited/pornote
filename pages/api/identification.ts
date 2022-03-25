@@ -84,7 +84,7 @@ export default async function handler (
   const body = bodyCheckResults.body;
   const pronoteBaseUrl = getBasePronoteUrl(body.pronote_url);
 
-  const pronoteIdentificationData = await request<PronoteApiIdentification>({
+  const pronoteRequest = await request<PronoteApiIdentification>({
     pronoteUrl: pronoteBaseUrl,
     accountId: body.pronote_account_type_id,
     sessionId: body.pronote_session_id,
@@ -107,14 +107,14 @@ export default async function handler (
     cookie: req.body.pronoteCookies ? (req.body.pronoteCookies as string[]).join("; ") : undefined
   });
 
-  if (!pronoteIdentificationData.success) return res.status(401).json({
+  if (!pronoteRequest.success) return res.status(401).json({
     success: false,
-    message: pronoteIdentificationData.message,
-    debug: pronoteIdentificationData.debug
+    message: pronoteRequest.message,
+    debug: pronoteRequest.debug
   });
 
   res.status(200).json({
     success: true,
-    pronoteData: pronoteIdentificationData
+    request: pronoteRequest
   });
 }

@@ -28,9 +28,7 @@ export interface ApiInformationsResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData: RequestSuccess<
-    | PronoteApiFonctionParametresStudent
-  >;
+  request: RequestSuccess<PronoteApiFonctionParametresStudent>;
 
   /** Keys used when authenticating. */
   pronoteCryptoInformations: {
@@ -45,21 +43,21 @@ export interface ApiIdentificationResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData: RequestSuccess<PronoteApiIdentification>;
+  request: RequestSuccess<PronoteApiIdentification>;
 }
 
 export interface ApiAuthenticationResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData: RequestSuccess<PronoteApiAuthentication>;
+  request: RequestSuccess<PronoteApiAuthentication>;
 }
 
 export interface ApiUserResponse {
   success: true;
 
   /** Server's response. */
-  pronoteData: RequestSuccess<PronoteApiUserDataStudent>;
+  request: RequestSuccess<PronoteApiUserDataStudent>;
   pronoteLoginCookie?: string;
 }
 
@@ -70,5 +68,5 @@ export interface ApiGetEntCookiesResponse {
 
 export interface ApiGetPronoteTicketResponse {
   success: true;
-  pronoteUrl: string;
+  pronote_url: string;
 }

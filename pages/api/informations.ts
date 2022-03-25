@@ -156,7 +156,7 @@ export default async function handler (
       cookie += pronotePageData.loginCookie.split(";")[0];
     }
 
-    const pronoteData = await request<PronoteApiFonctionParametresStudent>({
+    const pronoteRequest = await request<PronoteApiFonctionParametresStudent>({
       name: "FonctionParametres",
       body: informationsPostBody,
       pronoteUrl,
@@ -168,18 +168,18 @@ export default async function handler (
       isEncrypted: !session.sCrA
     });
 
-    if (!pronoteData.success) return res.status(500).json({
+    if (!pronoteRequest.success) return res.status(500).json({
       success: false,
-      message: pronoteData.message,
+      message: pronoteRequest.message,
       debug: {
         pronoteUrl,
-        request: pronoteData
+        request: pronoteRequest
       }
     });
 
     res.status(200).json({
       success: true,
-      pronoteData,
+      request: pronoteRequest,
       pronoteCryptoInformations,
       pronoteHtmlCookie: pronotePageData.loginCookie ? pronotePageData.loginCookie.split(";")[0] : undefined
     });

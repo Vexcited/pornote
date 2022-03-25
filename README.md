@@ -64,11 +64,25 @@ and to provide more easier requests to their functions.
 
 Every request's `Content-Type` is `application/json` and every response are also given in JSON.
 
+When an error is thrown, the API always respond with an error message.
+```typescript
+{
+  success: false,
+  message: string,
+  // This contains different informations
+  // depending on the request and the error.
+  debug?: any
+}
+```
+
+Every responses are typed in [`./types/ApiData.ts`](./types/ApiData.ts), and Pronote responses that are contained in the inner API responses are typed in [`./types/PronoteApiData.ts`](./types/PronoteApiData.ts).
+
 ### Summary
 
 - [API Error](#api-error)
-- [Common Informations](#apicommoninformations)
-- [Informations](#apiinformations)
+- [Common Informations](#apicommon_informations) - `FonctionParametres` (Account Type ID: `0`)
+- [Informations](#apiinformations) - `FonctionParametres`
+- [Identification](#apiidentification) - `Identification`
 
 ### `/api/common_informations`
 
@@ -114,16 +128,45 @@ It is used to get informations about a school and its different account types av
 }
 ```
 
-### API Error
+### `/api/identification`
 
-When an error is thrown, the API always respond with an error message.
+> [See code from source](./pages/api/identification.ts)
+
+Send `Identification` to Pronote to get the challenge to complete, client-side,
+in order to request `Authentification` (`/api/authentication`) to authenticate the user.
+
+#### Request Body
 
 ```typescript
 {
-  success: false,
-  message: string,
-  // This contains different informations
-  // depending on the request and the error.
-  debug?: any
+  pronote_url: string;
+
+  /** Account Type ID of the user to authenticate. */
+  pronote_account_type_id: number;
+
+  /** Session from Pronote HTML: `parseInt(session.h)` */
+  pronote_session_id: number;
+
+  /** **Unencrypted** order to send to Pronote. */
+  pronote_session_order: number;
+
+  /** Username of the user to authenticate. */
+  pronote_username: string;
+
+  using_ent?: boolean;
+}
+```
+
+### `/api/authentication`
+
+> [See code from source](./pages/api/authentication.ts)
+
+Send `Authentification` (`/api/authentication`) to Pronote with the resolved challenge, got from `Identification`), to authenticate the user.
+
+#### Request Body
+
+```typescript
+{
+  
 }
 ```

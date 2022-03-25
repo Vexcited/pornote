@@ -13,7 +13,27 @@ import type {
 } from "types/PronoteApiData";
 
 import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
+import { bodyChecker } from "@/apiUtils/objectChecker";
 import { request } from "@/apiUtils/request";
+
+export type ApiAuthenticationRequestBody = {
+  pronote_url: string;
+
+  /** Account Type ID of the user to authenticate. */
+  pronote_account_type_id: number;
+
+  /** Session from Pronote HTML: `parseInt(session.h)` */
+  pronote_session_id: number;
+
+  /** **Unencrypted** order to send to Pronote. */
+  pronote_session_order: number;
+
+  /** Challenge, from `Identification`, solved. */
+  pronote_auth_solved_challenge: string;
+
+  using_ent?: boolean;
+}
+
 
 export default async function handler (
   req: NextApiRequest,
@@ -53,7 +73,7 @@ export default async function handler (
       });
     }
 
-    const pronoteAuthenticationData = await request<PronoteApiAuthentication>({
+    const pronoteRequest = await request<PronoteApiAuthentication>({
       pronoteUrl: pronoteServerUrl,
       name: "Authentification",
       sessionId: pronoteSessionId,
@@ -69,15 +89,15 @@ export default async function handler (
       cookie: req.body.pronoteCookies ? (req.body.pronoteCookies as string[]).join("; ") : undefined
     });
 
-    if (!pronoteAuthenticationData.success) return res.status(401).json({
+    if (!pronoteRequest.success) return res.status(401).json({
       success: false,
-      message: pronoteAuthenticationData.message,
-      debug: pronoteAuthenticationData.debug
+      message: pronoteRequest.message,
+      debug: pronoteRequest.debug
     });
 
     res.status(200).json({
       success: true,
-      pronoteData: pronoteAuthenticationData
+      request: pronoteRequest
     });
   }
   else {
