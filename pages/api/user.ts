@@ -13,49 +13,93 @@ import type {
 } from "types/PronoteApiData";
 
 import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
+import { bodyChecker } from "@/apiUtils/objectChecker";
 import { request } from "@/apiUtils/request";
+
+export type ApiUserRequestBody = {
+  pronote_url: string;
+
+  // IV for encryption.
+  session_encryption_iv: string;
+  // Key for encryption.
+  session_encryption_key: string;
+
+  /** Account Type ID of the user to authenticate. */
+  pronote_account_type_id: number;
+
+  /** Session from Pronote HTML: `parseInt(session.h)` */
+  pronote_session_id: number;
+
+  /** **Unencrypted** order to send to Pronote. */
+  pronote_session_order: number;
+
+  /** Cookies given when logged in with ENT or re-store session. */
+  pronote_cookie?: string;
+}
 
 export default async function handler (
   req: NextApiRequest,
   res: NextApiResponse<ApiUserResponse | ApiServerError>
 ) {
   if (req.method === "POST") {
-    /** Dirty Pronote URL. */
-    const pronoteUrl: string = req.body.pronoteUrl;
+    const bodyCheckResults = bodyChecker<ApiUserRequestBody>(req, [
+      {
+        param: "pronote_url",
+        type: "string",
+        required: true
+      },
+      {
+        param: "session_encryption_iv",
+        type: "string",
+        required: true
+      },
+      {
+        param: "session_encryption_iv",
+        type: "string",
+        required: true
+      },
+      {
+        param: "pronote_account_type_id",
+        type: "number",
+        required: true
+      },
+      {
+        param: "pronote_session_id",
+        type: "number",
+        required: true
+      },
+      {
+        param: "pronote_session_order",
+        type: "number",
+        required: true
+      },
+      {
+        param: "pronote_cookie",
+        type: "string",
+        required: false
+      }
+    ]);
 
-    // Informations about the Pronote account path.
-    const pronoteAccountId: number = req.body.pronoteAccountId;
-    const pronoteSessionId: number = req.body.pronoteSessionId;
+    if (!bodyCheckResults.success) return res.status(401).json({
+      success: false,
+      message: bodyCheckResults.message
+    });
 
-    if (!pronoteUrl || !pronoteAccountId || !pronoteSessionId) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing informations about the Pronote account path."
-      });
-    }
+    const body = bodyCheckResults.body;
+    const pronoteBaseUrl = getBasePronoteUrl(body.pronote_url);
 
-    /** Cleaned Pronote URL. */
-    const pronoteServerUrl = getBasePronoteUrl(pronoteUrl);
-
-
-    const pronoteOrder: number = req.body.pronoteOrder;
-    if (!pronoteOrder) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing 'pronoteOrder' for 'numeroOrdre'."
-      });
-    }
-
-    const pronoteUserDataResponse = await request<
-      | PronoteApiUserDataStudent
-    >({
-      pronoteUrl: pronoteServerUrl,
-      sessionId: pronoteSessionId,
-      accountId: pronoteAccountId,
-      order: pronoteOrder,
+    const pronoteUserDataResponse = await request<PronoteApiUserDataStudent>({
+      pronoteUrl: pronoteBaseUrl,
+      sessionId: body.pronote_session_id,
+      accountId: body.pronote_account_type_id,
+      encryption: {
+        aesIv: body.session_encryption_iv,
+        aesKey: body.session_encryption_key
+      },
+      order: body.pronote_session_order,
       name: "ParametresUtilisateur",
-      body: {},
-      cookie: req.body.pronoteCookie ? req.body.pronoteCookie : undefined
+      cookie: body.pronote_cookie,
+      body: {}
     });
 
     if (!pronoteUserDataResponse.success) return res.status(401).json({
@@ -63,7 +107,6 @@ export default async function handler (
       message: pronoteUserDataResponse.message,
       debug: pronoteUserDataResponse.debug
     });
-
 
     const pronoteLoginCookies = pronoteUserDataResponse.headers["set-cookie"];
 

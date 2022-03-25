@@ -136,11 +136,6 @@ export default async function handler (
     // Create Uuid for 'FonctionParametres'.
     const rsaUuid = forge.util.encode64(rsaKey.encrypt(randomIv), 64);
 
-    const informationsPostBody = {
-      identifiantNav: null,
-      Uuid: rsaUuid
-    };
-
     const pronoteCryptoInformations = {
       iv: randomIv,
       session
@@ -156,9 +151,16 @@ export default async function handler (
       cookie += pronotePageData.loginCookie.split(";")[0];
     }
 
+    const request_body = {
+      donnees: {
+        identifiantNav: null,
+        Uuid: rsaUuid
+      }
+    };
+
     const pronoteRequest = await request<PronoteApiFonctionParametresStudent>({
       name: "FonctionParametres",
-      body: informationsPostBody,
+      body: request_body,
       pronoteUrl,
       order: 1,
       sessionId: parseInt(session.h),

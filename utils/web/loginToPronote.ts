@@ -10,10 +10,7 @@ import type {
 import type { ApiInformationsRequestBody } from "pages/api/informations";
 import type { ApiIdentificationRequestBody } from "pages/api/identification";
 import type { ApiAuthenticationRequestBody } from "pages/api/authentication";
-
-import type {
-  PronoteApiFonctionParametresStudent
-} from "types/PronoteApiData";
+import type { ApiUserRequestBody } from "pages/api/user";
 
 import type {
   SavedAccountData
@@ -42,9 +39,6 @@ type LoginToPronoteProps = {
   entCookies?: string[];
   cookie?: string;
 };
-
-// Utility used to create the next string order.
-const getNextOrderNumber = (current: string) => (parseInt(current) + 1).toString();
 
 export default async function loginToPronote ({
   username,
@@ -246,29 +240,24 @@ export default async function loginToPronote ({
       key: challengeAesKeyBuffer
     });
 
-    /** Get the new AES key buffer. */
+    /** Get the new AES key that will be used in our requests. */
     const authenticationKeyBytesArray = new Uint8Array(decryptedAuthenticationKey.split(",").map(a => parseInt(a)));
-    const authenticationKey = forge.util.createBuffer(authenticationKeyBytesArray);
+    const authenticationKey = forge.util.createBuffer(authenticationKeyBytesArray).bytes();
 
-    // const encryptedUserDataOrder = encryptAes(
-    //   getNextOrderNumber(decryptedAuthenticationOrder),
-    //   { iv: bufferIv, key: authenticationKey }
-    // );
+    const pronoteUserBody: ApiUserRequestBody = {
+      pronote_url: pronoteUrl,
+      session_encryption_iv: iv,
+      pronote_account_type_id: accountType.id,
+      pronote_session_id: sessionId,
+      pronote_session_order: pronoteAuthenticationData.request.returnedOrder.unencrypted,
+      pronote_cookie: cookie,
+      session_encryption_key: authenticationKey,
+    };
 
+    console.info("[User] Request body:", pronoteUserBody);
     const pronoteUserData = await ky.post("/api/user", {
-      json: {
-        pronoteUrl,
-        pronoteAccountId: accountType.id,
-        pronoteSessionId: sessionId,
-
-        pronoteOrder: encryptedUserDataOrder,
-        ...(cookie ? { pronoteCookie: cookie } : {}),
-      }
+      json: pronoteUserBody
     }).json<ApiUserResponse>();
-
-    const pronoteInformationsOnlyData = pronoteInformationsData.pronoteData as (
-      | PronoteApiFonctionParametresStudent
-    );
 
     return {
       currentSessionData: {
@@ -281,8 +270,8 @@ export default async function loginToPronote ({
         entCookies,
         entUrl
       },
-      schoolInformations: pronoteInformationsOnlyData.donneesSec.donnees,
-      userInformations: pronoteUserData.pronoteData.donneesSec.donnees
+      schoolInformations: pronoteInformationsData.request.data.donnees,
+      userInformations: pronoteUserData.request.data.donnees
     };
   }
   catch (e) {

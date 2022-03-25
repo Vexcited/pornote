@@ -116,6 +116,8 @@ export async function request<T> ({
     iv: aesIv, key: aesKey
   });
 
+  console.log(isCompressed, isEncrypted);
+
   if (isCompressed) {
     // We get the JSON as string.
     body = forge.util.encodeUtf8("" + JSON.stringify(body));
@@ -158,6 +160,11 @@ export async function request<T> ({
         "Cookie": cookie
       }
     });
+
+    if (response.body.includes("Impossible d'afficher la page")) {
+      console.info("Used URL:", url);
+      throw new Error("Error with Pronote.");
+    }
 
     const data = JSON.parse(response.body) as PronoteApiResponse<T | string>;
 

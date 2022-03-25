@@ -5,12 +5,9 @@ import type {
   PronoteApiUserDataStudent
 } from "types/PronoteApiData";
 
-
-export type AccountType = {
-  id: number;
-  name: string;
-  path: string;
-};
+import type {
+  AccountType
+} from "@/apiUtils/accountTypes";
 
 export type EntData = {
   url: string;

@@ -4,9 +4,12 @@ import type {
 } from "types/ApiData";
 
 import type {
-  AccountType,
   SchoolInformations
 } from "types/SavedAccountData";
+
+import type {
+  AccountType
+} from "@/apiUtils/accountTypes";
 
 import type {
   ApiCommonInformationsRequestBody
@@ -34,7 +37,7 @@ export async function getCommonInformationsFrom (
 ): Promise<GetCommonInformationsResponse | RequestFail> {
   try {
     const body: ApiCommonInformationsRequestBody = {
-      pronoteUrl
+      pronote_url: pronoteUrl
     };
 
     const data = await ky.post("/api/common_informations", {

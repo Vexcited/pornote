@@ -19,8 +19,8 @@ export default function objectTypeChecker <T> (object: any) {
     ) => {
       if (required) {
         // Check if the key exists in object.
-        if (!object[key]) {
-          throw new Error(`Missing key: ${key}`);
+        if (!(key in object)) {
+          throw new Error(`Missing required key "${key}" in body request.`);
         }
 
         // Check if the type is correct for the object.

@@ -33,16 +33,23 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
     [key]: evt.target.value
   });
 
+  console.log(state);
+
   const handlePronoteLogin = async (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
 
     const initialButtonText = buttonCurrentText;
 
+    // Remove trailling slash and append account path.
+    const pronoteUrl = state.pronoteUrl.replace(/\/$/, "") + "/" + selectedAccountType.path;
+    console.log("Pronote URL:", pronoteUrl);
+
     setButtonCurrentText("Connexion à Pronote...");
     const accountData = await loginToPronote({
       username: formState.username,
       password: formState.password,
-      pronoteUrl: state.pronoteUrl
+      pronoteUrl: pronoteUrl,
+      usingEnt: false
     });
 
     if (accountData) {

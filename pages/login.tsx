@@ -1,5 +1,4 @@
 import type {
-  AccountType,
   SchoolInformations
 } from "types/SavedAccountData";
 
@@ -21,8 +20,6 @@ export type StateTypes = {
 
   // On submit from step 1.
   schoolInformations: SchoolInformations;
-
-  accountType: AccountType;
 }
 
 // Step 1.
@@ -48,12 +45,6 @@ export default function Home () {
       name: "",
       entUrl: undefined,
       availableAccountTypes: []
-    },
-
-    accountType: {
-      id: 0,
-      name: "",
-      path: ""
     }
   });
 
