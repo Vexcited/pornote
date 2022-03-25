@@ -156,7 +156,6 @@ export default async function handler (
       cookie += pronotePageData.loginCookie.split(";")[0];
     }
 
-
     const pronoteData = await request<PronoteApiFonctionParametresStudent>({
       name: "FonctionParametres",
       body: informationsPostBody,

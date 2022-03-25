@@ -68,27 +68,13 @@ Every request's `Content-Type` is `application/json` and every response are also
 
 - [API Error](#api-error)
 - [Common Informations](#apicommoninformations)
+- [Informations](#apiinformations)
 
 ### `/api/common_informations`
 
 > [See code from source](./pages/api/common_informations.ts)
 
-Route that sends a call to `FonctionParametres` without any data.
-It is used to get informations about a school and its different account types available.
-
-#### Request Body
-
-```typescript
-{
-  pronoteUrl: string;
-}
-```
-
-### `/api/informations`
-
-> [See code from source](./pages/api/informations.ts)
-
-Route that sends a call to `FonctionParametres` without any data.
+Route that sends a call to `FonctionParametres` without any data, with common account (`0`).
 It is used to get informations about a school and its different account types available.
 
 #### Request Body
@@ -96,7 +82,35 @@ It is used to get informations about a school and its different account types av
 ```typescript
 {
   pronote_url: string;
-  
+}
+```
+
+### `/api/informations`
+
+> [See code from source](./pages/api/informations.ts)
+
+Route that sends a call to `FonctionParametres` with RSA identification to setup AES keys for encryption.
+It is used to get informations about a school and its different account types available.
+
+#### Request Body
+
+```typescript
+{
+  pronote_url: string;
+
+  /** Account Type ID to use. */
+  pronote_account_type_id: number;
+
+  /** Whether to parse (`getBasePronoteUrl`) Pronote URL or not. */
+  use_raw_pronote_url: boolean;
+
+  /**
+   * Cookie used when getting Pronote HTML page.
+   * Needed when creating a new session from ENT or an already set-up session.
+   *
+   * This will append `e` and `f` in to the HTML session object.
+   */
+  pronote_setup_account_cookie?: string;
 }
 ```
 

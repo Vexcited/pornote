@@ -22,7 +22,7 @@ import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
 import extractSession from "@/apiUtils/extractSession";
 
 export type ApiCommonInformationsRequestBody = {
-  pronoteUrl: string;
+  pronote_url: string;
 }
 
 export default async function handler (
@@ -32,7 +32,7 @@ export default async function handler (
   if (req.method === "POST") {
     const bodyCheckResults = bodyChecker<ApiCommonInformationsRequestBody>(req, [
       {
-        param: "pronoteUrl",
+        param: "pronote_url",
         type: "string",
         required: true
       }
@@ -44,7 +44,7 @@ export default async function handler (
     });
 
     const body = bodyCheckResults.body;
-    const pronoteUrl = getBasePronoteUrl(body.pronoteUrl);
+    const pronoteUrl = getBasePronoteUrl(body.pronote_url);
 
     // Get the Pronote HTML page to parse session data.
     // We add `?login=true` at the end to bypass ENT.
