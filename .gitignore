@@ -10,6 +10,10 @@
 # Production
 /build
 
+# Build PWA
+/public/service-worker.js
+/public/workbox-*.js
+
 # Miscs
 .DS_Store
 *.pem

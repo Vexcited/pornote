@@ -23,7 +23,6 @@ import Button from "components/Button";
 import ky, { HTTPError } from "ky";
 
 import loginToPronote from "@/webUtils/loginToPronote";
-import getAccountTypeFromUrl from "@/webUtils/getAccountTypeFromUrl";
 import ModalSpecifySlug from "./utils/ModalSpecifySlug";
 
 type SpecifyEntCredentialsProps = {

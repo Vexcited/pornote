@@ -124,8 +124,6 @@ export async function request<T> ({
     key: aesKey
   });
 
-  console.log(isCompressed, isEncrypted);
-
   if (isCompressed) {
     // We get the JSON as string.
     body = forge.util.encodeUtf8("" + JSON.stringify(body));

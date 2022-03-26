@@ -1,5 +1,15 @@
 import type { AppProps } from "next/app";
-import { Fragment, useState, useEffect } from "react";
+
+import type {
+  PreloadedAccountData,
+  SavedAccountData
+} from "types/SavedAccountData";
+
+import {
+  Fragment,
+  useState,
+  useEffect
+} from "react";
 
 // SEO Configuration
 import { DefaultSeo } from "next-seo";
@@ -17,15 +27,21 @@ import "styles/globals.css";
 import { ThemeProvider } from "next-themes";
 
 // Global State
-import { useCreateStore, Provider, persistAccountsStore, useStore } from "@/webUtils/store";
-import type { PreloadedAccountData, SavedAccountData } from "types/SavedAccountData";
+import {
+  persistAccountsStore,
+  useCreateStore,
+  Provider
+} from "@/webUtils/store";
 
+/**
+ * When the app is loading, we fetch every stored account.
+ * Meanwhile, we show a loading screen.
+ */
 export default function PronoteApp({
   Component,
   pageProps
 }: AppProps) {
   const [loaded, setLoaded] = useState(false);
-
   const createdStore = useCreateStore([])();
 
   useEffect(() => {

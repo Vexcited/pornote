@@ -1,7 +1,4 @@
-import type { SavedAccountData } from "types/SavedAccountData";
-
 import NextLink from "next/link";
-import { useState, useEffect } from "react";
 
 import { useStore } from "@/webUtils/store";
 import { useTheme } from "next-themes";
@@ -9,21 +6,10 @@ import { useTheme } from "next-themes";
 import Button from "components/Button";
 
 export default function Home () {
-  type SavedAccounts = { [slug: string]: SavedAccountData };
   const accounts = useStore(state => state.accounts);
 
   const { theme, setTheme } = useTheme();
   const toggleTheme = () => theme === "dark" ? setTheme("light") : setTheme("dark");
-
-  // useEffect(() => {
-  //   const tempAccounts: SavedAccounts = {};
-  //   accountsStore.iterate((accountData: SavedAccountData, slug) => {
-  //     tempAccounts[slug] = accountData;
-  //   })
-  //     .then(() => {
-  //       setAccounts(tempAccounts);
-  //     });
-  // }, []);
 
   return (
     <div className="h-screen w-screen bg-brand-primary dark:bg-brand-dark text-brand-white">
