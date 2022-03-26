@@ -1,7 +1,6 @@
 import type { FetchEntProps } from "./";
-import request from "@/apiUtils/request";
 
-import { HTTPError, MaxRedirectsError } from "got";
+import got, { HTTPError, MaxRedirectsError } from "got";
 
 /** Connection for OpenENT. */
 export async function connect ({
@@ -19,11 +18,12 @@ export async function connect ({
     const callbackValue = decodeURIComponent(callbackParam);
     service = callbackValue.substring(callbackValue.indexOf("=") + 1);
   }
-  
+
   try {
     const hostname = new URL(url).hostname;
-    const { headers } = await request(`https://${hostname}`)({
+    const { headers } = await got({
       followRedirect: !onlyEntCookies,
+      prefixUrl: `https://${hostname}`,
       ...(onlyEntCookies
         // To get the login cookies from OpenENT, we send a POST
         // request to /auth/login and grab the cookies sent.
@@ -57,13 +57,13 @@ export async function connect ({
     const responseCookies = headers["set-cookie"] || [];
     const parsedCookies = responseCookies.map(cookie => cookie.split(";")[0]);
 
-    return [true, onlyEntCookies ? parsedCookies : headers["location"] as string]
+    return [true, onlyEntCookies ? parsedCookies : headers["location"] as string];
   }
   catch (e) {
     // If the login is successful and it redirects to the Pronote
     // ticket, get the redirected URL (for 'identifiant' parsing).
     if (e instanceof MaxRedirectsError) {
-      return [true, e.response.headers["location"] as string]
+      return [true, e.response.headers["location"] as string];
     }
     else if (e instanceof HTTPError) {
       return [false, e.message];

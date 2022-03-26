@@ -32,7 +32,7 @@ export default async function fetchEntLogin ({
 
   // Check if cookies for ENT authentication is given.
   if (!onlyEntCookies && (!cookies))
-    return [false, "ENT cookies aren't given."];  
+    return [false, "ENT cookies aren't given."];
 
   // Get the login function to connect to ENT.
   const hostname = new URL(url).hostname;
