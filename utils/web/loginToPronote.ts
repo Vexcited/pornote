@@ -138,7 +138,7 @@ export default async function loginToPronote ({
       session_encryption_iv: iv,
       pronote_account_type_id: accountType.id,
       pronote_session_id: sessionId,
-      pronote_session_order: pronoteInformationsData.request.returnedOrder.unencrypted,
+      pronote_session_order: pronoteInformationsData.request.returnedOrder.unencrypted + 1,
       pronote_username: pronoteUsername,
       using_ent: usingEnt,
       pronote_setup_account_cookie_response_cookies: isUsingPronoteIdentifiers
@@ -217,7 +217,7 @@ export default async function loginToPronote ({
       session_encryption_iv: iv,
       pronote_account_type_id: accountType.id,
       pronote_session_id: sessionId,
-      pronote_session_order: pronoteIdentificationData.request.returnedOrder.unencrypted,
+      pronote_session_order: pronoteIdentificationData.request.returnedOrder.unencrypted + 1,
       pronote_auth_solved_challenge: encrypted,
       pronote_setup_account_cookie_response_cookies: isUsingPronoteIdentifiers
         ? pronoteLoginCookies.join("; ")
@@ -249,9 +249,9 @@ export default async function loginToPronote ({
       session_encryption_iv: iv,
       pronote_account_type_id: accountType.id,
       pronote_session_id: sessionId,
-      pronote_session_order: pronoteAuthenticationData.request.returnedOrder.unencrypted,
+      pronote_session_order: pronoteAuthenticationData.request.returnedOrder.unencrypted + 1,
       pronote_cookie: cookie,
-      session_encryption_key: authenticationKey,
+      session_encryption_key: authenticationKey
     };
 
     console.info("[User] Request body:", pronoteUserBody);

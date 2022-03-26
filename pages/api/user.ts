@@ -54,7 +54,7 @@ export default async function handler (
         required: true
       },
       {
-        param: "session_encryption_iv",
+        param: "session_encryption_key",
         type: "string",
         required: true
       },

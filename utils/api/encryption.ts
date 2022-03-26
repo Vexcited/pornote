@@ -16,7 +16,7 @@ export function md5 (buffer: forge.util.ByteStringBuffer) {
 
 export function aesDecrypt (data: string, {
   key = forge.util.createBuffer(),
-  iv = undefined
+  iv
 }: AesEncryptionOptions) {
   // IV => Generate a MD5 ByteBuffer from current IV.
   if (iv && iv.length()) iv = md5(iv);
@@ -39,7 +39,7 @@ export function aesDecrypt (data: string, {
 
 export function aesEncrypt (data: string, {
   key = forge.util.createBuffer(),
-  iv = undefined
+  iv
 }: AesEncryptionOptions) {
   // Create cipher using 'AES-CBC' method and
   // use an MD5 ButeBuffer of the given 'key'.

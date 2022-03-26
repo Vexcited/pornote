@@ -33,8 +33,6 @@ function SpecifyPronoteCredentials ({ state }: SpecifyPronoteCredentialsProps) {
     [key]: evt.target.value
   });
 
-  console.log(state);
-
   const handlePronoteLogin = async (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault();
 

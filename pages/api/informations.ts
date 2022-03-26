@@ -165,6 +165,10 @@ export default async function handler (
       order: 1,
       sessionId: parseInt(session.h),
       accountId: accountType.id,
+      encryption: {
+        only_use_iv_to_decrypt_returned_order: true,
+        aesIv: pronoteCryptoInformations.iv,
+      },
       cookie,
       isCompressed: !session.sCoA,
       isEncrypted: !session.sCrA

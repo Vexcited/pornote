@@ -48,6 +48,13 @@ type RequestProps = {
    */
   body: any;
   encryption?: {
+    /**
+     * This is only used on `/api/informations` request.
+     * When the user do the request, we use an empty IV to encrypt order.
+     * On the response, we use the created IV given to decrypt order.
+     */
+    only_use_iv_to_decrypt_returned_order?: boolean;
+
     aesKey?: string;
     aesIv: string;
   }
@@ -113,7 +120,8 @@ export async function request<T> ({
   const aesKey = encryption?.aesKey ? forge.util.createBuffer(encryption.aesKey) : undefined;
 
   const orderEncrypted = aesEncrypt(order.toString(), {
-    iv: aesIv, key: aesKey
+    iv: encryption?.only_use_iv_to_decrypt_returned_order ? undefined : aesIv,
+    key: aesKey
   });
 
   console.log(isCompressed, isEncrypted);
