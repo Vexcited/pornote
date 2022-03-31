@@ -12,7 +12,7 @@ import Link from "next/link";
 import forge from "node-forge";
 import { aesEncrypt } from "@/apiUtils/encryption";
 import loginToPronote from "@/webUtils/loginToPronote";
-import getServerUrl from "@/apiUtils/getBasePronoteUrl";
+import getBasePronoteUrl from "@/apiUtils/getBasePronoteUrl";
 
 export default function Dashboard () {
   const router = useRouter();
@@ -58,7 +58,8 @@ export default function Dashboard () {
   useEffect(() => {
     if (!userData) return;
 
-    const pronoteBaseUrl = getServerUrl(userData.data.currentSessionData.pronoteUrl);
+    const pronoteBaseUrl = getBasePronoteUrl(userData.data.currentSessionData.pronoteUrl);
+    console.log(pronoteBaseUrl);
 
     if (userData.data.userInformations.ressource.avecPhoto) {
       const fileSessionData = JSON.stringify({

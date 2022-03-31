@@ -40,7 +40,6 @@ export default async function fetchEntLogin ({
     const foundService = service.hostnames.find(serviceHostname => serviceHostname === hostname);
 
     if (foundService) {
-      console.info("Found for service", serviceName);
       return await service.login({
         url,
         username,

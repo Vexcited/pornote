@@ -1,5 +1,3 @@
-import { URL } from "url";
-
 /**
  * Take any Pronote URL and return the base URL
  * of the application. Trailing slash **is already removed**.
