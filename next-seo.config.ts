@@ -1,7 +1,7 @@
 import type { DefaultSeoProps } from "next-seo";
 
 const projectDescription = "Redesign de l'application web Pronote. Celle-ci est complétement personnalisable et inclues de nouvelles fonctionnalitées.";
-const projectUrl = "https://pornote.vexcited.me";
+const projectUrl = "https://pornote.vexcited.ml";
 const projectName = "Pornote";
 
 const SeoProps: DefaultSeoProps = {
