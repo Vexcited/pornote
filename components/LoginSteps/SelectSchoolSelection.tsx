@@ -28,10 +28,27 @@ function SelectSchoolSelection ({ state, setState }: SelectSchoolSelectionProps)
     return (
       <div
         onClick={updateStep}
-        className="w-full p-4 bg-green-200 bg-opacity-40 hover:bg-opacity-60 transition-colors rounded cursor-pointer"
+        className="
+          w-full p-4
+
+          border-2 border-brand-primary
+          bg-brand-primary bg-opacity-20 hover:bg-opacity-80
+          text-brand-dark dark:text-brand-white
+          hover:text-brand-white  dark:hover:text-brand-dark
+
+          transition-colors rounded cursor-pointer
+        "
       >
-        <h2 className="font-medium text-lg">{name}</h2>
-        <p>{description}</p>
+        <h2 className="
+          font-medium text-lg
+        ">
+          {name}
+        </h2>
+        <p className="
+          opacity-60 dark:text-opacity-60
+        ">
+          {description}
+        </p>
       </div>
     );
   };

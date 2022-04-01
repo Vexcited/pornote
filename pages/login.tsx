@@ -57,13 +57,19 @@ export default function Home () {
       <header className="fixed top-0 w-full p-6">
         <NextLink href="/">
           <a className="
-            font-medium px-4 py-2 rounded
+            font-medium px-4 py-2 rounded-lg
             flex-row items-center inline-flex gap-2
-            text-green-50 md:bg-brand-primary bg-brand-dark bg-opacity-20
-            hover:bg-opacity-80 transition-colors
+            text-brand-white md:text-brand-dark
+            dark:text-brand-white dark:md:text-brand-white
+            md:bg-brand-light bg-brand-primary
+            dark:md:bg-brand-dark dark:bg-brand-light
+            hover:bg-opacity-40
+            dark:text-opacity-60 dark:hover:text-opacity-80
+            dark:bg-opacity-10 dark:hover:bg-opacity-30
+            transition-colors
           ">
             <BiArrowBack size={18} />
-            Revenir à la page d&apos;accueil
+            Annuler
           </a>
         </NextLink>
       </header>
@@ -71,21 +77,25 @@ export default function Home () {
       <div
         className="
           h-screen w-screen
-          bg-brand-light
+          bg-brand-primary
         "
       >
         <section className="
-          h-full w-full md:fixed md:right-0 md:w-[28rem] pt-24 px-8
-          flex flex-col
-          gap-8 bg-brand-primary md:rounded-l-xl
+          h-full w-full md:fixed md:right-0 md:w-[28rem] pt-28 md:pt-20 px-8
+          flex flex-col gap-16
+          bg-brand-light dark:bg-brand-dark
         ">
           <div className="
             flex flex-col
             items-center
-            md:items-start
           ">
-            <h1 className="text-2xl font-medium">
-              Connexion
+            <h1 className="
+              text-xl font-medium
+              rounded-full px-4 py-2
+              text-brand-light bg-brand-primary
+              dark:text-brand-dark
+            ">
+              Connexion à Pronote
             </h1>
           </div>
 

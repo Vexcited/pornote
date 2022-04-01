@@ -24,7 +24,12 @@ function SelectLoginSelection ({ state, setState }: SelectLoginSelectionProps) {
     return (
       <div
         onClick={updateStep}
-        className="w-full p-4 bg-green-200 bg-opacity-40 hover:bg-opacity-60 transition-colors rounded cursor-pointer"
+        className="
+          w-full p-4
+          bg-green-200 bg-opacity-40 hover:bg-opacity-60
+          dark:bg-brand-primary dark:bg-opacity-60 dark:hover:bg-opacity-80
+          transition-colors rounded cursor-pointer
+        "
       >
         <h2 className="font-medium text-lg">{name}</h2>
         <p>{description}</p>
