@@ -48,7 +48,7 @@ export default function Page404 () {
           Cette page n&apos;existe pas ou a été déplacée.
         </p>
 
-        <NextLink href="/">
+        <NextLink href="/" passHref>
           <Button
             isButton={false}
           >

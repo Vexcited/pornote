@@ -29,8 +29,7 @@ import { ThemeProvider } from "next-themes";
 // Global State
 import {
   persistAccountsStore,
-  useCreateStore,
-  Provider
+  useStore
 } from "@/webUtils/store";
 
 /**
@@ -42,7 +41,6 @@ export default function PronoteApp({
   pageProps
 }: AppProps) {
   const [loaded, setLoaded] = useState(false);
-  const createdStore = useCreateStore([])();
 
   useEffect(() => {
     async function loadSavedAccounts () {
@@ -52,23 +50,21 @@ export default function PronoteApp({
         accounts.push({ slug, data: accountData });
       });
 
-      createdStore.setState({ accounts });
+      useStore.setState(() => ({ accounts }));
       console.info("Accounts loaded and saved into local state.");
 
       setLoaded(true);
     }
 
     loadSavedAccounts();
-  }, [createdStore]);
+  }, []);
 
   return (
     <Fragment>
       <DefaultSeo {...SEO} />
       <ThemeProvider attribute="class">
         {(loaded) ? (
-          <Provider createStore={() => createdStore}>
-            <Component {...pageProps} />
-          </Provider>
+          <Component {...pageProps} />
         ) : (
           <div className="h-screen w-screen bg-brand-primary dark:bg-brand-dark text-brand-white">
             <h2>Chargement.. </h2>

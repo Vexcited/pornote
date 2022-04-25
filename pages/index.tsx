@@ -32,6 +32,7 @@ export default function Home () {
                 <NextLink
                   key={account.slug}
                   href={`/app/${account.slug}/dashboard`}
+                  passHref
                 >
                   <div
                     className="
