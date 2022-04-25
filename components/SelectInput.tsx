@@ -22,17 +22,15 @@ export function SelectInput ({
         <Listbox.Button
           className="
             relative w-full py-2 pl-3 pr-10 text-left
-            bg-white rounded-lg shadow-md cursor-default
-            focus:outline-none focus-visible:ring-2
-            focus-visible:ring-opacity-75 focus-visible:ring-white
-            focus-visible:ring-offset-green-300 focus-visible:ring-offset-2
-            focus-visible:border-green-500 sm:text-sm
+            bg-brand-white rounded-lg cursor-default
+
+            sm:text-sm
           "
         >
-          <span className="block truncate">{placeholder}</span>
+          <span className="block truncate dark:text-brand-dark font-medium">{placeholder}</span>
           <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
             <HiSelector
-              className="w-5 h-5 text-gray-400"
+              className="w-5 h-5 text-brand-primary"
               aria-hidden="true"
             />
           </span>
@@ -46,8 +44,8 @@ export function SelectInput ({
           <Listbox.Options
             className="
               absolute w-full py-1 mt-1 overflow-auto
-              text-base bg-white rounded-md shadow-lg
-              max-h-60 ring-1 ring-black
+              text-base bg-brand-white rounded-md shadow-lg
+              max-h-60 ring-1 ring-brand-dark
               ring-opacity-5 focus:outline-none sm:text-sm
             "
           >

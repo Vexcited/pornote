@@ -13,14 +13,17 @@ export default function Button ({
   children,
   isButton = true,
   buttonType = "button",
-  linkHref = "./",
+  linkHref = "#",
   onClick
 }: ButtonProps) {
 
   const className = `
     rounded-full px-4 py-2
-    bg-brand-light dark:bg-brand-primary
     text-brand-dark dark:text-brand-white
+    bg-brand-light hover:bg-opacity-80 bg-opacity-100
+    dark:bg-brand-primary dark:hover:bg-opacity-80 dark:bg-opacity-100
+    
+    transition-colors text-center
   `;
 
   return isButton

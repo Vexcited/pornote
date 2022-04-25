@@ -13,13 +13,14 @@ export default function Home () {
 
   return (
     <div className="h-screen w-screen bg-brand-primary dark:bg-brand-dark text-brand-white">
-      <header className="fixed top-0 h-32 w-full flex flex-col items-center justify-center">
+      <header className="fixed top-0 w-full py-4 flex flex-col items-center justify-start">
         <h1 className="font-bold text-3xl dark:text-brand-primary">Pornote</h1>
-        <p className="text-lg text-brand-primary dark:text-green-100">Client Pronote non-officiel.</p>
+        <p className="text-lg text-brand-light mb-4">Client Pronote non-officiel.</p>
+
         <Button
           onClick={toggleTheme}
         >
-          Toggle Theme
+          {theme === "light" ? "Mode Sombre" : "Mode Clair"}
         </Button>
       </header>
 
@@ -51,8 +52,15 @@ export default function Home () {
               )
             )
             : (
-              <div className="flex flex-col justify-center items-center">
-                <p className="text-md">Aucun compte sauvegardé localement</p>
+              <div className="
+                flex flex-col justify-center items-center gap-4 max-w-md p-6 rounded-lg
+
+                dark:bg-brand-primary dark:bg-opacity-20 dark:border-2 dark:border-brand-primary
+                bg-brand-dark
+              ">
+                <p className="text-sm sm:text-base opacity-100 text-center">
+                  Aucun compte sauvegardé localement !
+                </p>
                 <Button
                   isButton={false}
                   linkHref="/login"
@@ -66,7 +74,7 @@ export default function Home () {
 
       <footer className="w-full fixed bottom-0 flex flex-col items-center justify-center h-16">
         <a
-          className="font-medium text-brand-light hover:text-opacity-60 transition-colors"
+          className="font-medium text-brand-light dark:text-brand-white hover:text-opacity-60 transition-colors"
           href="https://github.com/Vexcited/pornote"
         >
           GitHub

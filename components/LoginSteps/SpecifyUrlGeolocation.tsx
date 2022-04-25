@@ -1,5 +1,3 @@
-import type { PronoteApiGeolocationItem } from "types/PronoteApiData";
-import type { SchoolInformations } from "types/SavedAccountData";
 import type { StateTypes } from "pages/login";
 
 import {
@@ -153,12 +151,14 @@ function SpecifyUrlGeolocation ({ state, setState }: SpecifyUrlGeolocationProps)
   return (
     <div className="
       flex flex-col justify-center items-center
-      min-w-lg rounded-md p-8 gap-4
-      bg-green-200 bg-opacity-60
+      min-w-lg rounded-xl p-8 gap-4
+      bg-brand-primary
+      dark:bg-brand-primary dark:bg-opacity-20
+      dark:border-2 dark:border-brand-primary
     ">
-      <div className="flex flex-col text-center">
-        <h2 className="text-lg font-medium">Géolocalisation</h2>
-        <p>Choisissez votre établissement dans la liste ci-dessous</p>
+      <div className="flex flex-col text-center text-brand-light">
+        <h2 className="text-xl font-medium">Géolocalisation</h2>
+        <p className="opacity-80 dark:opacity-60">Choisissez votre établissement dans la liste ci-dessous</p>
       </div>
       {selectedSchool ? (
         <SelectInput
