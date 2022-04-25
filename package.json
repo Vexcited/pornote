@@ -42,8 +42,12 @@
   },
   "license": "MIT",
   "release-it": {
+    "hooks": {
+      "before:init": ["yarn lint"]
+    },
     "git": {
       "commitMessage": "chore: release v${version}",
+      "tagAnnotation": "Release v${version}",
       "tagName": "v${version}"
     },
     "github": {
