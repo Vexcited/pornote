@@ -6,7 +6,7 @@ import ky, { HTTPError } from "ky";
 
 export default async function sendPronoteGeolocation (latitude: number, longitude: number) {
   try {
-    const geolocationResponse = await ky.post("https://www.index-education.com/swie/geoloc.php", {
+    const geolocationResponse = await ky.post("/proxy/geolocation", {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
       },

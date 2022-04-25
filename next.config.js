@@ -9,5 +9,14 @@ module.exports = withPWA({
     register: true,
     dest: "public",
     runtimeCaching
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/proxy/geolocation",
+        destination: "https://www.index-education.com/swie/geoloc.php"
+      }
+    ]
   }
 });
+
