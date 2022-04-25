@@ -56,7 +56,7 @@ export default function Home () {
                 flex flex-col justify-center items-center gap-4 max-w-md p-6 rounded-lg
 
                 dark:bg-brand-primary dark:bg-opacity-20 dark:border-2 dark:border-brand-primary
-                bg-brand-dark
+                bg-brand-dark bg-opacity-20 border-2 border-brand-dark
               ">
                 <p className="text-sm sm:text-base opacity-100 text-center">
                   Aucun compte sauvegardé localement !
