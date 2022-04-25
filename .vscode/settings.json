@@ -1,10 +1,15 @@
 {
+  // Indentation
   "editor.tabSize": 2,
   "editor.detectIndentation": false,
   "editor.insertSpaces": true,
+
+  // ESLint
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
+
+  // Dictionnary
   "cSpell.words": [
     "pornote",
     "pronote"
