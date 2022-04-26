@@ -29,8 +29,8 @@ import { ThemeProvider } from "next-themes";
 // Global State
 import {
   persistAccountsStore,
-  useStore
-} from "@/webUtils/store";
+  useAccountsStore
+} from "@/webUtils/accountsStore";
 
 /**
  * When the app is loading, we fetch every stored account.
@@ -43,21 +43,26 @@ export default function PronoteApp({
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    if (loaded) return;
+
     async function loadSavedAccounts () {
       const accounts: PreloadedAccountData[] = [];
 
+      // Get the accounts from the localForage.
       await persistAccountsStore.iterate((accountData: SavedAccountData, slug) => {
         accounts.push({ slug, data: accountData });
       });
 
-      useStore.setState(() => ({ accounts }));
-      console.info("Accounts loaded and saved into local state.");
+      // Load into global store.
+      useAccountsStore.setState({ accounts });
 
+      console.log("[_app]: Saved accounts loaded into global store.");
       setLoaded(true);
     }
 
+    console.log("[_app]: Load saved accounts.");
     loadSavedAccounts();
-  }, []);
+  }, [loaded]);
 
   return (
     <Fragment>

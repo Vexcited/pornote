@@ -12,13 +12,13 @@ import { useRouter } from "next/router";
 import InputText from "components/InputText";
 import Button from "components/Button";
 
-import { useStore } from "@/webUtils/store";
+import { useAccountsStore } from "@/webUtils/accountsStore";
 
 export default function ModalSpecifySlug ({ authData }: ModalSpecifySlugProps) {
   const [slug, setSlug] = useState("");
   const router = useRouter();
 
-  const updateAccount = useStore(state => state.updateAccount);
+  const updateAccount = useAccountsStore(state => state.updateAccount);
 
   const handleSlugInput = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const value = evt.target.value;

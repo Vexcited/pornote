@@ -1,12 +1,13 @@
 import NextLink from "next/link";
 
-import { useStore } from "@/webUtils/store";
+import { useAccountsStore } from "@/webUtils/accountsStore";
 import { useTheme } from "next-themes";
 
 import Button from "components/Button";
 
 export default function Home () {
-  const accounts = useStore(state => state.accounts);
+  const accounts = useAccountsStore(state => state.accounts);
+  console.log(accounts);
 
   const { theme, setTheme } = useTheme();
   const toggleTheme = () => theme === "dark" ? setTheme("light") : setTheme("dark");

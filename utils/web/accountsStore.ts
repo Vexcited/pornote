@@ -9,19 +9,19 @@ export const persistAccountsStore = localforage.createInstance({
   storeName: "accounts"
 });
 
-export interface StoreType {
-  accounts: PreloadedAccountData[];
+export interface AccountsStoreType {
+  accounts: null | PreloadedAccountData[];
   updateAccount: (slug: string, data: SavedAccountData) => Promise<void>;
   removeAccount: (string: string) => Promise<void>;
 };
 
 
-export const useStore = create<StoreType>((set, get) => ({
-  accounts: [],
+export const useAccountsStore = create<AccountsStoreType>((set, get) => ({
+  accounts: null,
   updateAccount: async (slug, data) => {
     try {
       console.group(`[store] Updating account "${slug}"`);
-      const accounts = get().accounts;
+      const accounts = get().accounts ?? [];
 
       // If already exsists, first remove it.
       const cleanedAccounts = accounts.filter((account) => account.slug !== slug);
@@ -52,7 +52,7 @@ export const useStore = create<StoreType>((set, get) => ({
       await persistAccountsStore.removeItem(slug);
       console.info("Removed from persistance.");
 
-      const accounts = get().accounts;
+      const accounts = get().accounts ?? [];
 
       // Remove from local state.
       const cleanedAccounts = accounts.filter((account) => account.slug !== slug);
