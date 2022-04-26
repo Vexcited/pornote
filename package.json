@@ -1,6 +1,6 @@
 {
   "name": "pronote-evolution",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -43,7 +43,9 @@
   "license": "MIT",
   "release-it": {
     "hooks": {
-      "before:init": ["yarn lint"]
+      "before:init": [
+        "yarn lint"
+      ]
     },
     "git": {
       "commitMessage": "chore: release v${version}",
