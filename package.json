@@ -13,7 +13,7 @@
     "@fontsource/poppins": "^4.5.1",
     "@fontsource/roboto": "^4.5.1",
     "@headlessui/react": "^1.6.6",
-    "got": "^12.0.2",
+    "got": "^12.2.0",
     "haversine-distance": "^1.2.1",
     "ky": "^0.31.1",
     "localforage": "^1.10.0",
